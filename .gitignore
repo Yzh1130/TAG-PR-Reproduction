@@ -145,3 +145,12 @@ cython_debug/
 ckpts/
 logs/
 *.log
+
+# TAG-PR local data and experiment artifacts
+dataset/
+datasets/
+data/
+checkpoints/
+outputs/
+runs/
+*.pth
