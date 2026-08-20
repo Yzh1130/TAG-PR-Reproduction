@@ -50,6 +50,12 @@ def build_parser():
         help="override data.batch_size (default: config value)",
     )
     parser.add_argument(
+        "--test_batch_size",
+        type=int,
+        default=None,
+        help="override data.test_batch_size (default: config value)",
+    )
+    parser.add_argument(
         "--epoch",
         type=int,
         default=None,
@@ -81,6 +87,12 @@ def apply_cli_overrides(config, args):
     overrides = []
     override_specs = [
         (args.batch_size, config.data, "batch_size", "data.batch_size"),
+        (
+            args.test_batch_size,
+            config.data,
+            "test_batch_size",
+            "data.test_batch_size",
+        ),
         (args.epoch, config.schedule, "epoch", "schedule.epoch"),
         (args.seed, config.misc, "seed", "misc.seed"),
         (args.lr, config.schedule, "lr", "schedule.lr"),
@@ -92,6 +104,12 @@ def apply_cli_overrides(config, args):
         section[key] = new_value
         overrides.append((dotted_key, old_value, new_value))
     return overrides
+
+
+def resolve_runtime_config(args):
+    config = parse_config(args.config)
+    overrides = apply_cli_overrides(config, args)
+    return config, overrides
 
 
 def configure_experiment(config, args):
@@ -116,6 +134,7 @@ def configure_experiment(config, args):
             args.exp_name,
             args.output_dir,
             args.batch_size,
+            args.test_batch_size,
             args.epoch,
             args.seed,
             args.lr,
@@ -126,11 +145,74 @@ def configure_experiment(config, args):
 
 
 def log_cli_overrides(logger, overrides):
+    logger.info("OVERRIDE SUMMARY")
     if not overrides:
-        logger.info("CLI overrides: none")
+        logger.info("no overrides")
+        logger.info("END OVERRIDE SUMMARY")
         return
     for key, old_value, new_value in overrides:
-        logger.info("CLI override %s: %r -> %r", key, old_value, new_value)
+        logger.info("%s: %r -> %r", key, old_value, new_value)
+    logger.info("END OVERRIDE SUMMARY")
+
+
+def assert_training_batch_size(config, train_loader):
+    expected = config.data.batch_size
+    actual = train_loader.batch_size
+    if actual != expected:
+        raise RuntimeError(
+            "DataLoader batch_size mismatch: "
+            f"config.data.batch_size={expected}, "
+            f"train_loader.batch_size={actual}"
+        )
+
+
+def _rebuild_loader_with_batch_size(loader, batch_size):
+    kwargs = {
+        "dataset": loader.dataset,
+        "batch_size": batch_size,
+        "sampler": loader.sampler,
+        "num_workers": loader.num_workers,
+        "collate_fn": loader.collate_fn,
+        "pin_memory": loader.pin_memory,
+        "drop_last": loader.drop_last,
+        "timeout": loader.timeout,
+        "worker_init_fn": loader.worker_init_fn,
+        "multiprocessing_context": loader.multiprocessing_context,
+        "generator": loader.generator,
+    }
+    if loader.num_workers > 0:
+        kwargs["prefetch_factor"] = loader.prefetch_factor
+        kwargs["persistent_workers"] = loader.persistent_workers
+    pin_memory_device = getattr(loader, "pin_memory_device", "")
+    if pin_memory_device:
+        kwargs["pin_memory_device"] = pin_memory_device
+    return torch.utils.data.DataLoader(**kwargs)
+
+
+def apply_test_loader_override(config, dataloader, cli_overrides):
+    if not any(key == "data.test_batch_size" for key, _, _ in cli_overrides):
+        return
+    expected = config.data.test_batch_size
+    test_loader = dataloader["test_loader"]
+    if test_loader.batch_size != expected:
+        test_loader = _rebuild_loader_with_batch_size(test_loader, expected)
+        dataloader["test_loader"] = test_loader
+    if test_loader.batch_size != expected:
+        raise RuntimeError(
+            "DataLoader test batch_size mismatch: "
+            f"config.data.test_batch_size={expected}, "
+            f"test_loader.batch_size={test_loader.batch_size}"
+        )
+
+
+def _cuda_peak_memory_gb():
+    if not torch.cuda.is_available():
+        return 0.0, 0.0
+    gib = 1024 ** 3
+    return (
+        torch.cuda.max_memory_allocated() / gib,
+        torch.cuda.max_memory_reserved() / gib,
+    )
 
 
 def environment_rank():
@@ -152,149 +234,240 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
     if experiment is not None:
         experiment.initialize_metrics()
 
-    # Keep training-only dependencies out of import/help/dry-run code paths.
-    from model.tbps_model_MoE import clip_vitb
-
-    # data
-    dataloader = build_pedes_data(config)
-    train_loader = dataloader['train_loader']
-    num_classes = len(train_loader.dataset.person2text)
-    config.num_classes = num_classes
-
-    meters = {
-        "loss": AverageMeter(),
-        "itc_loss": AverageMeter(),
-        "itc_tse_loss": AverageMeter(),
-        "view_loss": AverageMeter(),
-        "view_acc": AverageMeter(),
-        "sdm_loss": AverageMeter(),
-        "ortho_loss": AverageMeter(),
-        "ritc_loss": AverageMeter(),
-        "ritc_tse_loss": AverageMeter(),
-        "balance_loss": AverageMeter(),
-        "router_z_loss": AverageMeter(),
-        "id_loss": AverageMeter(),
-    }
+    training_start_time = time.time()
+    train_loader = None
+    completed_epochs = 0
+    full_peak_alloc_gb = 0.0
+    full_peak_reserved_gb = 0.0
     best_rank_1 = 0.0
     best_epoch = 0
     best_metrics = None
     best_metrics_epoch = None
 
-    # model
-    # model_name = "EVA02-CLIP-B-16"
-    # pretrained = "/data/zxy/UAV/checkpoints/EVA02_CLIP_B_psz16_s8B.pt"  # or "/path/to/EVA02_CLIP_B_psz16_s8B.pt"
-    # model, _, preprocess = create_model_and_transforms(config, model_name, pretrained, force_custom_clip=True)
-    model = clip_vitb(config, num_classes)
-    model.to(config.device)
-    model, load_result = load_checkpoint(model, config)
+    try:
+        # Keep training-only dependencies out of import/help/dry-run code paths.
+        from model.tbps_model_MoE import clip_vitb
 
-    if is_using_distributed():
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[config.device],
-                                                          find_unused_parameters=True)
+        dataloader = build_pedes_data(config)
+        apply_test_loader_override(config, dataloader, cli_overrides)
+        train_loader = dataloader['train_loader']
+        assert_training_batch_size(config, train_loader)
+        logger.info(
+            "DataLoader batch_size verified: expected=%s, actual=%s",
+            config.data.batch_size,
+            train_loader.batch_size,
+        )
+        logger.info(
+            "Evaluation DataLoader batch_size: config=%s, actual=%s",
+            config.data.test_batch_size,
+            dataloader['test_loader'].batch_size,
+        )
+        num_classes = len(train_loader.dataset.person2text)
+        config.num_classes = num_classes
 
-    # schedule
-    config.schedule.niter_per_ep = len(train_loader)
-    lr_schedule = cosine_scheduler(config)
+        meters = {
+            "loss": AverageMeter(),
+            "itc_loss": AverageMeter(),
+            "itc_tse_loss": AverageMeter(),
+            "view_loss": AverageMeter(),
+            "view_acc": AverageMeter(),
+            "sdm_loss": AverageMeter(),
+            "ortho_loss": AverageMeter(),
+            "ritc_loss": AverageMeter(),
+            "ritc_tse_loss": AverageMeter(),
+            "balance_loss": AverageMeter(),
+            "router_z_loss": AverageMeter(),
+            "id_loss": AverageMeter(),
+        }
 
-    # optimizer
-    optimizer = build_optimizer(config, model)
+        # model
+        # model_name = "EVA02-CLIP-B-16"
+        # pretrained = "/data/zxy/UAV/checkpoints/EVA02_CLIP_B_psz16_s8B.pt"  # or "/path/to/EVA02_CLIP_B_psz16_s8B.pt"
+        # model, _, preprocess = create_model_and_transforms(config, model_name, pretrained, force_custom_clip=True)
+        model = clip_vitb(config, num_classes)
+        model.to(config.device)
+        model, load_result = load_checkpoint(model, config)
 
-    # train
-    it = 0
-    scaler = torch.cuda.amp.GradScaler()
-    training_start_time = time.time()
-    for epoch in range(config.schedule.epoch):
         if is_using_distributed():
-            dataloader['train_sampler'].set_epoch(epoch)
+            model = torch.nn.parallel.DistributedDataParallel(
+                model,
+                device_ids=[config.device],
+                find_unused_parameters=True,
+            )
 
-        start_time = time.time()
-        for meter in meters.values():
-            meter.reset()
-        model.train()
+        config.schedule.niter_per_ep = len(train_loader)
+        lr_schedule = cosine_scheduler(config)
+        optimizer = build_optimizer(config, model)
 
-        for i, batch in enumerate(train_loader):
-            for param_group in optimizer.param_groups:
-                param_group['lr'] = lr_schedule[it] * param_group['ratio']
+        it = 0
+        scaler = torch.cuda.amp.GradScaler()
+        for epoch in range(config.schedule.epoch):
+            if torch.cuda.is_available():
+                torch.cuda.reset_peak_memory_stats()
+            if is_using_distributed():
+                dataloader['train_sampler'].set_epoch(epoch)
 
-            if epoch == 0:
-                alpha = config.model.softlabel_ratio * min(1.0, i / len(train_loader))
-            else:
-                alpha = config.model.softlabel_ratio
+            start_time = time.time()
+            for meter in meters.values():
+                meter.reset()
+            model.train()
 
-            with torch.autocast(device_type='cuda'):
-                ret = model(batch, alpha, training=True)
-                loss = sum([v for k, v in ret.items() if "loss" in k])
+            for i, batch in enumerate(train_loader):
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = lr_schedule[it] * param_group['ratio']
 
-            batch_size = batch['image'].shape[0]
-            meters['loss'].update(loss.item(), batch_size)
-            meters['itc_loss'].update(ret.get('itc_loss', 0), batch_size)
-            meters['itc_tse_loss'].update(ret.get('itc_tse_loss', 0), batch_size)
-            meters['sdm_loss'].update(ret.get('sdm_loss', 0), batch_size)
-            meters['view_loss'].update(ret.get('view_loss', 0), batch_size)
-            meters['ortho_loss'].update(ret.get('ortho_loss', 0), batch_size)
-            meters['view_acc'].update(ret.get('view_acc', 0), batch_size)
-            meters['ritc_loss'].update(ret.get('ritc_loss', 0), batch_size)
-            meters['ritc_tse_loss'].update(ret.get('ritc_tse_loss', 0), batch_size)
-            meters['balance_loss'].update(ret.get('balance_loss', 0), batch_size)
-            meters['router_z_loss'].update(ret.get('router_z_loss', 0), batch_size)
-            meters['id_loss'].update(ret.get('id_loss', 0), batch_size)
+                if epoch == 0:
+                    alpha = config.model.softlabel_ratio * min(1.0, i / len(train_loader))
+                else:
+                    alpha = config.model.softlabel_ratio
 
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
-            model.zero_grad()
-            optimizer.zero_grad()
-            it += 1
+                with torch.autocast(device_type='cuda'):
+                    ret = model(batch, alpha, training=True)
+                    loss = sum([v for k, v in ret.items() if "loss" in k])
 
-            if (i + 1) % config.log.print_period == 0:
-                info_str = f"Epoch[{epoch + 1}] Iteration[{i + 1}/{len(train_loader)}]"
-                # log loss
-                for k, v in meters.items():
-                    if v.val != 0:
-                        info_str += f", {k}: {v.val:.4f}"
-                info_str += f", Base Lr: {param_group['lr']:.2e}"
-                logger.info(info_str)
+                batch_size = batch['image'].shape[0]
+                meters['loss'].update(loss.item(), batch_size)
+                meters['itc_loss'].update(ret.get('itc_loss', 0), batch_size)
+                meters['itc_tse_loss'].update(ret.get('itc_tse_loss', 0), batch_size)
+                meters['sdm_loss'].update(ret.get('sdm_loss', 0), batch_size)
+                meters['view_loss'].update(ret.get('view_loss', 0), batch_size)
+                meters['ortho_loss'].update(ret.get('ortho_loss', 0), batch_size)
+                meters['view_acc'].update(ret.get('view_acc', 0), batch_size)
+                meters['ritc_loss'].update(ret.get('ritc_loss', 0), batch_size)
+                meters['ritc_tse_loss'].update(ret.get('ritc_tse_loss', 0), batch_size)
+                meters['balance_loss'].update(ret.get('balance_loss', 0), batch_size)
+                meters['router_z_loss'].update(ret.get('router_z_loss', 0), batch_size)
+                meters['id_loss'].update(ret.get('id_loss', 0), batch_size)
 
-        if is_master():
-            end_time = time.time()
-            time_per_batch = (end_time - start_time) / (i + 1)
-            logger.info("Epoch {} done. Time per batch: {:.3f}[s] Speed: {:.1f}[samples/s]".format(epoch + 1, time_per_batch, train_loader.batch_size / time_per_batch))
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
+                model.zero_grad()
+                optimizer.zero_grad()
+                it += 1
 
-            eval_result = test_tse(model.module, dataloader['test_loader'], 77, config.device)
-            rank_1, rank_5, rank_10, map = eval_result['r1'], eval_result['r5'], eval_result['r10'], eval_result['mAP']
-            logger.info('Acc@1 {top1:.5f} Acc@5 {top5:.5f} Acc@10 {top10:.5f} mAP {mAP:.5f}'.format(
-                top1=rank_1, top5=rank_5, top10=rank_10, mAP=map
-            ))
-            torch.cuda.empty_cache()
-            epoch_time_sec = time.time() - start_time
-            if experiment is not None:
-                experiment.append_metrics(
-                    epoch + 1,
-                    rank_1,
-                    rank_5,
-                    rank_10,
-                    map,
-                    meters['loss'].avg,
-                    epoch_time_sec,
+                if (i + 1) % config.log.print_period == 0:
+                    info_str = f"Epoch[{epoch + 1}] Iteration[{i + 1}/{len(train_loader)}]"
+                    for key, meter in meters.items():
+                        if meter.val != 0:
+                            info_str += f", {key}: {meter.val:.4f}"
+                    info_str += f", Base Lr: {param_group['lr']:.2e}"
+                    logger.info(info_str)
+
+            if is_master():
+                end_time = time.time()
+                time_per_batch = (end_time - start_time) / (i + 1)
+                logger.info(
+                    "Epoch {} done. Time per batch: {:.3f}[s] Speed: {:.1f}[samples/s]".format(
+                        epoch + 1,
+                        time_per_batch,
+                        train_loader.batch_size / time_per_batch,
+                    )
                 )
-            if best_metrics is None or best_metrics['r1'] < rank_1:
-                best_metrics = {
-                    'r1': rank_1,
-                    'r5': rank_5,
-                    'r10': rank_10,
-                    'mAP': map,
-                }
-                best_metrics_epoch = epoch
-            if best_rank_1 < rank_1:
-                best_rank_1 = rank_1
-                best_epoch = epoch
 
-                save_obj = {
-                    'model': model.module.state_dict(),
-                    'optimizer': optimizer.state_dict(),
-                    'config': config,
-                }
-                torch.save(save_obj, os.path.join(config.model.saved_path, 'checkpoint_best.pth'))
+                model_without_ddp = model.module if hasattr(model, "module") else model
+                eval_result = test_tse(
+                    model_without_ddp,
+                    dataloader['test_loader'],
+                    77,
+                    config.device,
+                )
+                rank_1, rank_5, rank_10, map = (
+                    eval_result['r1'],
+                    eval_result['r5'],
+                    eval_result['r10'],
+                    eval_result['mAP'],
+                )
+                logger.info(
+                    'Acc@1 {top1:.5f} Acc@5 {top5:.5f} Acc@10 {top10:.5f} mAP {mAP:.5f}'.format(
+                        top1=rank_1,
+                        top5=rank_5,
+                        top10=rank_10,
+                        mAP=map,
+                    )
+                )
+                torch.cuda.empty_cache()
+
+            epoch_peak_alloc_gb, epoch_peak_reserved_gb = _cuda_peak_memory_gb()
+            full_peak_alloc_gb = max(full_peak_alloc_gb, epoch_peak_alloc_gb)
+            full_peak_reserved_gb = max(
+                full_peak_reserved_gb,
+                epoch_peak_reserved_gb,
+            )
+            completed_epochs = epoch + 1
+            logger.info(
+                "Epoch %s peak CUDA memory: allocated=%.3f GiB, reserved=%.3f GiB",
+                epoch + 1,
+                epoch_peak_alloc_gb,
+                epoch_peak_reserved_gb,
+            )
+
+            if is_master():
+                epoch_time_sec = time.time() - start_time
+                if experiment is not None:
+                    experiment.append_metrics(
+                        epoch + 1,
+                        rank_1,
+                        rank_5,
+                        rank_10,
+                        map,
+                        meters['loss'].avg,
+                        epoch_time_sec,
+                        epoch_peak_alloc_gb,
+                        epoch_peak_reserved_gb,
+                    )
+                if best_metrics is None or best_metrics['r1'] < rank_1:
+                    best_metrics = {
+                        'r1': rank_1,
+                        'r5': rank_5,
+                        'r10': rank_10,
+                        'mAP': map,
+                    }
+                    best_metrics_epoch = epoch
+                if best_rank_1 < rank_1:
+                    best_rank_1 = rank_1
+                    best_epoch = epoch
+                    model_without_ddp = (
+                        model.module if hasattr(model, "module") else model
+                    )
+                    save_obj = {
+                        'model': model_without_ddp.state_dict(),
+                        'optimizer': optimizer.state_dict(),
+                        'config': config,
+                    }
+                    torch.save(
+                        save_obj,
+                        os.path.join(config.model.saved_path, 'checkpoint_best.pth'),
+                    )
+
+    except torch.cuda.OutOfMemoryError:
+        current_alloc_gb, current_reserved_gb = _cuda_peak_memory_gb()
+        full_peak_alloc_gb = max(full_peak_alloc_gb, current_alloc_gb)
+        full_peak_reserved_gb = max(full_peak_reserved_gb, current_reserved_gb)
+        actual_batch_size = (
+            train_loader.batch_size
+            if train_loader is not None
+            else config.data.batch_size
+        )
+        logger.exception(
+            "CUDA OOM: batch_size=%s, completed_epochs=%s, "
+            "peak_mem_alloc_gb=%.3f, peak_mem_reserved_gb=%.3f",
+            actual_batch_size,
+            completed_epochs,
+            full_peak_alloc_gb,
+            full_peak_reserved_gb,
+        )
+        if is_master() and experiment is not None:
+            experiment.write_final_results(
+                best_metrics_epoch + 1 if best_metrics_epoch is not None else None,
+                best_metrics,
+                time.time() - training_start_time,
+                full_peak_alloc_gb,
+                full_peak_reserved_gb,
+                completed_epochs,
+                run_status="cuda_oom",
+            )
+        raise
 
     total_training_time_sec = time.time() - training_start_time
     if is_master() and experiment is not None:
@@ -302,6 +475,9 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
             best_metrics_epoch + 1 if best_metrics_epoch is not None else None,
             best_metrics,
             total_training_time_sec,
+            full_peak_alloc_gb,
+            full_peak_reserved_gb,
+            completed_epochs,
         )
     print(f"best Acc@1: {best_rank_1} at epoch {best_epoch + 1}")
 
@@ -316,8 +492,7 @@ def count_parameters(model):
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
-    config = parse_config(args.config)
-    overrides = apply_cli_overrides(config, args)
+    config, overrides = resolve_runtime_config(args)
 
     try:
         experiment_directory, path_override = configure_experiment(config, args)

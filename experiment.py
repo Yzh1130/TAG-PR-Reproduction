@@ -21,6 +21,8 @@ METRICS_HEADER = [
     "mAP",
     "train_loss",
     "epoch_time_sec",
+    "peak_mem_alloc_gb",
+    "peak_mem_reserved_gb",
 ]
 
 RECORDED_ENVIRONMENT_VARIABLES = [
@@ -235,6 +237,8 @@ class ExperimentArchive:
         mean_average_precision,
         train_loss,
         epoch_time_sec,
+        peak_mem_alloc_gb,
+        peak_mem_reserved_gb,
     ):
         if not self.enabled:
             return
@@ -249,12 +253,23 @@ class ExperimentArchive:
                     mean_average_precision,
                     train_loss,
                     epoch_time_sec,
+                    peak_mem_alloc_gb,
+                    peak_mem_reserved_gb,
                 ]
             )
             handle.flush()
             os.fsync(handle.fileno())
 
-    def write_final_results(self, best_epoch, best_metrics, total_time_sec):
+    def write_final_results(
+        self,
+        best_epoch,
+        best_metrics,
+        total_time_sec,
+        peak_mem_alloc_gb=0.0,
+        peak_mem_reserved_gb=0.0,
+        completed_epochs=0,
+        run_status="completed",
+    ):
         if not self.enabled:
             return
 
@@ -275,6 +290,14 @@ class ExperimentArchive:
                 f"mAP: {best_metrics['mAP']}",
             ]
         result_lines.append(f"total_training_time_sec: {total_time_sec}")
+        result_lines.extend(
+            [
+                f"completed_epochs: {completed_epochs}",
+                f"peak_mem_alloc_gb: {peak_mem_alloc_gb}",
+                f"peak_mem_reserved_gb: {peak_mem_reserved_gb}",
+                f"run_status: {run_status}",
+            ]
+        )
         _write_text(
             self.directory / "final_results.txt",
             "\n".join(result_lines) + "\n",
