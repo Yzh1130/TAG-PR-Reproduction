@@ -10,6 +10,7 @@ expert_blocks: [6, 7, 8]
 
 experiment:
   grad_checkpoint: false
+  use_bridge: false
   # image
   input_resolution: [224, 224]
   # text

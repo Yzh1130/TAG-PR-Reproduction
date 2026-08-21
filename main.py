@@ -84,6 +84,16 @@ def build_parser():
         help="disable activation checkpointing (overrides config and --grad_checkpoint)",
     )
     parser.add_argument(
+        "--use_bridge",
+        action="store_true",
+        help="enable cross-view bridge image loading (default: config value)",
+    )
+    parser.add_argument(
+        "--no_use_bridge",
+        action="store_true",
+        help="disable cross-view bridge image loading (overrides config and --use_bridge)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
@@ -120,6 +130,11 @@ def apply_cli_overrides(config, args):
         overrides.append(
             ("experiment.grad_checkpoint", old_value, new_value)
         )
+    if args.no_use_bridge or args.use_bridge:
+        old_value = config.experiment.use_bridge
+        new_value = not args.no_use_bridge
+        config.experiment.use_bridge = new_value
+        overrides.append(("experiment.use_bridge", old_value, new_value))
     return overrides
 
 
@@ -157,7 +172,13 @@ def configure_experiment(config, args):
             args.lr,
         )
     ) or any(
-        (args.grad_checkpoint, args.no_grad_checkpoint, args.dry_run)
+        (
+            args.grad_checkpoint,
+            args.no_grad_checkpoint,
+            args.use_bridge,
+            args.no_use_bridge,
+            args.dry_run,
+        )
     ) or args.config != "config/config.yaml"
     directory = prepare_experiment_directory(directory, protect_checkpoint)
     return directory, path_override
@@ -173,6 +194,10 @@ def log_cli_overrides(logger, overrides, config):
     logger.info(
         "experiment.grad_checkpoint effective: %r",
         config.experiment.grad_checkpoint,
+    )
+    logger.info(
+        "experiment.use_bridge effective: %r",
+        config.experiment.use_bridge,
     )
     logger.info("END OVERRIDE SUMMARY")
 

@@ -116,7 +116,14 @@ def build_pedes_data(config):
     ]
     aug = Choose(rand_from, size)
     # tokenizer = get_tokenizer(config.model_name)
-    train_dataset = ps_train_dataset(config.anno_dir, config.image_dir, aug, split='train', max_words=77)
+    train_dataset = ps_train_dataset(
+        config.anno_dir,
+        config.image_dir,
+        aug,
+        split='train',
+        max_words=77,
+        use_bridge=config.experiment.use_bridge,
+    )
     test_dataset = ps_eval_dataset(config.anno_dir, config.image_dir, val_transform, split='test', max_words=77)
 
     if is_using_distributed():
