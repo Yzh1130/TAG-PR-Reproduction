@@ -2,11 +2,21 @@ from collections import OrderedDict
 
 import torch
 from torch import nn
-from torch.utils.checkpoint import checkpoint_sequential
+from torch.utils.checkpoint import checkpoint
 import torch.nn.functional as F
 from einops import rearrange, reduce
 global LAYER_NORM
 LAYER_NORM = True
+
+
+def _forward_block(block, x, use_checkpoint, **kwargs):
+    if not use_checkpoint:
+        return block(x, **kwargs)
+
+    def block_forward(block_input):
+        return block(block_input, **kwargs)
+
+    return checkpoint(block_forward, x, use_reentrant=False)
 
 
 class LayerNorm(nn.LayerNorm):
@@ -178,25 +188,21 @@ class Transformer(nn.Module):
         if expert_blocks:
             self.expert_blocks = expert_blocks
 
-    def checkpoint_fwd(self, layer, input, segments=2):
-        """checkpoint forward"""
-        # Make sure that the input to checkpoint have requires_grad=True, so that
-        # the autograd can take care of the checkpointed part of model
-        if not input.requires_grad:
-            input = input.detach()
-            input.requires_grad = True
-        return checkpoint_sequential(layer, segments, input)
-
     def forward(self, x: torch.Tensor):
         x = self.dropout(x)
-        if self.checkpoint:
-            return self.checkpoint_fwd(self.resblocks, x, self.layers)
-
+        use_checkpoint = self.checkpoint and self.training
         for i, blk in enumerate(self.resblocks):
-            if i == len(self.resblocks) - 1:
-                x, attn_weight = blk(x, need_weights=True)
+            need_weights = i == len(self.resblocks) - 1
+            block_output = _forward_block(
+                blk,
+                x,
+                use_checkpoint,
+                need_weights=need_weights,
+            )
+            if need_weights:
+                x, attn_weight = block_output
             else:
-                x = blk(x)
+                x = block_output
 
         return x, attn_weight
 
@@ -224,32 +230,29 @@ class Transformer_MoE(nn.Module):
         # self.resblocks = nn.Sequential(
         #     *[ResidualAttentionBlock(width, heads, attn_mask, dropout=dropout) for _ in range(layers)])
 
-    def checkpoint_fwd(self, layer, input, segments=2):
-        """checkpoint forward"""
-        # Make sure that the input to checkpoint have requires_grad=True, so that
-        # the autograd can take care of the checkpointed part of model
-        if not input.requires_grad:
-            input = input.detach()
-            input.requires_grad = True
-        return checkpoint_sequential(layer, segments, input)
-
     def forward(self, x: torch.Tensor, cam_id=None, training=False):
         losses = {}
         view_losses = []
         view_accs = []
         ortho_losses = []
         x = self.dropout(x)
-        if self.checkpoint:
-            return self.checkpoint_fwd(self.resblocks, x, self.layers)
+        use_checkpoint = self.checkpoint and self.training
         for i, blk in enumerate(self.resblocks):
+            need_weights = i == len(self.resblocks) - 1
             # MoE
             if self.expert_blocks and i in self.expert_blocks:
-                # last block attention weights for tse
-                if i == len(self.resblocks) - 1:
-                    x, view_loss, view_acc, ortho_loss, attn_weight = blk(x, cam_id=cam_id, training=training,
-                                                                          need_weights=True)
+                block_output = _forward_block(
+                    blk,
+                    x,
+                    use_checkpoint,
+                    cam_id=cam_id,
+                    training=training,
+                    need_weights=need_weights,
+                )
+                if need_weights:
+                    x, view_loss, view_acc, ortho_loss, attn_weight = block_output
                 else:
-                    x, view_loss, view_acc, ortho_loss = blk(x, cam_id=cam_id, training=training)
+                    x, view_loss, view_acc, ortho_loss = block_output
                 view_losses.append(view_loss)
                 view_accs.append(view_acc)
                 ortho_losses.append(ortho_loss)
@@ -258,10 +261,16 @@ class Transformer_MoE(nn.Module):
                     x = x[:-1, :, :]
             # non-MoE
             else:
-                if i == len(self.resblocks) - 1:
-                    x, attn_weight = blk(x, need_weights=True)
+                block_output = _forward_block(
+                    blk,
+                    x,
+                    use_checkpoint,
+                    need_weights=need_weights,
+                )
+                if need_weights:
+                    x, attn_weight = block_output
                 else:
-                    x = blk(x)
+                    x = block_output
         if training:
             losses['view_loss'] = torch.stack(view_losses).mean()
             losses['view_acc'] = sum(view_accs)/len(view_accs)

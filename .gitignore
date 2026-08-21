@@ -147,6 +147,7 @@ logs/
 *.log
 
 # TAG-PR local data and experiment artifacts
+config/config.local.yaml
 dataset/
 datasets/
 data/
@@ -154,3 +155,4 @@ checkpoints/
 outputs/
 runs/
 *.pth
+output.json

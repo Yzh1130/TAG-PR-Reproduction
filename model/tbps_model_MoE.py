@@ -211,5 +211,6 @@ class CLIP(nn.Module):
 def clip_vitb(config, num_classes=11003):
     image_encode = visual_transformer(config)
     text_encode = text_transformers(config)
+    text_encode.transformer.checkpoint = config.experiment.grad_checkpoint
     model = CLIP(config, image_encode, text_encode, num_classes, config.experiment.ritc_eps)
     return model

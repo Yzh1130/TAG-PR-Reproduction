@@ -74,6 +74,16 @@ def build_parser():
         help="override schedule.lr (default: config value)",
     )
     parser.add_argument(
+        "--grad_checkpoint",
+        action="store_true",
+        help="enable activation checkpointing (default: config value)",
+    )
+    parser.add_argument(
+        "--no_grad_checkpoint",
+        action="store_true",
+        help="disable activation checkpointing (overrides config and --grad_checkpoint)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
@@ -103,6 +113,13 @@ def apply_cli_overrides(config, args):
         old_value = section[key]
         section[key] = new_value
         overrides.append((dotted_key, old_value, new_value))
+    if args.no_grad_checkpoint or args.grad_checkpoint:
+        old_value = config.experiment.grad_checkpoint
+        new_value = not args.no_grad_checkpoint
+        config.experiment.grad_checkpoint = new_value
+        overrides.append(
+            ("experiment.grad_checkpoint", old_value, new_value)
+        )
     return overrides
 
 
@@ -139,19 +156,24 @@ def configure_experiment(config, args):
             args.seed,
             args.lr,
         )
-    ) or args.dry_run or args.config != "config/config.yaml"
+    ) or any(
+        (args.grad_checkpoint, args.no_grad_checkpoint, args.dry_run)
+    ) or args.config != "config/config.yaml"
     directory = prepare_experiment_directory(directory, protect_checkpoint)
     return directory, path_override
 
 
-def log_cli_overrides(logger, overrides):
+def log_cli_overrides(logger, overrides, config):
     logger.info("OVERRIDE SUMMARY")
     if not overrides:
         logger.info("no overrides")
-        logger.info("END OVERRIDE SUMMARY")
-        return
-    for key, old_value, new_value in overrides:
-        logger.info("%s: %r -> %r", key, old_value, new_value)
+    else:
+        for key, old_value, new_value in overrides:
+            logger.info("%s: %r -> %r", key, old_value, new_value)
+    logger.info(
+        "experiment.grad_checkpoint effective: %r",
+        config.experiment.grad_checkpoint,
+    )
     logger.info("END OVERRIDE SUMMARY")
 
 
@@ -229,7 +251,7 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
         experiment.write_pre_run(config, config_path)
     if experiment is not None and experiment.enabled:
         add_file_handler(logger, experiment.directory)
-    log_cli_overrides(logger, cli_overrides)
+    log_cli_overrides(logger, cli_overrides, config)
     logger.info(f'\n{config}')
     if experiment is not None:
         experiment.initialize_metrics()
@@ -512,7 +534,7 @@ def main(argv=None):
         experiment.write_pre_run(config, args.config)
         if experiment.enabled:
             add_file_handler(logger, experiment.directory)
-        log_cli_overrides(logger, overrides)
+        log_cli_overrides(logger, overrides, config)
         logger.info(f'\n{config}')
         logger.info("Dry run complete; training was not started.")
         return 0

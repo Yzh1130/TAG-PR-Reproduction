@@ -113,7 +113,7 @@ def visual_transformer(config):
         'input_resolution': config.experiment.input_resolution,
         'patch_size': 16,
         'width': vision_width,
-        'checkpoint': False,
+        'checkpoint': config.experiment.grad_checkpoint,
         'embed_dim': config.model.embed_dim,
     }
 
