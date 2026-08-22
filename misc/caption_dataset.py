@@ -3,6 +3,7 @@ import os
 import re
 from collections import defaultdict
 
+import numpy as np
 import torch
 from PIL import Image
 from PIL import ImageFile
@@ -79,10 +80,26 @@ class ps_train_dataset(Dataset):
 
         bridge_candidates = self.ground_images_by_person.get(person, ())
         if cam_id == 0 and bridge_candidates:
-            candidate_index = torch.randint(len(bridge_candidates), (1,)).item()
-            bridge_image_path = bridge_candidates[candidate_index]
-            bridge_image_pil = Image.open(bridge_image_path)
-            bridge_image = self.transform(bridge_image_pil.convert('RGB'))
+            python_rng_state = random.getstate()
+            numpy_rng_state = np.random.get_state()
+            bridge_seed = (torch.initial_seed() + index) % (2 ** 32)
+            try:
+                with torch.random.fork_rng(devices=[]):
+                    torch.manual_seed(bridge_seed)
+                    np.random.seed(bridge_seed)
+                    random.seed(bridge_seed)
+                    candidate_index = torch.randint(
+                        len(bridge_candidates),
+                        (1,),
+                    ).item()
+                    bridge_image_path = bridge_candidates[candidate_index]
+                    bridge_image_pil = Image.open(bridge_image_path)
+                    bridge_image = self.transform(
+                        bridge_image_pil.convert('RGB')
+                    )
+            finally:
+                np.random.set_state(numpy_rng_state)
+                random.setstate(python_rng_state)
             has_bridge = 1
         else:
             bridge_image = torch.zeros_like(image)

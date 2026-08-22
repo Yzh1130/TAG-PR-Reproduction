@@ -94,6 +94,18 @@ def build_parser():
         help="disable cross-view bridge image loading (overrides config and --use_bridge)",
     )
     parser.add_argument(
+        "--bridge_cv_ratio",
+        type=float,
+        default=None,
+        help="override experiment.bridge_cv_ratio (default: config value)",
+    )
+    parser.add_argument(
+        "--bridge_tg_ratio",
+        type=float,
+        default=None,
+        help="override experiment.bridge_tg_ratio (default: config value)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
@@ -116,6 +128,18 @@ def apply_cli_overrides(config, args):
         (args.epoch, config.schedule, "epoch", "schedule.epoch"),
         (args.seed, config.misc, "seed", "misc.seed"),
         (args.lr, config.schedule, "lr", "schedule.lr"),
+        (
+            args.bridge_cv_ratio,
+            config.experiment,
+            "bridge_cv_ratio",
+            "experiment.bridge_cv_ratio",
+        ),
+        (
+            args.bridge_tg_ratio,
+            config.experiment,
+            "bridge_tg_ratio",
+            "experiment.bridge_tg_ratio",
+        ),
     ]
     for new_value, section, key, dotted_key in override_specs:
         if new_value is None:
@@ -170,6 +194,8 @@ def configure_experiment(config, args):
             args.epoch,
             args.seed,
             args.lr,
+            args.bridge_cv_ratio,
+            args.bridge_tg_ratio,
         )
     ) or any(
         (
@@ -198,6 +224,14 @@ def log_cli_overrides(logger, overrides, config):
     logger.info(
         "experiment.use_bridge effective: %r",
         config.experiment.use_bridge,
+    )
+    logger.info(
+        "experiment.bridge_cv_ratio effective: %r",
+        config.experiment.bridge_cv_ratio,
+    )
+    logger.info(
+        "experiment.bridge_tg_ratio effective: %r",
+        config.experiment.bridge_tg_ratio,
     )
     logger.info("END OVERRIDE SUMMARY")
 
@@ -325,6 +359,8 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
             "balance_loss": AverageMeter(),
             "router_z_loss": AverageMeter(),
             "id_loss": AverageMeter(),
+            "bridge_cv_loss": AverageMeter(),
+            "bridge_tg_loss": AverageMeter(),
         }
 
         # model
@@ -385,6 +421,8 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                 meters['balance_loss'].update(ret.get('balance_loss', 0), batch_size)
                 meters['router_z_loss'].update(ret.get('router_z_loss', 0), batch_size)
                 meters['id_loss'].update(ret.get('id_loss', 0), batch_size)
+                meters['bridge_cv_loss'].update(ret.get('bridge_cv_loss', 0), batch_size)
+                meters['bridge_tg_loss'].update(ret.get('bridge_tg_loss', 0), batch_size)
 
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)

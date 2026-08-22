@@ -109,7 +109,113 @@ class CLIP(nn.Module):
             id_loss = (F.cross_entropy(image_logits, ids) + F.cross_entropy(text_logits, ids)) / 2
             ret['id_loss'] = id_loss * self.config.experiment.id_ratio
 
+        bridge_cv_ratio = self.config.experiment.bridge_cv_ratio
+        bridge_tg_ratio = self.config.experiment.bridge_tg_ratio
+        if self.config.experiment.use_bridge and (
+            bridge_cv_ratio > 0 or bridge_tg_ratio > 0
+        ):
+            ret.update(
+                self.compute_bridge_losses(
+                    input,
+                    image_features_norm,
+                    text_features_norm,
+                    ids,
+                    logit_scale,
+                    bridge_cv_ratio,
+                    bridge_tg_ratio,
+                    training,
+                )
+            )
+
         return ret
+
+    def compute_bridge_losses(
+        self,
+        input,
+        image_features_norm,
+        text_features_norm,
+        ids,
+        logit_scale,
+        bridge_cv_ratio,
+        bridge_tg_ratio,
+        training,
+    ):
+        ret = {}
+        has_bridge = input['has_bridge'].bool()
+        feature_mask = has_bridge.to(image_features_norm.device)
+        zero_loss = image_features_norm.sum() * 0.0
+
+        if not torch.any(has_bridge):
+            if bridge_cv_ratio > 0:
+                ret['bridge_cv_loss'] = zero_loss
+            if bridge_tg_ratio > 0:
+                ret['bridge_tg_loss'] = zero_loss
+            return ret
+
+        bridge_images = input['bridge_image'][has_bridge].to(self.config.device)
+        bridge_cam_id = torch.ones(
+            bridge_images.shape[0],
+            dtype=torch.long,
+            device=bridge_images.device,
+        )
+        bridge_features = self.encode_bridge_image(
+            bridge_images,
+            bridge_cam_id,
+            training,
+        )
+        bridge_features_norm = F.normalize(bridge_features, dim=-1)
+
+        aerial_features_sub = image_features_norm[feature_mask]
+        text_features_sub = text_features_norm[feature_mask]
+        ids_sub = ids[feature_mask]
+        pos = (ids_sub.view(-1, 1) == ids_sub.view(1, -1)).float()
+        targets = pos / pos.sum(1, keepdim=True)
+
+        if bridge_cv_ratio > 0:
+            bridge_cv_loss = self.bidirectional_soft_target_loss(
+                aerial_features_sub,
+                bridge_features_norm,
+                targets,
+                logit_scale,
+            )
+            ret['bridge_cv_loss'] = bridge_cv_loss * bridge_cv_ratio
+        if bridge_tg_ratio > 0:
+            bridge_tg_loss = self.bidirectional_soft_target_loss(
+                text_features_sub,
+                bridge_features_norm,
+                targets,
+                logit_scale,
+            )
+            ret['bridge_tg_loss'] = bridge_tg_loss * bridge_tg_ratio
+        return ret
+
+    def encode_bridge_image(self, image, cam_id, training):
+        bridge_features, _ = self.visual(
+            image.type(self.dtype),
+            cam_id=cam_id,
+            training=training,
+            return_dense=False,
+        )
+        return bridge_features
+
+    @staticmethod
+    def bidirectional_soft_target_loss(
+        features_a,
+        features_b,
+        targets,
+        logit_scale,
+    ):
+        logits_a_to_b = logit_scale * features_a @ features_b.t()
+        logits_b_to_a = logits_a_to_b.t()
+        loss_a_to_b = -torch.sum(
+            F.log_softmax(logits_a_to_b, dim=1) * targets,
+            dim=1,
+        ).mean()
+        loss_b_to_a = -torch.sum(
+            F.log_softmax(logits_b_to_a, dim=1) * targets.t(),
+            dim=1,
+        ).mean()
+        return (loss_a_to_b + loss_b_to_a) / 2
 
     def compute_ritc(self, img_feats, txt_feats, img_feats_gathered, txt_feats_gathered, logit_scale, sim_targets):
         logits_per_img = logit_scale * img_feats @ txt_feats_gathered.t()
