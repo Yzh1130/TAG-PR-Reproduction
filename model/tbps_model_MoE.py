@@ -32,6 +32,17 @@ class CLIP(nn.Module):
         self.config = config
         self.eps = eps
 
+        if config.experiment.nrw_mode == 'view_norm':
+            self.register_buffer('nrw_view_mu', torch.zeros(2))
+            self.register_buffer('nrw_view_var', torch.ones(2))
+        elif config.experiment.nrw_mode == 'global_norm':
+            self.register_buffer('nrw_global_mu', torch.zeros(()))
+            self.register_buffer('nrw_global_var', torch.ones(()))
+        elif config.experiment.nrw_mode not in ('off', 'fixed'):
+            raise ValueError(
+                f"Unsupported experiment.nrw_mode: {config.experiment.nrw_mode}"
+            )
+
         self.visual_emb_layer = VisualEmbeddingLayer(ratio=0.3)
         self.textual_emb_layer = TexualEmbeddingLayer(ratio=0.3)
 
@@ -40,7 +51,7 @@ class CLIP(nn.Module):
             nn.init.normal_(self.classifier.weight.data, std=0.001)
             nn.init.constant_(self.classifier.bias.data, val=0.0)
 
-    def forward(self, input, alpha, training=False):
+    def forward(self, input, alpha, training=False, epoch=0):
         ret = dict()
 
         images = input['image'].to(self.config.device)
@@ -78,10 +89,34 @@ class CLIP(nn.Module):
         image_features_s_norm_gathered = image_features_norm_gathered.detach()
         text_features_s_norm_gathered = text_features_norm_gathered.detach()
 
-        nitc_loss = self.calc_contrastive(image_features_norm, text_features_norm, image_features_s_norm,
-                                          text_features_s_norm, image_features_norm_gathered,
-                                          text_features_norm_gathered, image_features_s_norm_gathered,
-                                          text_features_s_norm_gathered, sim_targets, alpha, logit_scale)
+        nrw_mode = self.config.experiment.nrw_mode
+        if nrw_mode == 'off':
+            nitc_loss = self.calc_contrastive(image_features_norm, text_features_norm, image_features_s_norm,
+                                              text_features_s_norm, image_features_norm_gathered,
+                                              text_features_norm_gathered, image_features_s_norm_gathered,
+                                              text_features_s_norm_gathered, sim_targets, alpha, logit_scale)
+        else:
+            nrw_weights, nrw_metrics = self.compute_nrw_weights(
+                image_features_norm,
+                text_features_norm,
+                cam_id,
+                epoch,
+            )
+            ret.update(nrw_metrics)
+            nitc_loss = self.calc_contrastive_weighted(
+                image_features_norm,
+                text_features_norm,
+                image_features_s_norm,
+                text_features_s_norm,
+                image_features_norm_gathered,
+                text_features_norm_gathered,
+                image_features_s_norm_gathered,
+                text_features_s_norm_gathered,
+                sim_targets,
+                alpha,
+                logit_scale,
+                nrw_weights,
+            )
 
         i_tse_f = F.normalize(self.visual_emb_layer(feaAttn_i, image_seq_embeddings), dim=-1)
         t_tse_f = F.normalize(self.textual_emb_layer(feaAttn_t, text_tokens, text_seq_embeddings), dim=-1)
@@ -89,9 +124,25 @@ class CLIP(nn.Module):
         t_tse_f_norm_gathered = self.all_gather(t_tse_f)
         i_tse_f_s_gathered = i_tse_f_norm_gathered.detach()
         t_tse_f_s_gathered = t_tse_f_norm_gathered.detach()
-        nitc_tse_loss = self.calc_contrastive(i_tse_f, t_tse_f, i_tse_f.detach(), t_tse_f.detach(),
-                                              i_tse_f_norm_gathered, t_tse_f_norm_gathered,
-                                              i_tse_f_s_gathered, t_tse_f_s_gathered, sim_targets, alpha, logit_scale)
+        if nrw_mode == 'off':
+            nitc_tse_loss = self.calc_contrastive(i_tse_f, t_tse_f, i_tse_f.detach(), t_tse_f.detach(),
+                                                  i_tse_f_norm_gathered, t_tse_f_norm_gathered,
+                                                  i_tse_f_s_gathered, t_tse_f_s_gathered, sim_targets, alpha, logit_scale)
+        else:
+            nitc_tse_loss = self.calc_contrastive_weighted(
+                i_tse_f,
+                t_tse_f,
+                i_tse_f.detach(),
+                t_tse_f.detach(),
+                i_tse_f_norm_gathered,
+                t_tse_f_norm_gathered,
+                i_tse_f_s_gathered,
+                t_tse_f_s_gathered,
+                sim_targets,
+                alpha,
+                logit_scale,
+                nrw_weights,
+            )
 
         ret['itc_loss'] = (nitc_loss + nitc_tse_loss) * self.config.experiment.nitc_ratio
 
@@ -128,6 +179,148 @@ class CLIP(nn.Module):
             )
 
         return ret
+
+    @torch.no_grad()
+    def compute_nrw_weights(
+        self,
+        image_features_norm,
+        text_features_norm,
+        cam_id,
+        epoch,
+    ):
+        mode = self.config.experiment.nrw_mode
+        cam_id = cam_id.to(image_features_norm.device, dtype=torch.long)
+        if mode == 'fixed':
+            weights = torch.ones(
+                cam_id.shape,
+                dtype=torch.float32,
+                device=cam_id.device,
+            )
+            weights[cam_id == 0] = self.config.experiment.nrw_fixed_aerial
+            if epoch < self.config.experiment.nrw_warmup_epochs:
+                weights.fill_(1.0)
+            weights = weights.detach()
+            zero = weights.new_zeros(())
+            return weights, {
+                'nrw_w_mean_aerial': self._masked_mean(
+                    weights,
+                    cam_id == 0,
+                ),
+                'nrw_w_mean_ground': self._masked_mean(
+                    weights,
+                    cam_id == 1,
+                ),
+                'nrw_mu_aerial': zero,
+                'nrw_mu_ground': zero.clone(),
+            }
+
+        similarities = (
+            image_features_norm.detach().float()
+            * text_features_norm.detach().float()
+        ).sum(dim=1)
+        ema = self.config.experiment.nrw_ema
+
+        if mode == 'view_norm':
+            counts = torch.stack([
+                (cam_id == view_id).sum() for view_id in (0, 1)
+            ]).float()
+            sums = torch.stack([
+                similarities[cam_id == view_id].sum()
+                for view_id in (0, 1)
+            ])
+            squared_sums = torch.stack([
+                similarities[cam_id == view_id].square().sum()
+                for view_id in (0, 1)
+            ])
+            counts, batch_mu, batch_var = self._nrw_batch_moments(
+                counts,
+                sums,
+                squared_sums,
+            )
+            present = counts > 0
+            self.nrw_view_mu.copy_(torch.where(
+                present,
+                ema * self.nrw_view_mu + (1.0 - ema) * batch_mu,
+                self.nrw_view_mu,
+            ))
+            self.nrw_view_var.copy_(torch.where(
+                present,
+                ema * self.nrw_view_var + (1.0 - ema) * batch_var,
+                self.nrw_view_var,
+            ))
+            selected_mu = self.nrw_view_mu[cam_id]
+            selected_sigma = self.nrw_view_var[cam_id].clamp_min(0).sqrt()
+            confidence = (similarities - selected_mu) / (
+                selected_sigma + 1e-6
+            )
+            weights = self._nrw_sigmoid_weights(confidence)
+            mu_aerial = self.nrw_view_mu[0].detach().clone()
+            mu_ground = self.nrw_view_mu[1].detach().clone()
+        elif mode == 'global_norm':
+            counts, batch_mu, batch_var = self._nrw_batch_moments(
+                similarities.new_tensor([similarities.numel()]),
+                similarities.sum().view(1),
+                similarities.square().sum().view(1),
+            )
+            if counts[0] > 0:
+                self.nrw_global_mu.mul_(ema).add_(
+                    batch_mu[0],
+                    alpha=1.0 - ema,
+                )
+                self.nrw_global_var.mul_(ema).add_(
+                    batch_var[0],
+                    alpha=1.0 - ema,
+                )
+            sigma = self.nrw_global_var.clamp_min(0).sqrt()
+            confidence = (similarities - self.nrw_global_mu) / (sigma + 1e-6)
+            weights = self._nrw_sigmoid_weights(confidence)
+            mu_aerial = self.nrw_global_mu.detach().clone()
+            mu_ground = self.nrw_global_mu.detach().clone()
+        else:
+            raise ValueError(f"Unsupported experiment.nrw_mode: {mode}")
+
+        if epoch < self.config.experiment.nrw_warmup_epochs:
+            weights = torch.ones_like(weights)
+        weights = weights.detach()
+        aerial_mask = cam_id == 0
+        ground_mask = cam_id == 1
+        metrics = {
+            'nrw_w_mean_aerial': self._masked_mean(weights, aerial_mask),
+            'nrw_w_mean_ground': self._masked_mean(weights, ground_mask),
+            'nrw_mu_aerial': mu_aerial,
+            'nrw_mu_ground': mu_ground,
+        }
+        return weights, metrics
+
+    @staticmethod
+    def _nrw_batch_moments(counts, sums, squared_sums):
+        statistics = torch.cat((counts, sums, squared_sums))
+        if (
+            torch.distributed.is_available()
+            and torch.distributed.is_initialized()
+        ):
+            torch.distributed.all_reduce(statistics)
+        group_count = counts.numel()
+        counts = statistics[:group_count]
+        sums = statistics[group_count:2 * group_count]
+        squared_sums = statistics[2 * group_count:]
+        safe_counts = counts.clamp_min(1.0)
+        means = sums / safe_counts
+        variances = (squared_sums / safe_counts - means.square()).clamp_min(0)
+        return counts, means, variances
+
+    def _nrw_sigmoid_weights(self, confidence):
+        min_weight = self.config.experiment.nrw_min_weight
+        alpha = self.config.experiment.nrw_alpha
+        return min_weight + (1.0 - min_weight) * torch.sigmoid(
+            alpha * confidence
+        )
+
+    @staticmethod
+    def _masked_mean(values, mask):
+        if torch.any(mask):
+            return values[mask].mean().detach()
+        return values.new_zeros(())
 
     def compute_bridge_losses(
         self,
@@ -264,6 +457,58 @@ class CLIP(nn.Module):
         loss_t2i = -torch.sum(F.log_softmax(sim_t2i, dim=1) * sim_t2i_targets, dim=1).mean()
         loss_ita = (loss_i2t + loss_t2i) / 2
         return loss_ita
+
+    def calc_contrastive_weighted(
+        self,
+        image_features,
+        text_features,
+        image_features_s,
+        text_features_s,
+        image_features_gathered,
+        text_features_gathered,
+        image_features_s_gathered,
+        text_features_s_gathered,
+        sim_targets,
+        alpha,
+        logit_scale,
+        sample_weights,
+    ):
+        with torch.no_grad():
+            sim_i2t_s = (
+                logit_scale
+                * image_features_s
+                @ text_features_s_gathered.t()
+            )
+            sim_t2i_s = (
+                logit_scale
+                * text_features_s
+                @ image_features_s_gathered.t()
+            )
+            sim_i2t_targets = (
+                alpha * F.softmax(sim_i2t_s, dim=1)
+                + (1 - alpha) * sim_targets
+            )
+            sim_t2i_targets = (
+                alpha * F.softmax(sim_t2i_s, dim=1)
+                + (1 - alpha) * sim_targets
+            )
+        sim_i2t = logit_scale * image_features @ text_features_gathered.t()
+        sim_t2i = logit_scale * text_features @ image_features_gathered.t()
+        loss_i2t_per_sample = -torch.sum(
+            F.log_softmax(sim_i2t, dim=1) * sim_i2t_targets,
+            dim=1,
+        )
+        loss_t2i_per_sample = -torch.sum(
+            F.log_softmax(sim_t2i, dim=1) * sim_t2i_targets,
+            dim=1,
+        )
+        per_sample_loss = (loss_i2t_per_sample + loss_t2i_per_sample) / 2
+        sample_weights = sample_weights.to(
+            dtype=per_sample_loss.dtype,
+        ).detach()
+        return (
+            sample_weights * per_sample_loss
+        ).sum() / (sample_weights.sum() + 1e-6)
 
     def compute_simclr_loss(self, logits_a, logits_b, logits_a_gathered, logits_b_gathered, labels, temperature):
         sim_aa = logits_a @ logits_a_gathered.t() / temperature

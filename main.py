@@ -106,6 +106,42 @@ def build_parser():
         help="override experiment.bridge_tg_ratio (default: config value)",
     )
     parser.add_argument(
+        "--nrw_mode",
+        choices=("off", "view_norm", "global_norm", "fixed"),
+        default=None,
+        help="override experiment.nrw_mode (default: config value)",
+    )
+    parser.add_argument(
+        "--nrw_alpha",
+        type=float,
+        default=None,
+        help="override experiment.nrw_alpha (default: config value)",
+    )
+    parser.add_argument(
+        "--nrw_min_weight",
+        type=float,
+        default=None,
+        help="override experiment.nrw_min_weight (default: config value)",
+    )
+    parser.add_argument(
+        "--nrw_warmup_epochs",
+        type=int,
+        default=None,
+        help="override experiment.nrw_warmup_epochs (default: config value)",
+    )
+    parser.add_argument(
+        "--nrw_ema",
+        type=float,
+        default=None,
+        help="override experiment.nrw_ema (default: config value)",
+    )
+    parser.add_argument(
+        "--nrw_fixed_aerial",
+        type=float,
+        default=None,
+        help="override experiment.nrw_fixed_aerial (default: config value)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
@@ -139,6 +175,42 @@ def apply_cli_overrides(config, args):
             config.experiment,
             "bridge_tg_ratio",
             "experiment.bridge_tg_ratio",
+        ),
+        (
+            args.nrw_mode,
+            config.experiment,
+            "nrw_mode",
+            "experiment.nrw_mode",
+        ),
+        (
+            args.nrw_alpha,
+            config.experiment,
+            "nrw_alpha",
+            "experiment.nrw_alpha",
+        ),
+        (
+            args.nrw_min_weight,
+            config.experiment,
+            "nrw_min_weight",
+            "experiment.nrw_min_weight",
+        ),
+        (
+            args.nrw_warmup_epochs,
+            config.experiment,
+            "nrw_warmup_epochs",
+            "experiment.nrw_warmup_epochs",
+        ),
+        (
+            args.nrw_ema,
+            config.experiment,
+            "nrw_ema",
+            "experiment.nrw_ema",
+        ),
+        (
+            args.nrw_fixed_aerial,
+            config.experiment,
+            "nrw_fixed_aerial",
+            "experiment.nrw_fixed_aerial",
         ),
     ]
     for new_value, section, key, dotted_key in override_specs:
@@ -196,6 +268,12 @@ def configure_experiment(config, args):
             args.lr,
             args.bridge_cv_ratio,
             args.bridge_tg_ratio,
+            args.nrw_mode,
+            args.nrw_alpha,
+            args.nrw_min_weight,
+            args.nrw_warmup_epochs,
+            args.nrw_ema,
+            args.nrw_fixed_aerial,
         )
     ) or any(
         (
@@ -232,6 +310,21 @@ def log_cli_overrides(logger, overrides, config):
     logger.info(
         "experiment.bridge_tg_ratio effective: %r",
         config.experiment.bridge_tg_ratio,
+    )
+    logger.info("experiment.nrw_mode effective: %r", config.experiment.nrw_mode)
+    logger.info("experiment.nrw_alpha effective: %r", config.experiment.nrw_alpha)
+    logger.info(
+        "experiment.nrw_min_weight effective: %r",
+        config.experiment.nrw_min_weight,
+    )
+    logger.info(
+        "experiment.nrw_warmup_epochs effective: %r",
+        config.experiment.nrw_warmup_epochs,
+    )
+    logger.info("experiment.nrw_ema effective: %r", config.experiment.nrw_ema)
+    logger.info(
+        "experiment.nrw_fixed_aerial effective: %r",
+        config.experiment.nrw_fixed_aerial,
     )
     logger.info("END OVERRIDE SUMMARY")
 
@@ -362,6 +455,13 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
             "bridge_cv_loss": AverageMeter(),
             "bridge_tg_loss": AverageMeter(),
         }
+        if config.experiment.nrw_mode != 'off':
+            meters.update({
+                "nrw_w_mean_aerial": AverageMeter(),
+                "nrw_w_mean_ground": AverageMeter(),
+                "nrw_mu_aerial": AverageMeter(),
+                "nrw_mu_ground": AverageMeter(),
+            })
 
         # model
         # model_name = "EVA02-CLIP-B-16"
@@ -405,7 +505,10 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                     alpha = config.model.softlabel_ratio
 
                 with torch.autocast(device_type='cuda'):
-                    ret = model(batch, alpha, training=True)
+                    if config.experiment.nrw_mode == 'off':
+                        ret = model(batch, alpha, training=True)
+                    else:
+                        ret = model(batch, alpha, training=True, epoch=epoch)
                     loss = sum([v for k, v in ret.items() if "loss" in k])
 
                 batch_size = batch['image'].shape[0]
@@ -423,6 +526,11 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                 meters['id_loss'].update(ret.get('id_loss', 0), batch_size)
                 meters['bridge_cv_loss'].update(ret.get('bridge_cv_loss', 0), batch_size)
                 meters['bridge_tg_loss'].update(ret.get('bridge_tg_loss', 0), batch_size)
+                if config.experiment.nrw_mode != 'off':
+                    meters['nrw_w_mean_aerial'].update(ret['nrw_w_mean_aerial'], batch_size)
+                    meters['nrw_w_mean_ground'].update(ret['nrw_w_mean_ground'], batch_size)
+                    meters['nrw_mu_aerial'].update(ret['nrw_mu_aerial'], batch_size)
+                    meters['nrw_mu_ground'].update(ret['nrw_mu_ground'], batch_size)
 
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)

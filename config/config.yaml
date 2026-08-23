@@ -13,6 +13,12 @@ experiment:
   use_bridge: false
   bridge_cv_ratio: 0.0
   bridge_tg_ratio: 0.0
+  nrw_mode: 'off'
+  nrw_alpha: 2.0
+  nrw_min_weight: 0.2
+  nrw_warmup_epochs: 3
+  nrw_ema: 0.99
+  nrw_fixed_aerial: 0.8
   # image
   input_resolution: [224, 224]
   # text
