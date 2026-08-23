@@ -142,6 +142,28 @@ def build_parser():
         help="override experiment.nrw_fixed_aerial (default: config value)",
     )
     parser.add_argument(
+        "--view_ratio",
+        type=float,
+        default=None,
+        help="override experiment.view_ratio (default: config value)",
+    )
+    parser.add_argument(
+        "--ortho_ratio",
+        type=float,
+        default=None,
+        help="override experiment.ortho_ratio (default: config value)",
+    )
+    parser.add_argument(
+        "--disable_moe",
+        action="store_true",
+        help="replace expert blocks with standard ViT blocks (default: config value)",
+    )
+    parser.add_argument(
+        "--no_disable_moe",
+        action="store_true",
+        help="enable MoE blocks (overrides config and --disable_moe)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
@@ -212,6 +234,18 @@ def apply_cli_overrides(config, args):
             "nrw_fixed_aerial",
             "experiment.nrw_fixed_aerial",
         ),
+        (
+            args.view_ratio,
+            config.experiment,
+            "view_ratio",
+            "experiment.view_ratio",
+        ),
+        (
+            args.ortho_ratio,
+            config.experiment,
+            "ortho_ratio",
+            "experiment.ortho_ratio",
+        ),
     ]
     for new_value, section, key, dotted_key in override_specs:
         if new_value is None:
@@ -231,6 +265,11 @@ def apply_cli_overrides(config, args):
         new_value = not args.no_use_bridge
         config.experiment.use_bridge = new_value
         overrides.append(("experiment.use_bridge", old_value, new_value))
+    if args.no_disable_moe or args.disable_moe:
+        old_value = config.experiment.disable_moe
+        new_value = not args.no_disable_moe
+        config.experiment.disable_moe = new_value
+        overrides.append(("experiment.disable_moe", old_value, new_value))
     return overrides
 
 
@@ -274,6 +313,8 @@ def configure_experiment(config, args):
             args.nrw_warmup_epochs,
             args.nrw_ema,
             args.nrw_fixed_aerial,
+            args.view_ratio,
+            args.ortho_ratio,
         )
     ) or any(
         (
@@ -281,6 +322,8 @@ def configure_experiment(config, args):
             args.no_grad_checkpoint,
             args.use_bridge,
             args.no_use_bridge,
+            args.disable_moe,
+            args.no_disable_moe,
             args.dry_run,
         )
     ) or args.config != "config/config.yaml"
@@ -326,6 +369,9 @@ def log_cli_overrides(logger, overrides, config):
         "experiment.nrw_fixed_aerial effective: %r",
         config.experiment.nrw_fixed_aerial,
     )
+    logger.info("experiment.view_ratio effective: %r", config.experiment.view_ratio)
+    logger.info("experiment.ortho_ratio effective: %r", config.experiment.ortho_ratio)
+    logger.info("experiment.disable_moe effective: %r", config.experiment.disable_moe)
     logger.info("END OVERRIDE SUMMARY")
 
 

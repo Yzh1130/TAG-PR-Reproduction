@@ -75,7 +75,8 @@ class ResidualAttentionBlock(nn.Module):
 
 class ResidualAttentionBlockMoE(nn.Module):
     def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None, dropout: float = 0.,
-                 num_of_experts: int = None, num_of_selected_experts: int = None):
+                 num_of_experts: int = None, num_of_selected_experts: int = None,
+                 compute_view_loss: bool = True, compute_ortho_loss: bool = True):
         super().__init__()
 
         self.attn = nn.MultiheadAttention(d_model, n_head, dropout=dropout)
@@ -84,6 +85,8 @@ class ResidualAttentionBlockMoE(nn.Module):
 
         self.num_of_experts = num_of_experts
         self.num_of_selected_experts = num_of_selected_experts
+        self.compute_view_loss = compute_view_loss
+        self.compute_ortho_loss = compute_ortho_loss
         self.img_router = nn.Linear(d_model, 2)
         nn.init.normal_(self.img_router.weight.data, std=0.001)
         nn.init.constant_(self.img_router.bias.data, val=0.0)
@@ -113,14 +116,16 @@ class ResidualAttentionBlockMoE(nn.Module):
         view_logits = self.img_router(x[:, -1, :])  # [B, E]
     
         if training and cam_id is not None:
-            ce = nn.CrossEntropyLoss()
-            view_loss = ce(view_logits, cam_id)
-            preds = torch.argmax(view_logits, dim=1)
-            correct = (preds == cam_id).sum().item()
-            total = cam_id.size(0)
-            view_acc = correct / total
-            cos_sim = torch.cosine_similarity(F.normalize(x[:, 0, :], dim=-1), F.normalize(x[:, -1, :]), dim=-1).abs()
-            ortho_loss = (cos_sim - 0.001).clamp(min=0.0).mean() * 100
+            if self.compute_view_loss:
+                ce = nn.CrossEntropyLoss()
+                view_loss = ce(view_logits, cam_id)
+                preds = torch.argmax(view_logits, dim=1)
+                correct = (preds == cam_id).sum().item()
+                total = cam_id.size(0)
+                view_acc = correct / total
+            if self.compute_ortho_loss:
+                cos_sim = torch.cosine_similarity(F.normalize(x[:, 0, :], dim=-1), F.normalize(x[:, -1, :]), dim=-1).abs()
+                ortho_loss = (cos_sim - 0.001).clamp(min=0.0).mean() * 100
     
         group_probs = F.gumbel_softmax(view_logits, hard=not training)
         group_id = torch.argmax(group_probs, dim=1)  # [B]
@@ -216,13 +221,19 @@ class Transformer_MoE(nn.Module):
         self.checkpoint = checkpoint
         self.dropout = nn.Dropout(emb_dropout)
 
-        self.expert_blocks = getattr(config, 'expert_blocks', [])
+        self.configured_expert_blocks = getattr(config, 'expert_blocks', [])
+        self.disable_moe = config.experiment.disable_moe
+        self.expert_blocks = [] if self.disable_moe else self.configured_expert_blocks
         self.num_of_experts = getattr(config, 'num_of_experts', 0)
         self.num_of_selected_experts = getattr(config, 'num_of_selected_experts', 0)
+        self.compute_view_loss = config.experiment.view_ratio > 0
+        self.compute_ortho_loss = config.experiment.ortho_ratio > 0
 
         self.resblocks = nn.ModuleList([
             ResidualAttentionBlockMoE(width, heads, attn_mask, dropout=dropout, num_of_experts=self.num_of_experts,
-                                      num_of_selected_experts=self.num_of_selected_experts)
+                                      num_of_selected_experts=self.num_of_selected_experts,
+                                      compute_view_loss=self.compute_view_loss,
+                                      compute_ortho_loss=self.compute_ortho_loss)
             if i in self.expert_blocks else
             ResidualAttentionBlock(width, heads, attn_mask, dropout=dropout)
             for i in range(layers)
@@ -236,6 +247,8 @@ class Transformer_MoE(nn.Module):
         view_accs = []
         ortho_losses = []
         x = self.dropout(x)
+        if self.disable_moe:
+            x = x[:-1, :, :]
         use_checkpoint = self.checkpoint and self.training
         for i, blk in enumerate(self.resblocks):
             need_weights = i == len(self.resblocks) - 1
@@ -253,9 +266,11 @@ class Transformer_MoE(nn.Module):
                     x, view_loss, view_acc, ortho_loss, attn_weight = block_output
                 else:
                     x, view_loss, view_acc, ortho_loss = block_output
-                view_losses.append(view_loss)
-                view_accs.append(view_acc)
-                ortho_losses.append(ortho_loss)
+                if self.compute_view_loss:
+                    view_losses.append(view_loss)
+                    view_accs.append(view_acc)
+                if self.compute_ortho_loss:
+                    ortho_losses.append(ortho_loss)
                 # remove the view token
                 if i == self.expert_blocks[-1]:
                     x = x[:-1, :, :]
@@ -271,9 +286,10 @@ class Transformer_MoE(nn.Module):
                     x, attn_weight = block_output
                 else:
                     x = block_output
-        if training:
+        if training and view_losses:
             losses['view_loss'] = torch.stack(view_losses).mean()
             losses['view_acc'] = sum(view_accs)/len(view_accs)
+        if training and ortho_losses:
             losses['ortho_loss'] = torch.stack(ortho_losses).mean()
         return x, losses, attn_weight
 

@@ -19,6 +19,9 @@ experiment:
   nrw_warmup_epochs: 3
   nrw_ema: 0.99
   nrw_fixed_aerial: 0.8
+  view_ratio: 1.0
+  ortho_ratio: 1.0
+  disable_moe: false
   # image
   input_resolution: [224, 224]
   # text

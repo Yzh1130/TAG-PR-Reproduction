@@ -71,9 +71,15 @@ class CLIP(nn.Module):
         text_features_norm = F.normalize(text_features)
         image_features_norm_gathered = self.all_gather(image_features_norm)
         text_features_norm_gathered = self.all_gather(text_features_norm)
-        ret['view_loss'] = losses.get('view_loss', 0)
+        view_ratio = self.config.experiment.view_ratio
+        ortho_ratio = self.config.experiment.ortho_ratio
+        if view_ratio > 0:
+            view_loss = losses.get('view_loss', 0)
+            ret['view_loss'] = view_loss if view_ratio == 1.0 else view_loss * view_ratio
         ret['view_acc'] = losses.get('view_acc', 0)
-        ret['ortho_loss'] = losses.get('ortho_loss', 0)
+        if ortho_ratio > 0:
+            ortho_loss = losses.get('ortho_loss', 0)
+            ret['ortho_loss'] = ortho_loss if ortho_ratio == 1.0 else ortho_loss * ortho_ratio
 
         logit_scale = self.logit_scale.exp()
         logit_scale.data = torch.clamp(logit_scale.data, max=100)
@@ -557,6 +563,34 @@ class CLIP(nn.Module):
         output = AllGather.apply(input)
         output = output.view(-1, *(output.shape[2:]))
         return output
+
+    def load_state_dict(self, state_dict, *args, **kwargs):
+        if not self.config.experiment.disable_moe:
+            return super().load_state_dict(state_dict, *args, **kwargs)
+
+        # The original-CLIP loader expands each configured MLP into identical
+        # expert copies. Collapse expert 0 back to the standard ViT MLP used by
+        # this ablation, and discard all MoE-only parameters.
+        metadata = getattr(state_dict, '_metadata', None)
+        state_dict = OrderedDict(state_dict)
+        if metadata is not None:
+            state_dict._metadata = metadata
+        for block_index in self.config.expert_blocks:
+            prefix = f'visual.transformer.resblocks.{block_index}.'
+            expert_zero_prefix = prefix + 'experts.0.'
+            moe_prefixes = (
+                prefix + 'experts.',
+                prefix + 'router.',
+                prefix + 'img_router.',
+                prefix + 'fea_router.',
+            )
+            for key in list(state_dict):
+                if key.startswith(expert_zero_prefix):
+                    mlp_key = prefix + 'mlp.' + key[len(expert_zero_prefix):]
+                    state_dict.setdefault(mlp_key, state_dict[key])
+                if key.startswith(moe_prefixes):
+                    del state_dict[key]
+        return super().load_state_dict(state_dict, *args, **kwargs)
 
 
 def clip_vitb(config, num_classes=11003):
