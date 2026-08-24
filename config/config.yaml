@@ -33,6 +33,10 @@ experiment:
   text_length: 77
   # loss
   nitc_ratio: 1.0
+  sdm_ratio: 0.0
+  tal_ratio: 0.0
+  tal_margin: 0.1
+  tal_tau: 0.02
   ####
   ritc: true
   ritc_eps: 1.0e-2

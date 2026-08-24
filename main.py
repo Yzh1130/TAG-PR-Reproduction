@@ -117,6 +117,30 @@ def build_parser():
         help="override experiment.bridge_tg_ratio (default: config value)",
     )
     parser.add_argument(
+        "--sdm_ratio",
+        type=float,
+        default=None,
+        help="override experiment.sdm_ratio (default: config value)",
+    )
+    parser.add_argument(
+        "--tal_ratio",
+        type=float,
+        default=None,
+        help="override experiment.tal_ratio (default: config value)",
+    )
+    parser.add_argument(
+        "--tal_margin",
+        type=float,
+        default=None,
+        help="override experiment.tal_margin (default: config value)",
+    )
+    parser.add_argument(
+        "--tal_tau",
+        type=float,
+        default=None,
+        help="override experiment.tal_tau (default: config value)",
+    )
+    parser.add_argument(
         "--nrw_mode",
         choices=("off", "view_norm", "global_norm", "fixed"),
         default=None,
@@ -246,6 +270,30 @@ def apply_cli_overrides(config, args):
             config.experiment,
             "bridge_tg_ratio",
             "experiment.bridge_tg_ratio",
+        ),
+        (
+            args.sdm_ratio,
+            config.experiment,
+            "sdm_ratio",
+            "experiment.sdm_ratio",
+        ),
+        (
+            args.tal_ratio,
+            config.experiment,
+            "tal_ratio",
+            "experiment.tal_ratio",
+        ),
+        (
+            args.tal_margin,
+            config.experiment,
+            "tal_margin",
+            "experiment.tal_margin",
+        ),
+        (
+            args.tal_tau,
+            config.experiment,
+            "tal_tau",
+            "experiment.tal_tau",
         ),
         (
             args.nrw_mode,
@@ -379,6 +427,10 @@ def configure_experiment(config, args):
             args.lr,
             args.bridge_cv_ratio,
             args.bridge_tg_ratio,
+            args.sdm_ratio,
+            args.tal_ratio,
+            args.tal_margin,
+            args.tal_tau,
             args.nrw_mode,
             args.nrw_alpha,
             args.nrw_min_weight,
@@ -435,6 +487,10 @@ def log_cli_overrides(logger, overrides, config=None):
         "experiment.bridge_tg_ratio effective: %r",
         config.experiment.bridge_tg_ratio,
     )
+    logger.info("experiment.sdm_ratio effective: %r", config.experiment.sdm_ratio)
+    logger.info("experiment.tal_ratio effective: %r", config.experiment.tal_ratio)
+    logger.info("experiment.tal_margin effective: %r", config.experiment.tal_margin)
+    logger.info("experiment.tal_tau effective: %r", config.experiment.tal_tau)
     logger.info("experiment.nrw_mode effective: %r", config.experiment.nrw_mode)
     logger.info("experiment.nrw_alpha effective: %r", config.experiment.nrw_alpha)
     logger.info(
@@ -747,6 +803,7 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
             "view_loss": AverageMeter(),
             "view_acc": AverageMeter(),
             "sdm_loss": AverageMeter(),
+            "tal_loss": AverageMeter(),
             "ortho_loss": AverageMeter(),
             "ritc_loss": AverageMeter(),
             "ritc_tse_loss": AverageMeter(),
@@ -841,7 +898,14 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                 meters['loss'].update(loss.item(), batch_size)
                 meters['itc_loss'].update(ret.get('itc_loss', 0), batch_size)
                 meters['itc_tse_loss'].update(ret.get('itc_tse_loss', 0), batch_size)
-                meters['sdm_loss'].update(ret.get('sdm_loss', 0), batch_size)
+                meters['sdm_loss'].update(
+                    ret['sdm_loss'].item() if 'sdm_loss' in ret else 0,
+                    batch_size,
+                )
+                meters['tal_loss'].update(
+                    ret['tal_loss'].item() if 'tal_loss' in ret else 0,
+                    batch_size,
+                )
                 meters['view_loss'].update(ret.get('view_loss', 0), batch_size)
                 meters['ortho_loss'].update(ret.get('ortho_loss', 0), batch_size)
                 meters['view_acc'].update(ret.get('view_acc', 0), batch_size)

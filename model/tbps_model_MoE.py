@@ -177,6 +177,53 @@ class CLIP(nn.Module):
 
         ret['itc_loss'] = (nitc_loss + nitc_tse_loss) * self.config.experiment.nitc_ratio
 
+        sdm_ratio = self.config.experiment.sdm_ratio
+        if sdm_ratio > 0:
+            sdm_global_loss = self.compute_sdm(
+                image_features_norm,
+                text_features_norm,
+                image_features_norm_gathered,
+                text_features_norm_gathered,
+                sim_targets,
+                logit_scale,
+            )
+            sdm_tse_loss = self.compute_sdm(
+                i_tse_f,
+                t_tse_f,
+                i_tse_f_norm_gathered,
+                t_tse_f_norm_gathered,
+                sim_targets,
+                logit_scale,
+            )
+            ret['sdm_loss'] = (
+                sdm_global_loss + sdm_tse_loss
+            ) * sdm_ratio
+
+        tal_ratio = self.config.experiment.tal_ratio
+        if tal_ratio > 0:
+            tal_global_loss = self.compute_tal(
+                image_features_norm,
+                text_features_norm,
+                image_features_norm_gathered,
+                text_features_norm_gathered,
+                ids,
+                gathered_ids,
+                self.config.experiment.tal_margin,
+                self.config.experiment.tal_tau,
+            )
+            tal_tse_loss = self.compute_tal(
+                i_tse_f,
+                t_tse_f,
+                i_tse_f_norm_gathered,
+                t_tse_f_norm_gathered,
+                ids,
+                gathered_ids,
+                self.config.experiment.tal_margin,
+                self.config.experiment.tal_tau,
+            )
+            ret['tal_loss'] = (
+                tal_global_loss + tal_tse_loss
+            ) * tal_ratio
 
         if self.config.experiment.ritc:
             ritc_loss = self.compute_ritc(image_features_norm, text_features_norm, image_features_norm_gathered,
@@ -471,6 +518,80 @@ class CLIP(nn.Module):
 
         loss = torch.mean(torch.sum(i2t_loss, dim=1)) + torch.mean(torch.sum(t2i_loss, dim=1))
         return loss
+
+    def compute_tal(
+        self,
+        image_features,
+        text_features,
+        image_features_gathered,
+        text_features_gathered,
+        ids,
+        gathered_ids,
+        margin,
+        tau,
+    ):
+        """RDE triplet alignment loss with ID-aware positive sets."""
+        if tau <= 0:
+            raise ValueError("experiment.tal_tau must be positive")
+
+        positive_mask = ids.view(-1, 1).eq(gathered_ids.view(1, -1))
+        # Keep the temperature-scaled upper bound out of mixed precision.
+        with torch.autocast(device_type=image_features.device.type, enabled=False):
+            image_to_text = (
+                image_features.float() @ text_features_gathered.float().t()
+            )
+            text_to_image = (
+                text_features.float() @ image_features_gathered.float().t()
+            )
+            image_to_text_loss = self._compute_tal_direction(
+                image_to_text,
+                positive_mask,
+                margin,
+                tau,
+            )
+            text_to_image_loss = self._compute_tal_direction(
+                text_to_image,
+                positive_mask,
+                margin,
+                tau,
+            )
+        return (image_to_text_loss + text_to_image_loss) / 2
+
+    @staticmethod
+    def _compute_tal_direction(similarities, positive_mask, margin, tau):
+        similarities = similarities.float()
+        if similarities.shape != positive_mask.shape:
+            raise ValueError("TAL similarity and ID-mask shapes must match")
+        if torch.any(~positive_mask.any(dim=1)):
+            raise ValueError("every TAL anchor must have at least one positive")
+
+        negative_mask = ~positive_mask
+        valid_rows = negative_mask.any(dim=1)
+        if not torch.any(valid_rows):
+            return similarities.sum() * 0.0
+
+        similarities = similarities[valid_rows]
+        positive_mask = positive_mask[valid_rows]
+        negative_mask = negative_mask[valid_rows]
+
+        positive_logits = (similarities / tau).masked_fill(
+            ~positive_mask,
+            float('-inf'),
+        )
+        positive_weights = F.softmax(positive_logits, dim=1).detach()
+        positive_similarity = (positive_weights * similarities).sum(dim=1)
+
+        negative_logits = (similarities / tau).masked_fill(
+            ~negative_mask,
+            float('-inf'),
+        )
+        negative_upper_bound = tau * torch.logsumexp(
+            negative_logits,
+            dim=1,
+        )
+        return F.relu(
+            margin - positive_similarity + negative_upper_bound
+        ).mean()
 
     # input features are normed
     def calc_contrastive(self, image_features, text_features, image_features_s, text_features_s,
