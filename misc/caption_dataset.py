@@ -16,6 +16,62 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 Image.MAX_IMAGE_PIXELS = None
 
 
+def _initialize_text_length_stats(
+    dataset,
+    max_words,
+    text_length,
+    collect_token_stats=False,
+):
+    if max_words <= 0:
+        raise ValueError("max_words must be a positive integer")
+    if text_length <= 1:
+        raise ValueError("text_length must leave room for SOS and EOS tokens")
+    dataset.max_words = max_words
+    dataset.text_length = text_length
+    dataset.collect_token_stats = collect_token_stats
+    dataset.text_sample_count = 0
+    dataset.words_after_truncation = 0
+    dataset.truncated_sample_count = 0
+    dataset.token_overflow_count = 0 if collect_token_stats else None
+
+
+def _preprocess_caption(dataset, caption):
+    caption, word_count, was_truncated = pre_caption(
+        caption,
+        dataset.max_words,
+        return_stats=True,
+    )
+    dataset.text_sample_count += 1
+    dataset.words_after_truncation += min(word_count, dataset.max_words)
+    dataset.truncated_sample_count += int(was_truncated)
+    if dataset.collect_token_stats:
+        from text_utils.tokenizer import _tokenizer
+
+        token_count = len(_tokenizer.encode(caption)) + 2  # SOS and EOS
+        dataset.token_overflow_count += int(token_count > dataset.text_length)
+    return caption
+
+
+def _print_text_length_summary(dataset):
+    count = dataset.text_sample_count
+    mean_words = dataset.words_after_truncation / count if count else 0.0
+    truncated_ratio = 100.0 * dataset.truncated_sample_count / count if count else 0.0
+    print("TEXT LENGTH SUMMARY")
+    print(f"  max_words: {dataset.max_words}")
+    print(f"  mean words after truncation: {mean_words:.2f}")
+    print(
+        "  truncated samples: "
+        f"{dataset.truncated_sample_count} ({truncated_ratio:.2f}%)"
+    )
+    print(
+        f"  samples exceeding text_length={dataset.text_length} after tokenization: "
+        f"{dataset.token_overflow_count}"
+    )
+    if dataset.token_overflow_count:
+        print("  WARNING: CLIP tokenize will truncate these samples to text_length")
+    print("END TEXT LENGTH SUMMARY")
+
+
 class ps_train_dataset(Dataset):
     def __init__(
         self,
@@ -24,12 +80,21 @@ class ps_train_dataset(Dataset):
         transform,
         split,
         max_words=30,
+        text_length=77,
         use_bridge=False,
+        print_text_summary=False,
     ):
         ann_file = os.path.join(ann_root, split + '_reid.json')
         anns = json.load(open(ann_file))
         self.transform = transform
         self.use_bridge = use_bridge
+        print_text_summary = print_text_summary and self._is_rank_zero()
+        _initialize_text_length_stats(
+            self,
+            max_words,
+            text_length,
+            collect_token_stats=print_text_summary,
+        )
         self.person2text = defaultdict(list)
         self.ground_images_by_person = defaultdict(list)
 
@@ -55,12 +120,14 @@ class ps_train_dataset(Dataset):
                 self.ground_images_by_person[person_idx].append(image_path)
                 ground_images_seen[person_idx].add(image_path)
             for caption in ann['captions']:
-                caption = pre_caption(caption, max_words)
+                caption = _preprocess_caption(self, caption)
                 self.pairs.append((image_path, caption, cam_id, person_idx))
                 self.person2text[person_idx].append(caption)
 
         if self.use_bridge and self._is_rank_zero():
             self._print_bridge_index_summary()
+        if print_text_summary:
+            _print_text_length_summary(self)
 
     def __len__(self):
         return len(self.pairs)
@@ -162,7 +229,15 @@ class ps_train_dataset(Dataset):
 
 
 class ps_eval_dataset(Dataset):
-    def __init__(self, ann_root, image_root, transform, split, max_words=30):
+    def __init__(
+        self,
+        ann_root,
+        image_root,
+        transform,
+        split,
+        max_words=30,
+        text_length=77,
+    ):
         ann_file = os.path.join(ann_root, split + '_reid.json')
         anns = json.load(open(ann_file, 'r'))
         self.transform = transform
@@ -170,6 +245,8 @@ class ps_eval_dataset(Dataset):
         self.image = []
         self.txt2person = []
         self.img2person = []
+        self.img_cam_ids = []
+        _initialize_text_length_stats(self, max_words, text_length)
 
         for ann in anns:
             image_path = os.path.join(image_root, ann['file_path'])
@@ -177,12 +254,14 @@ class ps_eval_dataset(Dataset):
 
             person_id = ann['id']
             self.img2person.append(person_id)
+            self.img_cam_ids.append(ann.get('cam_id', 1))
             for caption in ann['captions']:
-                self.text.append(pre_caption(caption, max_words))
+                self.text.append(_preprocess_caption(self, caption))
                 self.txt2person.append(person_id)
 
         self.txt2person = torch.tensor(self.txt2person, dtype=torch.long)
         self.img2person = torch.tensor(self.img2person, dtype=torch.long)
+        self.img_cam_ids = torch.tensor(self.img_cam_ids, dtype=torch.long)
 
     def __len__(self):
         return len(self.image)
@@ -194,7 +273,7 @@ class ps_eval_dataset(Dataset):
 
         return image
 
-def pre_caption(caption, max_words=50):
+def pre_caption(caption, max_words=50, return_stats=False):
     caption = re.sub(
         r"([.!\"()*#:;~])",
         ' ',
@@ -210,7 +289,11 @@ def pre_caption(caption, max_words=50):
 
     # truncate caption
     caption_words = caption.split(' ')
+    word_count = len(caption_words) if caption else 0
+    was_truncated = word_count > max_words
     if len(caption_words) > max_words:
         caption = ' '.join(caption_words[:max_words])
 
+    if return_stats:
+        return caption, word_count, was_truncated
     return caption

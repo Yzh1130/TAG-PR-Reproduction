@@ -22,6 +22,10 @@ experiment:
   view_ratio: 1.0
   ortho_ratio: 1.0
   disable_moe: false
+  max_words: 30
+  use_ema: false
+  ema_decay: 0.999
+  view_prompt: false
   # image
   input_resolution: [224, 224]
   # text
@@ -70,4 +74,4 @@ distributed:
   url: 'env://'
 
 anno_dir: "/path/to/dataset/anno_dir"   
-image_dir: "/path/to/dataset/images"     
+image_dir: "/path/to/dataset/images"

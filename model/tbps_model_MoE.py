@@ -32,6 +32,15 @@ class CLIP(nn.Module):
         self.config = config
         self.eps = eps
 
+        if config.experiment.view_prompt:
+            if text_encode.context_length < 3:
+                raise ValueError(
+                    "view prompt requires text_length >= 3 for SOS and EOS"
+                )
+            prompt_width = text_encode.token_embedding.embedding_dim
+            self.view_prompt_embed = nn.Parameter(torch.empty(2, prompt_width))
+            nn.init.normal_(self.view_prompt_embed, std=0.02)
+
         if config.experiment.nrw_mode == 'view_norm':
             self.register_buffer('nrw_view_mu', torch.zeros(2))
             self.register_buffer('nrw_view_var', torch.ones(2))
@@ -58,15 +67,31 @@ class CLIP(nn.Module):
         texts = input['caption']
         cam_id = input['cam_id']
 
-        text_tokens = tokenize(texts, context_length=self.config.experiment.text_length).to(self.config.device)
+        if self.config.experiment.view_prompt:
+            text_tokens = tokenize(
+                texts,
+                context_length=self.config.experiment.text_length - 1,
+            ).to(self.config.device)
+        else:
+            text_tokens = tokenize(texts, context_length=self.config.experiment.text_length).to(self.config.device)
         ids = input['id'].to(self.config.device)
 
         image_features, image_seq_embeddings, losses, feaAttn_i = self.encode_image(
             images, cam_id=cam_id, return_dense=True, training=training
         )
-        text_features, text_seq_embeddings, feaAttn_t = self.encode_text(
-            text_tokens, return_dense=True, training=training
-        )
+        if self.config.experiment.view_prompt:
+            text_features, text_seq_embeddings, feaAttn_t = self.encode_text_with_view_prompt(
+                text_tokens,
+                cam_id,
+                return_dense=True,
+                training=training,
+            )
+            text_tokens_for_tse = self.view_prompt_token_ids(text_tokens)
+        else:
+            text_features, text_seq_embeddings, feaAttn_t = self.encode_text(
+                text_tokens, return_dense=True, training=training
+            )
+            text_tokens_for_tse = text_tokens
         image_features_norm = F.normalize(image_features)
         text_features_norm = F.normalize(text_features)
         image_features_norm_gathered = self.all_gather(image_features_norm)
@@ -125,7 +150,7 @@ class CLIP(nn.Module):
             )
 
         i_tse_f = F.normalize(self.visual_emb_layer(feaAttn_i, image_seq_embeddings), dim=-1)
-        t_tse_f = F.normalize(self.textual_emb_layer(feaAttn_t, text_tokens, text_seq_embeddings), dim=-1)
+        t_tse_f = F.normalize(self.textual_emb_layer(feaAttn_t, text_tokens_for_tse, text_seq_embeddings), dim=-1)
         i_tse_f_norm_gathered = self.all_gather(i_tse_f)
         t_tse_f_norm_gathered = self.all_gather(t_tse_f)
         i_tse_f_s_gathered = i_tse_f_norm_gathered.detach()
@@ -556,6 +581,55 @@ class CLIP(nn.Module):
             return output
         output = self.visual(image.type(self.dtype), training=training)
         return output
+
+    def view_prompt_token_ids(self, text_tokens):
+        prompted_tokens = torch.zeros(
+            text_tokens.shape[0],
+            text_tokens.shape[1] + 1,
+            dtype=text_tokens.dtype,
+            device=text_tokens.device,
+        )
+        prompted_tokens[:, 0] = text_tokens[:, 0]
+        prompted_tokens[:, 1] = 1  # non-padding placeholder for the learned prompt
+        prompted_tokens[:, 2:] = text_tokens[:, 1:]
+        return prompted_tokens
+
+    def encode_text_with_view_prompt(
+        self,
+        text_tokens,
+        cam_id,
+        return_dense=False,
+        training=False,
+    ):
+        del training
+        encoder = self.encode_text
+        if text_tokens.shape[1] + 1 != encoder.context_length:
+            raise ValueError(
+                "view-prompt input must reserve one position after the SOS token"
+            )
+        cam_id = cam_id.to(text_tokens.device, dtype=torch.long)
+        if torch.any((cam_id < 0) | (cam_id > 1)):
+            raise ValueError("view prompt requires cam_id values in {0, 1}")
+
+        token_embeddings = encoder.token_embedding(text_tokens).type(encoder.dtype)
+        prompt_embeddings = self.view_prompt_embed[cam_id].to(encoder.dtype).unsqueeze(1)
+        x = torch.cat(
+            [token_embeddings[:, :1], prompt_embeddings, token_embeddings[:, 1:]],
+            dim=1,
+        )
+        if encoder.positional_embedding_flag:
+            x = x + encoder.positional_embedding.type(encoder.dtype)
+        x = x.permute(1, 0, 2)
+        x, fea_attn = encoder.transformer(x)
+        x = x.permute(1, 0, 2)
+        x = encoder.ln_final(x).type(encoder.dtype)
+        x = x @ encoder.text_projection
+
+        eos_positions = text_tokens.argmax(dim=-1) + 1
+        global_features = x[torch.arange(x.shape[0], device=x.device), eos_positions]
+        if return_dense:
+            return global_features, x, fea_attn
+        return global_features, fea_attn
 
     def all_gather(self, input):
         if not self.use_gather or not is_using_distributed():

@@ -2,9 +2,12 @@ import argparse
 import os
 import random
 import time
+from collections import OrderedDict
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 
 import torch
+import torch.nn.functional as F
 from experiment import (
     ExperimentArchive,
     ExperimentDirectoryConflict,
@@ -15,7 +18,7 @@ from experiment import (
 from misc.utils import get_rank
 from misc.build import load_checkpoint, cosine_scheduler, build_optimizer
 from misc.data import build_pedes_data
-from misc.eval import test_tse, test
+from misc.eval import metric_eval, test_tse, test
 from misc.utils import parse_config, init_distributed_mode, set_seed, is_master, is_using_distributed, \
     AverageMeter
 from options import get_args
@@ -172,6 +175,38 @@ def build_parser():
         help="enable MoE blocks (overrides config and --disable_moe)",
     )
     parser.add_argument(
+        "--max_words",
+        type=int,
+        default=None,
+        help="override experiment.max_words (default: config value)",
+    )
+    parser.add_argument(
+        "--use_ema",
+        action="store_true",
+        help="enable model exponential moving average (default: config value)",
+    )
+    parser.add_argument(
+        "--no_use_ema",
+        action="store_true",
+        help="disable model EMA (overrides config and --use_ema)",
+    )
+    parser.add_argument(
+        "--ema_decay",
+        type=float,
+        default=None,
+        help="override experiment.ema_decay (default: config value)",
+    )
+    parser.add_argument(
+        "--view_prompt",
+        action="store_true",
+        help="enable view-conditioned text prompts (default: config value)",
+    )
+    parser.add_argument(
+        "--no_view_prompt",
+        action="store_true",
+        help="disable view-conditioned prompts (overrides config and --view_prompt)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
@@ -260,6 +295,18 @@ def apply_cli_overrides(config, args):
             "ortho_ratio",
             "experiment.ortho_ratio",
         ),
+        (
+            args.max_words,
+            config.experiment,
+            "max_words",
+            "experiment.max_words",
+        ),
+        (
+            args.ema_decay,
+            config.experiment,
+            "ema_decay",
+            "experiment.ema_decay",
+        ),
     ]
     for new_value, section, key, dotted_key in override_specs:
         if new_value is None:
@@ -284,6 +331,16 @@ def apply_cli_overrides(config, args):
         new_value = not args.no_disable_moe
         config.experiment.disable_moe = new_value
         overrides.append(("experiment.disable_moe", old_value, new_value))
+    if args.no_use_ema or args.use_ema:
+        old_value = config.experiment.use_ema
+        new_value = not args.no_use_ema
+        config.experiment.use_ema = new_value
+        overrides.append(("experiment.use_ema", old_value, new_value))
+    if args.no_view_prompt or args.view_prompt:
+        old_value = config.experiment.view_prompt
+        new_value = not args.no_view_prompt
+        config.experiment.view_prompt = new_value
+        overrides.append(("experiment.view_prompt", old_value, new_value))
     return overrides
 
 
@@ -330,6 +387,8 @@ def configure_experiment(config, args):
             args.nrw_fixed_aerial,
             args.view_ratio,
             args.ortho_ratio,
+            args.max_words,
+            args.ema_decay,
         )
     ) or any(
         (
@@ -339,6 +398,10 @@ def configure_experiment(config, args):
             args.no_use_bridge,
             args.disable_moe,
             args.no_disable_moe,
+            args.use_ema,
+            args.no_use_ema,
+            args.view_prompt,
+            args.no_view_prompt,
             args.dry_run,
         )
     ) or args.config != "config/config.yaml"
@@ -346,13 +409,16 @@ def configure_experiment(config, args):
     return directory, path_override
 
 
-def log_cli_overrides(logger, overrides, config):
+def log_cli_overrides(logger, overrides, config=None):
     logger.info("OVERRIDE SUMMARY")
     if not overrides:
         logger.info("no overrides")
     else:
         for key, old_value, new_value in overrides:
             logger.info("%s: %r -> %r", key, old_value, new_value)
+    if config is None:
+        logger.info("END OVERRIDE SUMMARY")
+        return
     logger.info(
         "experiment.grad_checkpoint effective: %r",
         config.experiment.grad_checkpoint,
@@ -387,6 +453,10 @@ def log_cli_overrides(logger, overrides, config):
     logger.info("experiment.view_ratio effective: %r", config.experiment.view_ratio)
     logger.info("experiment.ortho_ratio effective: %r", config.experiment.ortho_ratio)
     logger.info("experiment.disable_moe effective: %r", config.experiment.disable_moe)
+    logger.info("experiment.max_words effective: %r", config.experiment.max_words)
+    logger.info("experiment.use_ema effective: %r", config.experiment.use_ema)
+    logger.info("experiment.ema_decay effective: %r", config.experiment.ema_decay)
+    logger.info("experiment.view_prompt effective: %r", config.experiment.view_prompt)
     logger.info("END OVERRIDE SUMMARY")
 
 
@@ -438,6 +508,176 @@ def apply_test_loader_override(config, dataloader, cli_overrides):
             f"config.data.test_batch_size={expected}, "
             f"test_loader.batch_size={test_loader.batch_size}"
         )
+
+
+class ModelEMA:
+    """Parameter EMA with direct-copy semantics for model buffers."""
+
+    def __init__(self, model, decay):
+        if not 0.0 <= decay < 1.0:
+            raise ValueError("experiment.ema_decay must be in [0, 1)")
+        self.decay = decay
+        self.parameter_names = set(dict(model.named_parameters()))
+        self.shadow = OrderedDict(
+            (name, value.detach().clone())
+            for name, value in model.state_dict().items()
+        )
+
+    @torch.no_grad()
+    def update(self, model, update_parameters=True):
+        current = model.state_dict()
+        if current.keys() != self.shadow.keys():
+            raise RuntimeError("model state changed after EMA initialization")
+        for name, average in self.shadow.items():
+            value = current[name].detach()
+            if name in self.parameter_names:
+                if update_parameters:
+                    average.mul_(self.decay).add_(value, alpha=1.0 - self.decay)
+            else:
+                average.copy_(value)
+
+    def state_dict(self):
+        return OrderedDict(
+            (name, value.detach().clone())
+            for name, value in self.shadow.items()
+        )
+
+    @torch.no_grad()
+    def load_state_dict(self, state_dict):
+        if state_dict.keys() != self.shadow.keys():
+            raise RuntimeError("checkpoint EMA keys do not match the model")
+        for name, average in self.shadow.items():
+            saved = state_dict[name]
+            if saved.shape != average.shape or saved.dtype != average.dtype:
+                raise RuntimeError(f"checkpoint EMA tensor mismatch for {name}")
+        for name, average in self.shadow.items():
+            average.copy_(state_dict[name].to(device=average.device))
+
+    @torch.no_grad()
+    def _swap(self, model):
+        live_state = model.state_dict()
+        if live_state.keys() != self.shadow.keys():
+            raise RuntimeError("model state does not match the EMA state")
+        for name, value in live_state.items():
+            average = self.shadow[name]
+            if (
+                value.shape != average.shape
+                or value.dtype != average.dtype
+                or value.device != average.device
+            ):
+                raise RuntimeError(f"EMA tensor mismatch for {name}")
+        for name, value in live_state.items():
+            temporary = value.detach().clone()
+            value.copy_(self.shadow[name])
+            self.shadow[name].copy_(temporary)
+
+    @contextmanager
+    def average_parameters(self, model):
+        """Swap EMA values in place and restore the exact live state on exit."""
+        was_training = model.training
+        self._swap(model)
+        try:
+            yield
+        finally:
+            self._swap(model)
+            model.train(was_training)
+
+
+@torch.no_grad()
+def test_tse_view_prompt(model, data_loader, max_length, device):
+    """Evaluate text twice and select scores using each gallery image's view."""
+    from text_utils.tokenizer import tokenize
+
+    model.eval()
+    dataset = data_loader.dataset
+    if not hasattr(dataset, "img_cam_ids"):
+        raise RuntimeError("view-prompt evaluation requires gallery img_cam_ids")
+
+    texts = dataset.text
+    text_features_by_view = {}
+    text_tse_features_by_view = {}
+    text_batch_size = 256
+    for view in (0, 1):
+        text_features = []
+        text_tse_features = []
+        for start in range(0, len(texts), text_batch_size):
+            batch_texts = texts[start: min(len(texts), start + text_batch_size)]
+            tokens = tokenize(
+                batch_texts,
+                context_length=max_length - 1,
+            ).to(device)
+            cam_ids = torch.full(
+                (tokens.shape[0],),
+                view,
+                dtype=torch.long,
+                device=device,
+            )
+            text_feature, text_dense, text_attention = (
+                model.encode_text_with_view_prompt(
+                    tokens,
+                    cam_ids,
+                    return_dense=True,
+                )
+            )
+            prompted_tokens = model.view_prompt_token_ids(tokens)
+            text_features.append(F.normalize(text_feature, dim=-1))
+            text_tse_features.append(
+                F.normalize(
+                    model.textual_emb_layer(
+                        text_attention,
+                        prompted_tokens,
+                        text_dense,
+                        training=False,
+                    ),
+                    dim=-1,
+                )
+            )
+        text_features_by_view[view] = torch.cat(text_features, dim=0)
+        text_tse_features_by_view[view] = torch.cat(text_tse_features, dim=0)
+
+    image_features = []
+    image_tse_features = []
+    for images in data_loader:
+        images = images.to(device)
+        image_feature, image_dense, image_attention = model.encode_image(
+            images,
+            return_dense=True,
+        )
+        image_features.append(F.normalize(image_feature, dim=-1))
+        image_tse_features.append(
+            F.normalize(
+                model.visual_emb_layer(
+                    image_attention,
+                    image_dense,
+                    training=False,
+                ),
+                dim=-1,
+            )
+        )
+    image_features = torch.cat(image_features, dim=0)
+    image_tse_features = torch.cat(image_tse_features, dim=0)
+
+    gallery_cam_ids = dataset.img_cam_ids.to(device)
+    if gallery_cam_ids.shape[0] != image_features.shape[0]:
+        raise RuntimeError("gallery cam_id count does not match gallery image count")
+    if torch.any((gallery_cam_ids < 0) | (gallery_cam_ids > 1)):
+        raise ValueError("view prompt requires gallery cam_id values in {0, 1}")
+
+    similarities = image_features.new_empty(len(texts), image_features.shape[0])
+    for view in (0, 1):
+        image_mask = gallery_cam_ids == view
+        if not image_mask.any():
+            continue
+        similarities[:, image_mask] = (
+            text_features_by_view[view] @ image_features[image_mask].t()
+            + text_tse_features_by_view[view] @ image_tse_features[image_mask].t()
+        ) / 2
+
+    return metric_eval(
+        similarities,
+        dataset.img2person,
+        dataset.txt2person,
+    )
 
 
 def _cuda_peak_memory_gb():
@@ -539,6 +779,31 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                 find_unused_parameters=True,
             )
 
+        model_without_ddp = model.module if hasattr(model, "module") else model
+        model_ema = None
+        if config.experiment.use_ema and is_master():
+            model_ema = ModelEMA(
+                model_without_ddp,
+                config.experiment.ema_decay,
+            )
+            if config.model.ckpt_type == 'saved':
+                saved_checkpoint = torch.load(
+                    os.path.join(
+                        config.model.saved_path,
+                        'checkpoint_best.pth',
+                    ),
+                    map_location='cpu',
+                )
+                if 'model_ema' in saved_checkpoint:
+                    model_ema.load_state_dict(saved_checkpoint['model_ema'])
+                    logger.info("Restored model EMA from saved checkpoint")
+                else:
+                    logger.warning(
+                        "Saved checkpoint has no model_ema; initialized EMA "
+                        "from the restored model weights"
+                    )
+                del saved_checkpoint
+
         config.schedule.niter_per_ep = len(train_loader)
         lr_schedule = cosine_scheduler(config)
         optimizer = build_optimizer(config, model)
@@ -594,8 +859,20 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                     meters['nrw_mu_ground'].update(ret['nrw_mu_ground'], batch_size)
 
                 scaler.scale(loss).backward()
-                scaler.step(optimizer)
-                scaler.update()
+                if model_ema is None:
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    scale_before_step = scaler.get_scale()
+                    scaler.step(optimizer)
+                    scaler.update()
+                    optimizer_step_succeeded = (
+                        scaler.get_scale() >= scale_before_step
+                    )
+                    model_ema.update(
+                        model_without_ddp,
+                        update_parameters=optimizer_step_succeeded,
+                    )
                 model.zero_grad()
                 optimizer.zero_grad()
                 it += 1
@@ -619,13 +896,26 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                     )
                 )
 
-                model_without_ddp = model.module if hasattr(model, "module") else model
-                eval_result = test_tse(
-                    model_without_ddp,
-                    dataloader['test_loader'],
-                    77,
-                    config.device,
+                ema_context = (
+                    model_ema.average_parameters(model_without_ddp)
+                    if model_ema is not None
+                    else nullcontext()
                 )
+                with ema_context:
+                    if config.experiment.view_prompt:
+                        eval_result = test_tse_view_prompt(
+                            model_without_ddp,
+                            dataloader['test_loader'],
+                            config.experiment.text_length,
+                            config.device,
+                        )
+                    else:
+                        eval_result = test_tse(
+                            model_without_ddp,
+                            dataloader['test_loader'],
+                            config.experiment.text_length,
+                            config.device,
+                        )
                 rank_1, rank_5, rank_10, map = (
                     eval_result['r1'],
                     eval_result['r5'],
@@ -681,18 +971,18 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                 if best_rank_1 < rank_1:
                     best_rank_1 = rank_1
                     best_epoch = epoch
-                    model_without_ddp = (
-                        model.module if hasattr(model, "module") else model
-                    )
                     save_obj = {
                         'model': model_without_ddp.state_dict(),
                         'optimizer': optimizer.state_dict(),
                         'config': config,
                     }
+                    if model_ema is not None:
+                        save_obj['model_ema'] = model_ema.state_dict()
                     torch.save(
                         save_obj,
                         os.path.join(config.model.saved_path, 'checkpoint_best.pth'),
                     )
+                    del save_obj
 
     except torch.cuda.OutOfMemoryError:
         current_alloc_gb, current_reserved_gb = _cuda_peak_memory_gb()

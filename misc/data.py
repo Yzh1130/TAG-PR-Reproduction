@@ -121,10 +121,19 @@ def build_pedes_data(config):
         config.image_dir,
         aug,
         split='train',
-        max_words=77,
+        max_words=config.experiment.max_words,
+        text_length=config.experiment.text_length,
         use_bridge=config.experiment.use_bridge,
+        print_text_summary=True,
     )
-    test_dataset = ps_eval_dataset(config.anno_dir, config.image_dir, val_transform, split='test', max_words=77)
+    test_dataset = ps_eval_dataset(
+        config.anno_dir,
+        config.image_dir,
+        val_transform,
+        split='test',
+        max_words=config.experiment.max_words,
+        text_length=config.experiment.text_length,
+    )
 
     if is_using_distributed():
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
