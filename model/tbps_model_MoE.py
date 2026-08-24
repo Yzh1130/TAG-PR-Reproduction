@@ -565,31 +565,82 @@ class CLIP(nn.Module):
         return output
 
     def load_state_dict(self, state_dict, *args, **kwargs):
-        if not self.config.experiment.disable_moe:
+        position_key = 'visual.positional_embedding'
+        grid_key = 'visual.positional_embedding_grid_size'
+        target_grid = tuple(self.visual.position_grid_size)
+        if position_key not in state_dict:
+            if not self.config.experiment.disable_moe:
+                return super().load_state_dict(state_dict, *args, **kwargs)
+            source_grid_tensor = None
+            source_grid = target_grid
+            resize_position = False
+            remove_grid_marker = False
+            position_capacity_mismatch = False
+        else:
+            source_grid_tensor = state_dict.get(grid_key)
+            if source_grid_tensor is None:
+                source_patch_count = state_dict[position_key].shape[0] - 1
+                source_grid_width = int(source_patch_count ** 0.5)
+                source_grid = (source_grid_width, source_grid_width)
+                if source_grid_width * source_grid_width != source_patch_count:
+                    raise ValueError(
+                        "Cannot infer a square source grid from visual positional embedding"
+                    )
+            else:
+                source_grid = tuple(int(value) for value in source_grid_tensor.tolist())
+
+            resize_position = source_grid != target_grid
+            remove_grid_marker = (
+                source_grid_tensor is not None
+                and not self.visual.needs_positional_interpolation
+            )
+            position_capacity_mismatch = (
+                state_dict[position_key].shape
+                != self.visual.positional_embedding.shape
+            )
+        if (not resize_position and not remove_grid_marker
+                and not position_capacity_mismatch
+                and not self.config.experiment.disable_moe):
             return super().load_state_dict(state_dict, *args, **kwargs)
 
-        # The original-CLIP loader expands each configured MLP into identical
-        # expert copies. Collapse expert 0 back to the standard ViT MLP used by
-        # this ablation, and discard all MoE-only parameters.
         metadata = getattr(state_dict, '_metadata', None)
         state_dict = OrderedDict(state_dict)
         if metadata is not None:
             state_dict._metadata = metadata
-        for block_index in self.config.expert_blocks:
-            prefix = f'visual.transformer.resblocks.{block_index}.'
-            expert_zero_prefix = prefix + 'experts.0.'
-            moe_prefixes = (
-                prefix + 'experts.',
-                prefix + 'router.',
-                prefix + 'img_router.',
-                prefix + 'fea_router.',
+
+        if resize_position:
+            state_dict[position_key] = self.visual.interpolate_positional_embedding(
+                state_dict[position_key],
+                source_grid,
             )
-            for key in list(state_dict):
-                if key.startswith(expert_zero_prefix):
-                    mlp_key = prefix + 'mlp.' + key[len(expert_zero_prefix):]
-                    state_dict.setdefault(mlp_key, state_dict[key])
-                if key.startswith(moe_prefixes):
-                    del state_dict[key]
+        elif position_key in state_dict:
+            self.visual.ensure_positional_embedding_capacity(
+                state_dict[position_key].shape[0]
+            )
+        if self.visual.needs_positional_interpolation:
+            state_dict[grid_key] = self.visual.positional_embedding_grid_size
+        else:
+            state_dict.pop(grid_key, None)
+
+        if self.config.experiment.disable_moe:
+            # The original-CLIP loader expands each configured MLP into identical
+            # expert copies. Collapse expert 0 back to the standard ViT MLP used by
+            # this ablation, and discard all MoE-only parameters.
+            for block_index in self.config.expert_blocks:
+                prefix = f'visual.transformer.resblocks.{block_index}.'
+                expert_zero_prefix = prefix + 'experts.0.'
+                moe_prefixes = (
+                    prefix + 'experts.',
+                    prefix + 'router.',
+                    prefix + 'img_router.',
+                    prefix + 'fea_router.',
+                )
+                for key in list(state_dict):
+                    if key.startswith(expert_zero_prefix):
+                        mlp_key = prefix + 'mlp.' + key[len(expert_zero_prefix):]
+                        state_dict.setdefault(mlp_key, state_dict[key])
+                    if key.startswith(moe_prefixes):
+                        del state_dict[key]
         return super().load_state_dict(state_dict, *args, **kwargs)
 
 

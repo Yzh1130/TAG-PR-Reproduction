@@ -56,6 +56,14 @@ def build_parser():
         help="override data.test_batch_size (default: config value)",
     )
     parser.add_argument(
+        "--input_resolution",
+        type=int,
+        nargs=2,
+        metavar=("H", "W"),
+        default=None,
+        help="override experiment.input_resolution as height width (default: config value)",
+    )
+    parser.add_argument(
         "--epoch",
         type=int,
         default=None,
@@ -183,6 +191,12 @@ def apply_cli_overrides(config, args):
             "test_batch_size",
             "data.test_batch_size",
         ),
+        (
+            args.input_resolution,
+            config.experiment,
+            "input_resolution",
+            "experiment.input_resolution",
+        ),
         (args.epoch, config.schedule, "epoch", "schedule.epoch"),
         (args.seed, config.misc, "seed", "misc.seed"),
         (args.lr, config.schedule, "lr", "schedule.lr"),
@@ -302,6 +316,7 @@ def configure_experiment(config, args):
             args.output_dir,
             args.batch_size,
             args.test_batch_size,
+            args.input_resolution,
             args.epoch,
             args.seed,
             args.lr,

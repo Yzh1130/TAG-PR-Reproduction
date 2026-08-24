@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from torch import nn
 from .base_transformer import Transformer, LayerNorm, Transformer_MoE
 from typing import Tuple, Union
@@ -14,7 +15,12 @@ class VisualTransformer(nn.Module):
         self.input_resolution = input_resolution
         self.num_x = (input_resolution[1] - patch_size) // patch_size + 1
         self.num_y = (input_resolution[0] - patch_size) // patch_size + 1
-        num_patches = self.num_x * self.num_y
+        if input_resolution[0] % patch_size or input_resolution[1] % patch_size:
+            raise ValueError(
+                "input_resolution height and width must be divisible by patch_size"
+            )
+        self.position_grid_size = (self.num_y, self.num_x)
+        self.needs_positional_interpolation = self.position_grid_size != (14, 14)
 
         output_dim = embed_dim
         self.output_dim = output_dim
@@ -25,7 +31,13 @@ class VisualTransformer(nn.Module):
         scale = width ** -0.5
         self.class_embedding = nn.Parameter(scale * torch.randn(width))
         self.view_token = nn.Parameter(scale * torch.randn(width))
-        self.positional_embedding = nn.Parameter(scale * torch.randn(num_patches + 1, width))
+        position_capacity = 14 * 14
+        self.positional_embedding = nn.Parameter(scale * torch.randn(position_capacity + 1, width))
+        if self.needs_positional_interpolation:
+            self.register_buffer(
+                'positional_embedding_grid_size',
+                torch.tensor(self.position_grid_size, dtype=torch.long),
+            )
         self.ln_pre = LayerNorm(width)
 
         self.transformer = Transformer_MoE(config, width, layers, heads, checkpoint=checkpoint, dropout=dropout,
@@ -66,14 +78,84 @@ class VisualTransformer(nn.Module):
                     param.requires_grad = False
         return self
 
+    @property
+    def active_positional_embedding(self):
+        active_length = self.num_x * self.num_y + 1
+        if self.positional_embedding.shape[0] < active_length:
+            raise RuntimeError(
+                "positional_embedding has not been prepared for input_resolution"
+            )
+        return self.positional_embedding[:active_length]
+
+    def ensure_positional_embedding_capacity(self, position_count):
+        if self.positional_embedding.shape[0] == position_count:
+            return
+        self.positional_embedding = nn.Parameter(
+            torch.empty(
+                position_count,
+                self.positional_embedding.shape[1],
+                device=self.positional_embedding.device,
+                dtype=self.positional_embedding.dtype,
+            )
+        )
+
+    def interpolate_positional_embedding(self, positional_embedding, source_grid):
+        source_height, source_width = source_grid
+        source_patch_count = source_height * source_width
+        target_patch_count = self.num_y * self.num_x
+        if positional_embedding.shape[0] < source_patch_count + 1:
+            raise ValueError(
+                "positional_embedding is shorter than its declared source grid"
+            )
+        cls_position = positional_embedding[:1]
+        patch_positions = positional_embedding[1:source_patch_count + 1]
+        patch_positions = patch_positions.reshape(
+            1,
+            source_height,
+            source_width,
+            positional_embedding.shape[-1],
+        ).permute(0, 3, 1, 2)
+        patch_positions = F.interpolate(
+            patch_positions.float(),
+            size=self.position_grid_size,
+            mode='bicubic',
+            align_corners=False,
+        ).to(positional_embedding.dtype)
+        patch_positions = patch_positions.permute(0, 2, 3, 1).reshape(
+            target_patch_count,
+            positional_embedding.shape[-1],
+        )
+        active_positions = torch.cat([cls_position, patch_positions], dim=0)
+
+        position_capacity = max(14 * 14, target_patch_count) + 1
+        packed_positions = positional_embedding.new_zeros(
+            position_capacity,
+            positional_embedding.shape[-1],
+        )
+        copy_count = min(position_capacity, positional_embedding.shape[0])
+        packed_positions[:copy_count] = positional_embedding[:copy_count]
+        packed_positions[:target_patch_count + 1] = active_positions
+        self.ensure_positional_embedding_capacity(position_capacity)
+        print(
+            "Resized visual positional embedding with bicubic interpolation: "
+            f"source_grid={source_height}x{source_width}, "
+            f"target_grid={self.num_y}x{self.num_x}, "
+            f"active_shape={tuple(active_positions.shape)}"
+        )
+        return packed_positions
+
     def forward(self, x: torch.Tensor, cam_id=None, return_dense=False, return_feature=False, training=False):
         x = self.conv1(x)  # shape = [*, width, grid, grid]
         # shape = [*, width, grid ** 2]
         x = x.reshape(x.shape[0], x.shape[1], -1)
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
         x = torch.cat([self.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device), x], dim=1)
-        x = x + self.positional_embedding.to(x.dtype)
-
+        if self.needs_positional_interpolation:
+            x = x + self.active_positional_embedding.to(x.dtype)
+        else:
+            x = x + self.positional_embedding.to(x.dtype)
+        # The learned view token is appended after positional encoding and has
+        # no positional-embedding entry of its own.
         x = torch.cat([x, self.view_token.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device)], dim=1)
         x = self.ln_pre(x)
 
