@@ -26,6 +26,10 @@ experiment:
   use_ema: false
   ema_decay: 0.999
   view_prompt: false
+  rerank: false
+  rerank_k1: 20
+  rerank_k2: 6
+  rerank_lambda: 0.3
   # image
   input_resolution: [224, 224]
   # text

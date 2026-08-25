@@ -1,4 +1,5 @@
 import argparse
+import csv
 import os
 import random
 import time
@@ -11,6 +12,7 @@ import torch.nn.functional as F
 from experiment import (
     ExperimentArchive,
     ExperimentDirectoryConflict,
+    METRICS_HEADER,
     add_file_handler,
     prepare_experiment_directory,
     resolve_experiment_directory,
@@ -231,6 +233,45 @@ def build_parser():
         help="disable view-conditioned prompts (overrides config and --view_prompt)",
     )
     parser.add_argument(
+        "--rerank",
+        action="store_true",
+        help="enable k-reciprocal evaluation re-ranking (default: config value)",
+    )
+    parser.add_argument(
+        "--no_rerank",
+        action="store_true",
+        help="disable re-ranking (overrides config and --rerank)",
+    )
+    parser.add_argument(
+        "--rerank_k1",
+        type=int,
+        default=None,
+        help="override experiment.rerank_k1 (default: config value)",
+    )
+    parser.add_argument(
+        "--rerank_k2",
+        type=int,
+        default=None,
+        help="override experiment.rerank_k2 (default: config value)",
+    )
+    parser.add_argument(
+        "--rerank_lambda",
+        type=float,
+        default=None,
+        help="override experiment.rerank_lambda (default: config value)",
+    )
+    parser.add_argument(
+        "--eval_only",
+        action="store_true",
+        help="load --resume and run one evaluation without training",
+    )
+    parser.add_argument(
+        "--resume",
+        type=str,
+        default=None,
+        help="checkpoint path for --eval_only (default: None)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
@@ -355,6 +396,24 @@ def apply_cli_overrides(config, args):
             "ema_decay",
             "experiment.ema_decay",
         ),
+        (
+            args.rerank_k1,
+            config.experiment,
+            "rerank_k1",
+            "experiment.rerank_k1",
+        ),
+        (
+            args.rerank_k2,
+            config.experiment,
+            "rerank_k2",
+            "experiment.rerank_k2",
+        ),
+        (
+            args.rerank_lambda,
+            config.experiment,
+            "rerank_lambda",
+            "experiment.rerank_lambda",
+        ),
     ]
     for new_value, section, key, dotted_key in override_specs:
         if new_value is None:
@@ -389,6 +448,11 @@ def apply_cli_overrides(config, args):
         new_value = not args.no_view_prompt
         config.experiment.view_prompt = new_value
         overrides.append(("experiment.view_prompt", old_value, new_value))
+    if args.no_rerank or args.rerank:
+        old_value = config.experiment.rerank
+        new_value = not args.no_rerank
+        config.experiment.rerank = new_value
+        overrides.append(("experiment.rerank", old_value, new_value))
     return overrides
 
 
@@ -441,6 +505,9 @@ def configure_experiment(config, args):
             args.ortho_ratio,
             args.max_words,
             args.ema_decay,
+            args.rerank_k1,
+            args.rerank_k2,
+            args.rerank_lambda,
         )
     ) or any(
         (
@@ -454,9 +521,19 @@ def configure_experiment(config, args):
             args.no_use_ema,
             args.view_prompt,
             args.no_view_prompt,
+            args.rerank,
+            args.no_rerank,
             args.dry_run,
         )
     ) or args.config != "config/config.yaml"
+    if (
+        args.eval_only
+        and args.output_dir is None
+        and args.exp_name is None
+    ):
+        # Evaluation never writes a checkpoint, so it may safely read one from
+        # an otherwise protected experiment directory.
+        protect_checkpoint = False
     directory = prepare_experiment_directory(directory, protect_checkpoint)
     return directory, path_override
 
@@ -513,6 +590,13 @@ def log_cli_overrides(logger, overrides, config=None):
     logger.info("experiment.use_ema effective: %r", config.experiment.use_ema)
     logger.info("experiment.ema_decay effective: %r", config.experiment.ema_decay)
     logger.info("experiment.view_prompt effective: %r", config.experiment.view_prompt)
+    logger.info("experiment.rerank effective: %r", config.experiment.rerank)
+    logger.info("experiment.rerank_k1 effective: %r", config.experiment.rerank_k1)
+    logger.info("experiment.rerank_k2 effective: %r", config.experiment.rerank_k2)
+    logger.info(
+        "experiment.rerank_lambda effective: %r",
+        config.experiment.rerank_lambda,
+    )
     logger.info("END OVERRIDE SUMMARY")
 
 
@@ -736,6 +820,365 @@ def test_tse_view_prompt(model, data_loader, max_length, device):
     )
 
 
+def _fused_retrieval_features(*features):
+    return torch.cat(features, dim=-1).float() / (len(features) ** 0.5)
+
+
+@torch.no_grad()
+def test_tse_with_rerank(model, data_loader, config, logger):
+    """Evaluate raw scores and their label-free k-reciprocal re-ranking."""
+    from text_utils.tokenizer import tokenize
+    from misc.rerank import (
+        ENCODING_BLOCK_SIZE,
+        JACCARD_QUERY_BLOCK_SIZE,
+        QUERY_EXPANSION_BLOCK_SIZE,
+        RANK_BLOCK_SIZE,
+        k_reciprocal_rerank,
+        self_cosine_distance,
+    )
+
+    if not torch.cuda.is_available() or not str(config.device).startswith('cuda'):
+        raise RuntimeError(
+            "k-reciprocal re-ranking requires CUDA; CPU fallback is disabled"
+        )
+    model.eval()
+    dataset = data_loader.dataset
+    texts = dataset.text
+    text_batch_size = 256
+    max_length = config.experiment.text_length
+    device = config.device
+
+    if config.experiment.view_prompt:
+        text_features_by_view = {}
+        text_tse_features_by_view = {}
+        for view in (0, 1):
+            text_features = []
+            text_tse_features = []
+            for start in range(0, len(texts), text_batch_size):
+                batch_texts = texts[start: min(len(texts), start + text_batch_size)]
+                tokens = tokenize(
+                    batch_texts,
+                    context_length=max_length - 1,
+                ).to(device)
+                cam_ids = torch.full(
+                    (tokens.shape[0],),
+                    view,
+                    dtype=torch.long,
+                    device=device,
+                )
+                text_feature, text_dense, text_attention = (
+                    model.encode_text_with_view_prompt(
+                        tokens,
+                        cam_ids,
+                        return_dense=True,
+                    )
+                )
+                prompted_tokens = model.view_prompt_token_ids(tokens)
+                text_features.append(F.normalize(text_feature, dim=-1))
+                text_tse_features.append(
+                    F.normalize(
+                        model.textual_emb_layer(
+                            text_attention,
+                            prompted_tokens,
+                            text_dense,
+                            training=False,
+                        ),
+                        dim=-1,
+                    )
+                )
+            text_features_by_view[view] = torch.cat(text_features, dim=0)
+            text_tse_features_by_view[view] = torch.cat(
+                text_tse_features,
+                dim=0,
+            )
+        # Average both prompt-conditioned text graphs into one QQ relation.
+        query_relation_features = _fused_retrieval_features(
+            text_features_by_view[0],
+            text_tse_features_by_view[0],
+            text_features_by_view[1],
+            text_tse_features_by_view[1],
+        )
+    else:
+        text_features = []
+        text_tse_features = []
+        for start in range(0, len(texts), text_batch_size):
+            batch_texts = texts[start: min(len(texts), start + text_batch_size)]
+            tokens = tokenize(batch_texts, context_length=max_length).to(device)
+            text_feature, text_dense, text_attention = model.encode_text(
+                tokens,
+                return_dense=True,
+            )
+            text_features.append(F.normalize(text_feature, dim=-1))
+            text_tse_features.append(
+                F.normalize(
+                    model.textual_emb_layer(
+                        text_attention,
+                        tokens,
+                        text_dense,
+                        training=False,
+                    ),
+                    dim=-1,
+                )
+            )
+        text_features = torch.cat(text_features, dim=0)
+        text_tse_features = torch.cat(text_tse_features, dim=0)
+        query_relation_features = _fused_retrieval_features(
+            text_features,
+            text_tse_features,
+        )
+
+    image_features = []
+    image_tse_features = []
+    for images in data_loader:
+        images = images.to(device)
+        image_feature, image_dense, image_attention = model.encode_image(
+            images,
+            return_dense=True,
+        )
+        image_features.append(F.normalize(image_feature, dim=-1))
+        image_tse_features.append(
+            F.normalize(
+                model.visual_emb_layer(
+                    image_attention,
+                    image_dense,
+                    training=False,
+                ),
+                dim=-1,
+            )
+        )
+    image_features = torch.cat(image_features, dim=0)
+    image_tse_features = torch.cat(image_tse_features, dim=0)
+    gallery_relation_features = _fused_retrieval_features(
+        image_features,
+        image_tse_features,
+    )
+
+    if config.experiment.view_prompt:
+        if not hasattr(dataset, "img_cam_ids"):
+            raise RuntimeError("view-prompt re-ranking requires gallery img_cam_ids")
+        gallery_cam_ids = dataset.img_cam_ids.to(device)
+        if gallery_cam_ids.shape[0] != image_features.shape[0]:
+            raise RuntimeError("gallery cam_id count does not match gallery images")
+        if torch.any((gallery_cam_ids < 0) | (gallery_cam_ids > 1)):
+            raise ValueError("view prompt requires cam_id values in {0, 1}")
+        similarities = image_features.new_empty(
+            len(texts),
+            image_features.shape[0],
+        )
+        for view in (0, 1):
+            image_mask = gallery_cam_ids == view
+            if not image_mask.any():
+                continue
+            similarities[:, image_mask] = (
+                text_features_by_view[view] @ image_features[image_mask].t()
+                + text_tse_features_by_view[view]
+                @ image_tse_features[image_mask].t()
+            ) / 2
+    else:
+        similarities = (
+            text_features @ image_features.t()
+            + text_tse_features @ image_tse_features.t()
+        ) / 2
+
+    raw_result = metric_eval(
+        similarities,
+        dataset.img2person,
+        dataset.txt2person,
+    )
+    # The normalized cosine distance is symmetric, non-negative, and bounded.
+    query_gallery_distance = (
+        1.0 - similarities.float()
+    ).mul_(0.5).clamp_(0.0, 1.0)
+    del similarities
+    if config.experiment.view_prompt:
+        del text_features_by_view, text_tse_features_by_view
+    else:
+        del text_features, text_tse_features
+    del image_features, image_tse_features
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+    torch.cuda.synchronize()
+    rerank_start = time.time()
+    logger.info(
+        "RERANK BLOCKS rank=%s encoding=%s query_expansion=%s jaccard_query=%s",
+        RANK_BLOCK_SIZE,
+        ENCODING_BLOCK_SIZE,
+        QUERY_EXPANSION_BLOCK_SIZE,
+        JACCARD_QUERY_BLOCK_SIZE,
+    )
+    try:
+        query_query_distance = self_cosine_distance(query_relation_features)
+        gallery_gallery_distance = self_cosine_distance(
+            gallery_relation_features
+        )
+        del query_relation_features, gallery_relation_features
+        reranked_distance = k_reciprocal_rerank(
+            query_gallery_distance,
+            query_query_distance,
+            gallery_gallery_distance,
+            k1=config.experiment.rerank_k1,
+            k2=config.experiment.rerank_k2,
+            lambda_value=config.experiment.rerank_lambda,
+        )
+        del (
+            query_gallery_distance,
+            query_query_distance,
+            gallery_gallery_distance,
+        )
+    except torch.cuda.OutOfMemoryError as exc:
+        raise RuntimeError(
+            "CUDA out of memory during k-reciprocal re-ranking; lower "
+            "--test_batch_size for feature extraction, free model/EMA memory, "
+            "or reduce the internal re-ranking block sizes"
+        ) from exc
+    torch.cuda.synchronize()
+    rerank_time_sec = time.time() - rerank_start
+    logger.info("K-reciprocal re-ranking completed in %.3f seconds", rerank_time_sec)
+    reranked_result = metric_eval(
+        reranked_distance.neg_(),
+        dataset.img2person,
+        dataset.txt2person,
+    )
+    return raw_result, reranked_result
+
+
+def evaluate_model(model, data_loader, config, logger):
+    if config.experiment.rerank:
+        return test_tse_with_rerank(model, data_loader, config, logger)
+    if config.experiment.view_prompt:
+        result = test_tse_view_prompt(
+            model,
+            data_loader,
+            config.experiment.text_length,
+            config.device,
+        )
+    else:
+        result = test_tse(
+            model,
+            data_loader,
+            config.experiment.text_length,
+            config.device,
+        )
+    return result, None
+
+
+def log_evaluation_results(logger, result, reranked_result=None):
+    logger.info(
+        'Acc@1 {top1:.5f} Acc@5 {top5:.5f} Acc@10 {top10:.5f} mAP {mAP:.5f}'.format(
+            top1=result['r1'],
+            top5=result['r5'],
+            top10=result['r10'],
+            mAP=result['mAP'],
+        )
+    )
+    if reranked_result is not None:
+        logger.info(
+            'RERANK Acc@1 {top1:.5f} Acc@5 {top5:.5f} '
+            'Acc@10 {top10:.5f} mAP {mAP:.5f}'.format(
+                top1=reranked_result['r1'],
+                top5=reranked_result['r5'],
+                top10=reranked_result['r10'],
+                mAP=reranked_result['mAP'],
+            )
+        )
+
+
+RERANK_METRICS_HEADER = METRICS_HEADER + [
+    "R1_rr",
+    "R5_rr",
+    "R10_rr",
+    "mAP_rr",
+]
+
+
+def initialize_metrics(experiment, rerank):
+    if not rerank:
+        experiment.initialize_metrics()
+        return
+    if not experiment.enabled:
+        return
+    metrics_path = experiment.directory / "metrics_by_epoch.csv"
+    with metrics_path.open("w", encoding="utf-8", newline="") as handle:
+        csv.writer(handle).writerow(RERANK_METRICS_HEADER)
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def append_metrics(
+    experiment,
+    epoch,
+    result,
+    train_loss,
+    epoch_time_sec,
+    peak_mem_alloc_gb,
+    peak_mem_reserved_gb,
+    reranked_result=None,
+):
+    if reranked_result is None:
+        experiment.append_metrics(
+            epoch,
+            result['r1'],
+            result['r5'],
+            result['r10'],
+            result['mAP'],
+            train_loss,
+            epoch_time_sec,
+            peak_mem_alloc_gb,
+            peak_mem_reserved_gb,
+        )
+        return
+    if not experiment.enabled:
+        return
+    metrics_path = experiment.directory / "metrics_by_epoch.csv"
+    with metrics_path.open("a", encoding="utf-8", newline="") as handle:
+        csv.writer(handle).writerow(
+            [
+                epoch,
+                result['r1'],
+                result['r5'],
+                result['r10'],
+                result['mAP'],
+                train_loss,
+                epoch_time_sec,
+                peak_mem_alloc_gb,
+                peak_mem_reserved_gb,
+                reranked_result['r1'],
+                reranked_result['r5'],
+                reranked_result['r10'],
+                reranked_result['mAP'],
+            ]
+        )
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def load_resume_weights(model, resume_path, use_ema, logger):
+    checkpoint_path = Path(resume_path).expanduser().resolve()
+    if not checkpoint_path.is_file():
+        raise FileNotFoundError(f"resume checkpoint does not exist: {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    if not isinstance(checkpoint, dict) or 'model' not in checkpoint:
+        raise RuntimeError("resume checkpoint must contain a 'model' state dict")
+    state_name = 'model'
+    if use_ema:
+        if 'model_ema' in checkpoint:
+            state_name = 'model_ema'
+        else:
+            logger.warning(
+                "Resume checkpoint has no model_ema; evaluating model weights"
+            )
+    load_result = model.load_state_dict(checkpoint[state_name], strict=True)
+    logger.info(
+        "Loaded %s weights from %s (missing=%s unexpected=%s)",
+        state_name,
+        checkpoint_path,
+        len(load_result.missing_keys),
+        len(load_result.unexpected_keys),
+    )
+    return load_result
+
+
 def _cuda_peak_memory_gb():
     if not torch.cuda.is_available():
         return 0.0, 0.0
@@ -753,7 +1196,14 @@ def environment_rank():
         return 0
 
 
-def run(config, experiment=None, cli_overrides=(), config_path=None):
+def run(
+    config,
+    experiment=None,
+    cli_overrides=(),
+    config_path=None,
+    eval_only=False,
+    resume_path=None,
+):
     logger = setup_logger('TAG', distributed_rank=get_rank())
     logger.propagate = False
     if experiment is not None:
@@ -763,7 +1213,7 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
     log_cli_overrides(logger, cli_overrides, config)
     logger.info(f'\n{config}')
     if experiment is not None:
-        experiment.initialize_metrics()
+        initialize_metrics(experiment, config.experiment.rerank)
 
     training_start_time = time.time()
     train_loader = None
@@ -826,6 +1276,29 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
         # pretrained = "/data/zxy/UAV/checkpoints/EVA02_CLIP_B_psz16_s8B.pt"  # or "/path/to/EVA02_CLIP_B_psz16_s8B.pt"
         # model, _, preprocess = create_model_and_transforms(config, model_name, pretrained, force_custom_clip=True)
         model = clip_vitb(config, num_classes)
+        if eval_only:
+            if not is_master():
+                return None
+            load_resume_weights(
+                model,
+                resume_path,
+                config.experiment.use_ema,
+                logger,
+            )
+            model.to(config.device)
+            eval_result, reranked_result = evaluate_model(
+                model,
+                dataloader['test_loader'],
+                config,
+                logger,
+            )
+            log_evaluation_results(logger, eval_result, reranked_result)
+            torch.cuda.empty_cache()
+            return {
+                'original': eval_result,
+                'reranked': reranked_result,
+            }
+
         model.to(config.device)
         model, load_result = load_checkpoint(model, config)
 
@@ -966,34 +1439,19 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
                     else nullcontext()
                 )
                 with ema_context:
-                    if config.experiment.view_prompt:
-                        eval_result = test_tse_view_prompt(
-                            model_without_ddp,
-                            dataloader['test_loader'],
-                            config.experiment.text_length,
-                            config.device,
-                        )
-                    else:
-                        eval_result = test_tse(
-                            model_without_ddp,
-                            dataloader['test_loader'],
-                            config.experiment.text_length,
-                            config.device,
-                        )
+                    eval_result, reranked_result = evaluate_model(
+                        model_without_ddp,
+                        dataloader['test_loader'],
+                        config,
+                        logger,
+                    )
                 rank_1, rank_5, rank_10, map = (
                     eval_result['r1'],
                     eval_result['r5'],
                     eval_result['r10'],
                     eval_result['mAP'],
                 )
-                logger.info(
-                    'Acc@1 {top1:.5f} Acc@5 {top5:.5f} Acc@10 {top10:.5f} mAP {mAP:.5f}'.format(
-                        top1=rank_1,
-                        top5=rank_5,
-                        top10=rank_10,
-                        mAP=map,
-                    )
-                )
+                log_evaluation_results(logger, eval_result, reranked_result)
                 torch.cuda.empty_cache()
 
             epoch_peak_alloc_gb, epoch_peak_reserved_gb = _cuda_peak_memory_gb()
@@ -1013,16 +1471,15 @@ def run(config, experiment=None, cli_overrides=(), config_path=None):
             if is_master():
                 epoch_time_sec = time.time() - start_time
                 if experiment is not None:
-                    experiment.append_metrics(
+                    append_metrics(
+                        experiment,
                         epoch + 1,
-                        rank_1,
-                        rank_5,
-                        rank_10,
-                        map,
+                        eval_result,
                         meters['loss'].avg,
                         epoch_time_sec,
                         epoch_peak_alloc_gb,
                         epoch_peak_reserved_gb,
+                        reranked_result,
                     )
                 if best_metrics is None or best_metrics['r1'] < rank_1:
                     best_metrics = {
@@ -1100,7 +1557,18 @@ def count_parameters(model):
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.eval_only and args.resume is None:
+        parser.error("--eval_only requires --resume PATH")
+    if args.resume is not None and not args.eval_only:
+        parser.error("--resume is currently supported only with --eval_only")
     config, overrides = resolve_runtime_config(args)
+    if config.experiment.rerank:
+        if config.experiment.rerank_k1 < 1:
+            parser.error("rerank_k1 must be positive")
+        if not 1 <= config.experiment.rerank_k2 <= config.experiment.rerank_k1 + 1:
+            parser.error("rerank_k2 must be in [1, rerank_k1 + 1]")
+        if not 0.0 <= config.experiment.rerank_lambda <= 1.0:
+            parser.error("rerank_lambda must be in [0, 1]")
 
     try:
         experiment_directory, path_override = configure_experiment(config, args)
@@ -1130,15 +1598,20 @@ def main(argv=None):
 
     init_distributed_mode(config)
     set_seed(config)
+    archive_eval_only = (
+        args.output_dir is not None or args.exp_name is not None
+    )
     experiment = ExperimentArchive(
         experiment_directory,
-        enabled=is_master(),
+        enabled=is_master() and (not args.eval_only or archive_eval_only),
     )
     run(
         config,
         experiment=experiment,
         cli_overrides=overrides,
         config_path=args.config,
+        eval_only=args.eval_only,
+        resume_path=args.resume,
     )
     return 0
 
