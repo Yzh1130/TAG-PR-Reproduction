@@ -440,6 +440,21 @@ class CLIP(nn.Module):
         pos_idx = torch.eq(idx, idx_all).float()
         sim_targets = pos_idx / pos_idx.sum(1, keepdim=True)
 
+        dhn_margin = self.config.experiment.dhn_margin
+        dhn_hard_mask = None
+        if dhn_margin > 0:
+            domain_ids = input['domain_id'].to(self.config.device)
+            gathered_domain_ids = self.all_gather(domain_ids)
+            dhn_hard_mask = self.build_dhn_hard_mask(
+                ids,
+                gathered_ids,
+                domain_ids,
+                gathered_domain_ids,
+            )
+            ret['dhn_hard_ratio'] = (
+                dhn_hard_mask.float().mean().detach()
+            )
+
         image_features_s_norm = image_features_norm.detach()
         text_features_s_norm = text_features_norm.detach()
         image_features_s_norm_gathered = image_features_norm_gathered.detach()
@@ -450,7 +465,8 @@ class CLIP(nn.Module):
             nitc_loss = self.calc_contrastive(image_features_norm, text_features_norm, image_features_s_norm,
                                               text_features_s_norm, image_features_norm_gathered,
                                               text_features_norm_gathered, image_features_s_norm_gathered,
-                                              text_features_s_norm_gathered, sim_targets, alpha, logit_scale)
+                                              text_features_s_norm_gathered, sim_targets, alpha, logit_scale,
+                                              dhn_hard_mask, dhn_margin)
         else:
             nrw_weights, nrw_metrics = self.compute_nrw_weights(
                 image_features_norm,
@@ -472,6 +488,8 @@ class CLIP(nn.Module):
                 alpha,
                 logit_scale,
                 nrw_weights,
+                dhn_hard_mask,
+                dhn_margin,
             )
 
         i_tse_f = F.normalize(self.visual_emb_layer(feaAttn_i, image_seq_embeddings), dim=-1)
@@ -483,7 +501,8 @@ class CLIP(nn.Module):
         if nrw_mode == 'off':
             nitc_tse_loss = self.calc_contrastive(i_tse_f, t_tse_f, i_tse_f.detach(), t_tse_f.detach(),
                                                   i_tse_f_norm_gathered, t_tse_f_norm_gathered,
-                                                  i_tse_f_s_gathered, t_tse_f_s_gathered, sim_targets, alpha, logit_scale)
+                                                  i_tse_f_s_gathered, t_tse_f_s_gathered, sim_targets, alpha, logit_scale,
+                                                  dhn_hard_mask, dhn_margin)
         else:
             nitc_tse_loss = self.calc_contrastive_weighted(
                 i_tse_f,
@@ -498,6 +517,8 @@ class CLIP(nn.Module):
                 alpha,
                 logit_scale,
                 nrw_weights,
+                dhn_hard_mask,
+                dhn_margin,
             )
 
         ret['itc_loss'] = (nitc_loss + nitc_tse_loss) * self.config.experiment.nitc_ratio
@@ -918,18 +939,63 @@ class CLIP(nn.Module):
             margin - positive_similarity + negative_upper_bound
         ).mean()
 
+    @staticmethod
+    def build_dhn_hard_mask(
+        local_ids,
+        gathered_ids,
+        local_domain_ids,
+        gathered_domain_ids,
+    ):
+        same_domain = local_domain_ids.view(-1, 1).eq(
+            gathered_domain_ids.view(1, -1)
+        )
+        same_id = local_ids.view(-1, 1).eq(gathered_ids.view(1, -1))
+        return (same_domain & ~same_id).detach()
+
+    @staticmethod
+    def apply_dhn_margin(
+        cosine_similarities,
+        hard_mask,
+        dhn_margin,
+        logit_scale,
+    ):
+        hard_mask = hard_mask.detach()
+        if cosine_similarities.shape != hard_mask.shape:
+            raise ValueError(
+                "DHN similarity and hard-negative mask shapes must match"
+            )
+        adjusted_cosine = cosine_similarities + (
+            hard_mask.to(cosine_similarities.dtype) * dhn_margin
+        )
+        return logit_scale * adjusted_cosine
+
     # input features are normed
     def calc_contrastive(self, image_features, text_features, image_features_s, text_features_s,
                          image_features_gathered, text_features_gathered, image_features_s_gathered,
                          text_features_s_gathered,
-                         sim_targets, alpha, logit_scale):
+                         sim_targets, alpha, logit_scale,
+                         dhn_hard_mask=None, dhn_margin=0.0):
         with torch.no_grad():
             sim_i2t_s = logit_scale * image_features_s @ text_features_s_gathered.t()
             sim_t2i_s = logit_scale * text_features_s @ image_features_s_gathered.t()
             sim_i2t_targets = alpha * F.softmax(sim_i2t_s, dim=1) + (1 - alpha) * sim_targets
             sim_t2i_targets = alpha * F.softmax(sim_t2i_s, dim=1) + (1 - alpha) * sim_targets  # soft + hard
-        sim_i2t = logit_scale * image_features @ text_features_gathered.t()
-        sim_t2i = logit_scale * text_features @ image_features_gathered.t()
+        if dhn_hard_mask is None:
+            sim_i2t = logit_scale * image_features @ text_features_gathered.t()
+            sim_t2i = logit_scale * text_features @ image_features_gathered.t()
+        else:
+            sim_i2t = self.apply_dhn_margin(
+                image_features @ text_features_gathered.t(),
+                dhn_hard_mask,
+                dhn_margin,
+                logit_scale,
+            )
+            sim_t2i = self.apply_dhn_margin(
+                text_features @ image_features_gathered.t(),
+                dhn_hard_mask,
+                dhn_margin,
+                logit_scale,
+            )
         loss_i2t = -torch.sum(F.log_softmax(sim_i2t, dim=1) * sim_i2t_targets, dim=1).mean()
         loss_t2i = -torch.sum(F.log_softmax(sim_t2i, dim=1) * sim_t2i_targets, dim=1).mean()
         loss_ita = (loss_i2t + loss_t2i) / 2
@@ -949,6 +1015,8 @@ class CLIP(nn.Module):
         alpha,
         logit_scale,
         sample_weights,
+        dhn_hard_mask=None,
+        dhn_margin=0.0,
     ):
         with torch.no_grad():
             sim_i2t_s = (
@@ -969,8 +1037,22 @@ class CLIP(nn.Module):
                 alpha * F.softmax(sim_t2i_s, dim=1)
                 + (1 - alpha) * sim_targets
             )
-        sim_i2t = logit_scale * image_features @ text_features_gathered.t()
-        sim_t2i = logit_scale * text_features @ image_features_gathered.t()
+        if dhn_hard_mask is None:
+            sim_i2t = logit_scale * image_features @ text_features_gathered.t()
+            sim_t2i = logit_scale * text_features @ image_features_gathered.t()
+        else:
+            sim_i2t = self.apply_dhn_margin(
+                image_features @ text_features_gathered.t(),
+                dhn_hard_mask,
+                dhn_margin,
+                logit_scale,
+            )
+            sim_t2i = self.apply_dhn_margin(
+                text_features @ image_features_gathered.t(),
+                dhn_hard_mask,
+                dhn_margin,
+                logit_scale,
+            )
         loss_i2t_per_sample = -torch.sum(
             F.log_softmax(sim_i2t, dim=1) * sim_i2t_targets,
             dim=1,

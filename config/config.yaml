@@ -37,6 +37,7 @@ experiment:
   text_length: 77
   # loss
   nitc_ratio: 1.0
+  dhn_margin: 0.0
   sdm_ratio: 0.0
   tal_ratio: 0.0
   tal_margin: 0.1

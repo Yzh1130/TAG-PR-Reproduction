@@ -126,6 +126,12 @@ def build_parser():
         help="override experiment.bridge_tg_ratio (default: config value)",
     )
     parser.add_argument(
+        "--dhn_margin",
+        type=float,
+        default=None,
+        help="override experiment.dhn_margin (default: config value)",
+    )
+    parser.add_argument(
         "--sdm_ratio",
         type=float,
         default=None,
@@ -321,6 +327,12 @@ def apply_cli_overrides(config, args):
             "experiment.bridge_tg_ratio",
         ),
         (
+            args.dhn_margin,
+            config.experiment,
+            "dhn_margin",
+            "experiment.dhn_margin",
+        ),
+        (
             args.sdm_ratio,
             config.experiment,
             "sdm_ratio",
@@ -500,6 +512,7 @@ def configure_experiment(config, args):
             args.lr,
             args.bridge_cv_ratio,
             args.bridge_tg_ratio,
+            args.dhn_margin,
             args.sdm_ratio,
             args.tal_ratio,
             args.tal_margin,
@@ -573,6 +586,7 @@ def log_cli_overrides(logger, overrides, config=None):
         "experiment.bridge_tg_ratio effective: %r",
         config.experiment.bridge_tg_ratio,
     )
+    logger.info("experiment.dhn_margin effective: %r", config.experiment.dhn_margin)
     logger.info("experiment.sdm_ratio effective: %r", config.experiment.sdm_ratio)
     logger.info("experiment.tal_ratio effective: %r", config.experiment.tal_ratio)
     logger.info("experiment.tal_margin effective: %r", config.experiment.tal_margin)
@@ -1347,6 +1361,8 @@ def run(
             "bridge_cv_loss": AverageMeter(),
             "bridge_tg_loss": AverageMeter(),
         }
+        if config.experiment.dhn_margin > 0:
+            meters["dhn_hard_ratio"] = AverageMeter()
         if config.experiment.nrw_mode != 'off':
             meters.update({
                 "nrw_w_mean_aerial": AverageMeter(),
@@ -1475,6 +1491,11 @@ def run(
                 meters['id_loss'].update(ret.get('id_loss', 0), batch_size)
                 meters['bridge_cv_loss'].update(ret.get('bridge_cv_loss', 0), batch_size)
                 meters['bridge_tg_loss'].update(ret.get('bridge_tg_loss', 0), batch_size)
+                if config.experiment.dhn_margin > 0:
+                    meters['dhn_hard_ratio'].update(
+                        ret['dhn_hard_ratio'].item(),
+                        batch_size,
+                    )
                 if config.experiment.nrw_mode != 'off':
                     meters['nrw_w_mean_aerial'].update(ret['nrw_w_mean_aerial'], batch_size)
                     meters['nrw_w_mean_ground'].update(ret['nrw_w_mean_ground'], batch_size)
@@ -1648,6 +1669,8 @@ def main(argv=None):
     if args.resume is not None and not args.eval_only:
         parser.error("--resume is currently supported only with --eval_only")
     config, overrides = resolve_runtime_config(args)
+    if config.experiment.dhn_margin < 0:
+        parser.error("dhn_margin must be non-negative")
     if config.experiment.rerank:
         if config.experiment.rerank_k1 < 1:
             parser.error("rerank_k1 must be positive")

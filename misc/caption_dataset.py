@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import numpy as np
 import torch
@@ -98,6 +98,16 @@ class ps_train_dataset(Dataset):
         self.person2text = defaultdict(list)
         self.ground_images_by_person = defaultdict(list)
 
+        domain_names = sorted({
+            ann['file_path'].split('/')[0]
+            for ann in anns
+        })
+        self.domain_to_id = {
+            domain_name: domain_id
+            for domain_id, domain_name in enumerate(domain_names)
+        }
+        self.domain_pair_counts = Counter()
+
         person_id2idx = {}
         n = 0
         self.pairs = []
@@ -105,6 +115,8 @@ class ps_train_dataset(Dataset):
 
         for ann in anns:
             image_path = os.path.join(image_root, ann['file_path'])
+            domain_name = ann['file_path'].split('/')[0]
+            domain_id = self.domain_to_id[domain_name]
             person_id = ann['id']
             # for single view datasets, we set cam_id to 1
             cam_id = ann.get('cam_id', 1)
@@ -121,9 +133,14 @@ class ps_train_dataset(Dataset):
                 ground_images_seen[person_idx].add(image_path)
             for caption in ann['captions']:
                 caption = _preprocess_caption(self, caption)
-                self.pairs.append((image_path, caption, cam_id, person_idx))
+                self.pairs.append(
+                    (image_path, caption, cam_id, person_idx, domain_id)
+                )
                 self.person2text[person_idx].append(caption)
+                self.domain_pair_counts[domain_id] += 1
 
+        if self._is_rank_zero():
+            self._print_domain_summary()
         if self.use_bridge and self._is_rank_zero():
             self._print_bridge_index_summary()
         if print_text_summary:
@@ -133,7 +150,7 @@ class ps_train_dataset(Dataset):
         return len(self.pairs)
 
     def __getitem__(self, index):
-        image_path, caption, cam_id, person = self.pairs[index]
+        image_path, caption, cam_id, person, domain_id = self.pairs[index]
         image_pil = Image.open(image_path)
         image = self.transform(image_pil.convert('RGB'))
         sample = {
@@ -141,6 +158,7 @@ class ps_train_dataset(Dataset):
             'caption': caption,
             'cam_id': cam_id,
             'id': person,
+            'domain_id': domain_id,
         }
         if not self.use_bridge:
             return sample
@@ -185,16 +203,16 @@ class ps_train_dataset(Dataset):
 
     def _print_bridge_index_summary(self):
         total_pairs = len(self.pairs)
-        aerial_pairs = sum(cam_id == 0 for _, _, cam_id, _ in self.pairs)
-        ground_pairs = sum(cam_id == 1 for _, _, cam_id, _ in self.pairs)
+        aerial_pairs = sum(cam_id == 0 for _, _, cam_id, _, _ in self.pairs)
+        ground_pairs = sum(cam_id == 1 for _, _, cam_id, _, _ in self.pairs)
         bridgeable_persons = {
             person
-            for _, _, cam_id, person in self.pairs
+            for _, _, cam_id, person, _ in self.pairs
             if cam_id == 0 and self.ground_images_by_person.get(person)
         }
         bridgeable_pairs = sum(
             cam_id == 0 and person in bridgeable_persons
-            for _, _, cam_id, person in self.pairs
+            for _, _, cam_id, person, _ in self.pairs
         )
         bridgeable_percent = (
             100.0 * bridgeable_pairs / total_pairs if total_pairs else 0.0
@@ -226,6 +244,20 @@ class ps_train_dataset(Dataset):
             f"{average_candidates:.2f}"
         )
         print("END BRIDGE INDEX SUMMARY")
+
+    def _print_domain_summary(self):
+        total_pairs = len(self.pairs)
+        print("DOMAIN SUMMARY")
+        for domain_name, domain_id in self.domain_to_id.items():
+            pair_count = self.domain_pair_counts[domain_id]
+            percentage = (
+                100.0 * pair_count / total_pairs if total_pairs else 0.0
+            )
+            print(
+                f"  {domain_name}: id={domain_id}, pairs={pair_count}, "
+                f"percentage={percentage:.2f}%"
+            )
+        print("END DOMAIN SUMMARY")
 
 
 class ps_eval_dataset(Dataset):
