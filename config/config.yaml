@@ -61,6 +61,8 @@ schedule:
   ratio_factor: 1.0
 
 model:
+  backbone: 'ViT-B/16'
+  expert_blocks_auto: true
   ckpt_type: original_clip  # original_clip / saved
   saved_path: 'ckpts/'
   checkpoint: '/path/to/clip/ViT-B-16.pt'    # e.g., '../../data/CLIP/ViT-B-16.pt'

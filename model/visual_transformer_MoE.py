@@ -8,6 +8,7 @@ from typing import Tuple, Union
 class VisualTransformer(nn.Module):
     def __init__(self, config, input_resolution: Union[int, Tuple[int, int]], patch_size: int, width: int,
                  layers: int, heads: int, embed_dim: int,
+                 pretrained_grid_size: Tuple[int, int],
                  checkpoint: bool, dropout: float = 0, emb_dropout: float = 0):
         super().__init__()
         if isinstance(input_resolution, int):
@@ -19,8 +20,11 @@ class VisualTransformer(nn.Module):
             raise ValueError(
                 "input_resolution height and width must be divisible by patch_size"
             )
+        self.pretrained_grid_size = tuple(pretrained_grid_size)
         self.position_grid_size = (self.num_y, self.num_x)
-        self.needs_positional_interpolation = self.position_grid_size != (14, 14)
+        self.needs_positional_interpolation = (
+            self.position_grid_size != self.pretrained_grid_size
+        )
 
         output_dim = embed_dim
         self.output_dim = output_dim
@@ -31,7 +35,9 @@ class VisualTransformer(nn.Module):
         scale = width ** -0.5
         self.class_embedding = nn.Parameter(scale * torch.randn(width))
         self.view_token = nn.Parameter(scale * torch.randn(width))
-        position_capacity = 14 * 14
+        position_capacity = (
+            self.pretrained_grid_size[0] * self.pretrained_grid_size[1]
+        )
         self.positional_embedding = nn.Parameter(scale * torch.randn(position_capacity + 1, width))
         if self.needs_positional_interpolation:
             self.register_buffer(
@@ -127,7 +133,10 @@ class VisualTransformer(nn.Module):
         )
         active_positions = torch.cat([cls_position, patch_positions], dim=0)
 
-        position_capacity = max(14 * 14, target_patch_count) + 1
+        pretrained_patch_count = (
+            self.pretrained_grid_size[0] * self.pretrained_grid_size[1]
+        )
+        position_capacity = max(pretrained_patch_count, target_patch_count) + 1
         packed_positions = positional_embedding.new_zeros(
             position_capacity,
             positional_embedding.shape[-1],
@@ -150,10 +159,7 @@ class VisualTransformer(nn.Module):
         x = x.reshape(x.shape[0], x.shape[1], -1)
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
         x = torch.cat([self.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device), x], dim=1)
-        if self.needs_positional_interpolation:
-            x = x + self.active_positional_embedding.to(x.dtype)
-        else:
-            x = x + self.positional_embedding.to(x.dtype)
+        x = x + self.active_positional_embedding.to(x.dtype)
         # The learned view token is appended after positional encoding and has
         # no positional-embedding entry of its own.
         x = torch.cat([x, self.view_token.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device)], dim=1)
@@ -184,19 +190,18 @@ class VisualTransformer(nn.Module):
 
 
 def visual_transformer(config):
-    vision_width = 768
-    vision_layers = 12
-    vision_heads = vision_width // 64
+    model_config = config.model
 
     kwargs = {
         'config': config,
-        'layers': vision_layers,
-        'heads': vision_heads,
+        'layers': model_config.vision_layers,
+        'heads': model_config.vision_heads,
         'input_resolution': config.experiment.input_resolution,
-        'patch_size': 16,
-        'width': vision_width,
+        'patch_size': model_config.patch_size,
+        'width': model_config.vision_width,
+        'pretrained_grid_size': tuple(model_config.pretrained_grid_size),
         'checkpoint': config.experiment.grad_checkpoint,
-        'embed_dim': config.model.embed_dim,
+        'embed_dim': model_config.embed_dim,
     }
 
     model = VisualTransformer(**kwargs)

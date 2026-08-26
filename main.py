@@ -69,6 +69,13 @@ def build_parser():
         help="override experiment.input_resolution as height width (default: config value)",
     )
     parser.add_argument(
+        "--backbone",
+        type=str,
+        choices=("ViT-B/16", "ViT-L/14"),
+        default=None,
+        help="override model.backbone (default: config value)",
+    )
+    parser.add_argument(
         "--epoch",
         type=int,
         default=None,
@@ -284,6 +291,7 @@ def build_parser():
 def apply_cli_overrides(config, args):
     overrides = []
     override_specs = [
+        (args.backbone, config.model, "backbone", "model.backbone"),
         (args.batch_size, config.data, "batch_size", "data.batch_size"),
         (
             args.test_batch_size,
@@ -486,6 +494,7 @@ def configure_experiment(config, args):
             args.batch_size,
             args.test_batch_size,
             args.input_resolution,
+            args.backbone,
             args.epoch,
             args.seed,
             args.lr,
@@ -597,7 +606,42 @@ def log_cli_overrides(logger, overrides, config=None):
         "experiment.rerank_lambda effective: %r",
         config.experiment.rerank_lambda,
     )
+    logger.info("model.backbone effective: %r", config.model.backbone)
+    logger.info(
+        "model.expert_blocks_auto effective: %r",
+        config.model.expert_blocks_auto,
+    )
     logger.info("END OVERRIDE SUMMARY")
+
+    if 'vision_width' in config.model:
+        logger.info("BACKBONE STRUCTURE SUMMARY")
+        logger.info("  source: %s", config.model.architecture_source)
+        logger.info("  patch_size: %s", config.model.patch_size)
+        logger.info("  vision_width: %s", config.model.vision_width)
+        logger.info("  vision_layers: %s", config.model.vision_layers)
+        logger.info("  vision_heads: %s", config.model.vision_heads)
+        logger.info("  embed_dim: %s", config.model.embed_dim)
+        logger.info("  text_width: %s", config.model.text_width)
+        logger.info("  text_layers: %s", config.model.text_layers)
+        logger.info("  text_heads: %s", config.model.text_heads)
+        logger.info(
+            "  pretrained_grid_size: %s",
+            list(config.model.pretrained_grid_size),
+        )
+        patch_rows = (
+            config.experiment.input_resolution[0] // config.model.patch_size
+        )
+        patch_columns = (
+            config.experiment.input_resolution[1] // config.model.patch_size
+        )
+        logger.info("  actual_patch_count: %s", patch_rows * patch_columns)
+        logger.info(
+            "  expert_blocks: %s -> %s (auto=%s)",
+            list(config.model.expert_blocks_source),
+            list(config.expert_blocks),
+            config.model.expert_blocks_auto,
+        )
+        logger.info("END BACKBONE STRUCTURE SUMMARY")
 
 
 def assert_training_batch_size(config, train_loader):
@@ -1157,7 +1201,11 @@ def load_resume_weights(model, resume_path, use_ema, logger):
     checkpoint_path = Path(resume_path).expanduser().resolve()
     if not checkpoint_path.is_file():
         raise FileNotFoundError(f"resume checkpoint does not exist: {checkpoint_path}")
-    checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    checkpoint = torch.load(
+        checkpoint_path,
+        map_location='cpu',
+        weights_only=False,
+    )
     if not isinstance(checkpoint, dict) or 'model' not in checkpoint:
         raise RuntimeError("resume checkpoint must contain a 'model' state dict")
     state_name = 'model'
@@ -1177,6 +1225,42 @@ def load_resume_weights(model, resume_path, use_ema, logger):
         len(load_result.unexpected_keys),
     )
     return load_result
+
+
+def validate_checkpoint_mapping(load_result, config):
+    if load_result is None:
+        return
+    unexpected = list(load_result.unexpected_keys)
+    if unexpected:
+        raise RuntimeError(
+            "Checkpoint contains keys that cannot be mapped:\n  "
+            + "\n  ".join(unexpected)
+        )
+    if config.model.ckpt_type != 'original_clip':
+        if load_result.missing_keys:
+            raise RuntimeError(
+                "Saved checkpoint is missing model keys:\n  "
+                + "\n  ".join(load_result.missing_keys)
+            )
+        return
+    allowed_visual_missing = (
+        'visual.view_token',
+        '.router.',
+        '.img_router.',
+        '.fea_router.',
+    )
+    missing_backbone = [
+        key
+        for key in load_result.missing_keys
+        if (
+            key.startswith('visual.') or key.startswith('encode_text.')
+        ) and not any(marker in key for marker in allowed_visual_missing)
+    ]
+    if missing_backbone:
+        raise RuntimeError(
+            "Checkpoint did not initialize required backbone keys:\n  "
+            + "\n  ".join(missing_backbone)
+        )
 
 
 def _cuda_peak_memory_gb():
@@ -1301,6 +1385,7 @@ def run(
 
         model.to(config.device)
         model, load_result = load_checkpoint(model, config)
+        validate_checkpoint_mapping(load_result, config)
 
         if is_using_distributed():
             model = torch.nn.parallel.DistributedDataParallel(
@@ -1323,6 +1408,7 @@ def run(
                         'checkpoint_best.pth',
                     ),
                     map_location='cpu',
+                    weights_only=False,
                 )
                 if 'model_ema' in saved_checkpoint:
                     model_ema.load_state_dict(saved_checkpoint['model_ema'])
@@ -1594,9 +1680,19 @@ def main(argv=None):
         return 0
 
     # Match the baseline import-before-seeding order for actual training runs.
-    import model.tbps_model_MoE
+    import model.tbps_model_MoE as tbps_model_module
 
     init_distributed_mode(config)
+    configure_backbone = getattr(
+        tbps_model_module,
+        'configure_backbone_from_checkpoint',
+        None,
+    )
+    if configure_backbone is not None:
+        configure_backbone(
+            config,
+            checkpoint_path=args.resume if args.eval_only else None,
+        )
     set_seed(config)
     archive_eval_only = (
         args.output_dir is not None or args.exp_name is not None

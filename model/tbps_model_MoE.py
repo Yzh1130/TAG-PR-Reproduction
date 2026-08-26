@@ -1,22 +1,341 @@
 import random
+import math
+import re
 import torch
 import torch.nn.functional as F
 from torch import nn
 
 import numpy as np
 import copy
+from dataclasses import dataclass
+from pathlib import Path
 
 from misc import utils
 from misc.utils import is_using_distributed
 from text_utils.tokenizer import tokenize
 from .visual_transformer_MoE import visual_transformer
-from .text_transformer import text_transformers
+from .text_transformer import TextTransformer
 from .base_transformer import Transformer, LayerNorm, QuickGELU
 
 from .shared_modules import AllGather
 from collections import OrderedDict
 
 from .CrossEmbeddingLayer_tse import VisualEmbeddingLayer, TexualEmbeddingLayer
+
+
+@dataclass(frozen=True)
+class ClipArchitecture:
+    patch_size: int
+    vision_width: int
+    vision_layers: int
+    vision_heads: int
+    embed_dim: int
+    text_width: int
+    text_heads: int
+    text_layers: int
+    vocab_size: int
+    source_context_length: int
+    pretrained_grid_size: tuple
+
+
+def _required_tensor(state_dict, *names):
+    for name in names:
+        value = state_dict.get(name)
+        if torch.is_tensor(value):
+            return value, name
+    raise KeyError(
+        "Checkpoint is missing required tensor; expected one of: "
+        + ", ".join(names)
+    )
+
+
+def _continuous_layer_count(state_dict, prefix):
+    pattern = re.compile(
+        rf"^{re.escape(prefix)}(\d+)\.attn\.in_proj_weight$"
+    )
+    indices = sorted(
+        int(match.group(1))
+        for key in state_dict
+        if (match := pattern.match(key)) is not None
+    )
+    if not indices:
+        raise KeyError(f"Checkpoint has no attention blocks under {prefix}")
+    expected = list(range(indices[-1] + 1))
+    if indices != expected:
+        raise ValueError(
+            f"Checkpoint block indices under {prefix} are not continuous: "
+            f"{indices}"
+        )
+    return len(indices)
+
+
+def infer_clip_architecture(state_dict):
+    """Infer the CLIP ViT/text structure from checkpoint tensor shapes."""
+    conv1, _ = _required_tensor(state_dict, 'visual.conv1.weight')
+    if conv1.ndim != 4 or conv1.shape[1] != 3:
+        raise ValueError(
+            "Only CLIP ViT checkpoints with visual.conv1.weight [width,3,p,p] "
+            "are supported"
+        )
+    patch_height, patch_width = conv1.shape[-2:]
+    if patch_height != patch_width:
+        raise ValueError("CLIP ViT patch embedding must use square patches")
+    patch_size = int(patch_height)
+    vision_width = int(conv1.shape[0])
+    vision_layers = _continuous_layer_count(
+        state_dict,
+        'visual.transformer.resblocks.',
+    )
+
+    visual_projection, _ = _required_tensor(state_dict, 'visual.proj')
+    if visual_projection.ndim != 2 or visual_projection.shape[0] != vision_width:
+        raise ValueError(
+            "visual.proj shape is inconsistent with visual.conv1 width"
+        )
+    embed_dim = int(visual_projection.shape[1])
+
+    visual_position, _ = _required_tensor(
+        state_dict,
+        'visual.positional_embedding',
+    )
+    if visual_position.ndim != 2 or visual_position.shape[1] != vision_width:
+        raise ValueError(
+            "visual positional embedding width is inconsistent with visual.conv1"
+        )
+    position_grid = state_dict.get('visual.positional_embedding_grid_size')
+    if position_grid is None:
+        source_patch_count = int(visual_position.shape[0] - 1)
+        source_grid_side = math.isqrt(source_patch_count)
+        if source_grid_side * source_grid_side != source_patch_count:
+            raise ValueError(
+                "Cannot infer a square source grid from visual positional embedding"
+            )
+        pretrained_grid_size = (source_grid_side, source_grid_side)
+    else:
+        pretrained_grid_size = tuple(int(value) for value in position_grid.tolist())
+        if len(pretrained_grid_size) != 2 or min(pretrained_grid_size) < 1:
+            raise ValueError(
+                "visual.positional_embedding_grid_size must contain two positive values"
+            )
+        active_position_count = (
+            pretrained_grid_size[0] * pretrained_grid_size[1] + 1
+        )
+        if visual_position.shape[0] < active_position_count:
+            raise ValueError(
+                "visual positional embedding is shorter than its declared grid"
+            )
+
+    token_embedding, token_key = _required_tensor(
+        state_dict,
+        'token_embedding.weight',
+        'encode_text.token_embedding.weight',
+    )
+    if token_embedding.ndim != 2:
+        raise ValueError("token_embedding.weight must be two-dimensional")
+    vocab_size, text_width = (int(value) for value in token_embedding.shape)
+    text_prefix = (
+        'encode_text.' if token_key.startswith('encode_text.') else ''
+    )
+    text_layers = _continuous_layer_count(
+        state_dict,
+        text_prefix + 'transformer.resblocks.',
+    )
+    text_projection, _ = _required_tensor(
+        state_dict,
+        text_prefix + 'text_projection',
+    )
+    if text_projection.shape != (text_width, embed_dim):
+        raise ValueError(
+            "text_projection shape is inconsistent with inferred text width "
+            "and shared embed_dim"
+        )
+    text_position, _ = _required_tensor(
+        state_dict,
+        text_prefix + 'positional_embedding',
+    )
+    if text_position.ndim != 2 or text_position.shape[1] != text_width:
+        raise ValueError(
+            "text positional embedding width is inconsistent with token embedding"
+        )
+    source_context_length = int(text_position.shape[0])
+
+    if vision_width % 64 or text_width % 64:
+        raise ValueError(
+            "OpenAI CLIP ViT attention widths must be divisible by 64"
+        )
+    vision_heads = vision_width // 64
+    text_heads = text_width // 64
+
+    for prefix, layers, width in (
+        ('visual.transformer.resblocks.', vision_layers, vision_width),
+        (text_prefix + 'transformer.resblocks.', text_layers, text_width),
+    ):
+        expected_shape = (3 * width, width)
+        for block_index in range(layers):
+            key = f'{prefix}{block_index}.attn.in_proj_weight'
+            if tuple(state_dict[key].shape) != expected_shape:
+                raise ValueError(
+                    f"Checkpoint tensor {key} has shape "
+                    f"{tuple(state_dict[key].shape)}, expected {expected_shape}"
+                )
+
+    return ClipArchitecture(
+        patch_size=patch_size,
+        vision_width=vision_width,
+        vision_layers=vision_layers,
+        vision_heads=vision_heads,
+        embed_dim=embed_dim,
+        text_width=text_width,
+        text_heads=text_heads,
+        text_layers=text_layers,
+        vocab_size=vocab_size,
+        source_context_length=source_context_length,
+        pretrained_grid_size=pretrained_grid_size,
+    )
+
+
+def _checkpoint_model_state(config, checkpoint_path=None):
+    if checkpoint_path is not None:
+        resolved_path = Path(checkpoint_path).expanduser().resolve()
+        payload = torch.load(
+            resolved_path,
+            map_location='cpu',
+            weights_only=False,
+        )
+        source_description = str(resolved_path)
+    elif config.model.ckpt_type == 'original_clip':
+        resolved_path = Path(config.model.checkpoint).expanduser().resolve()
+        if not resolved_path.is_file():
+            raise FileNotFoundError(
+                f"CLIP checkpoint does not exist: {resolved_path}"
+            )
+        with resolved_path.open('rb') as opened_file:
+            scripted_model = torch.jit.load(opened_file, map_location='cpu')
+        state_dict = scripted_model.state_dict()
+        del scripted_model
+        return state_dict, str(resolved_path)
+    elif config.model.ckpt_type == 'saved':
+        resolved_path = (
+            Path(config.model.saved_path).expanduser().resolve()
+            / 'checkpoint_best.pth'
+        )
+        payload = torch.load(
+            resolved_path,
+            map_location='cpu',
+            weights_only=False,
+        )
+        source_description = str(resolved_path)
+    else:
+        raise KeyError(f"Unknown ckpt_type: {config.model.ckpt_type}")
+
+    if not isinstance(payload, dict):
+        raise RuntimeError(
+            f"Checkpoint {source_description} must contain a state dict"
+        )
+    if isinstance(payload.get('model'), dict):
+        state_dict = payload['model']
+    elif isinstance(payload.get('state_dict'), dict):
+        state_dict = payload['state_dict']
+    elif payload and all(torch.is_tensor(value) for value in payload.values()):
+        state_dict = payload
+    else:
+        raise RuntimeError(
+            f"Checkpoint {source_description} has no model/state_dict mapping"
+        )
+    if state_dict and all(key.startswith('module.') for key in state_dict):
+        state_dict = OrderedDict(
+            (key[len('module.'):], value) for key, value in state_dict.items()
+        )
+    return state_dict, source_description
+
+
+def _mapped_expert_blocks(config, vision_layers):
+    source_blocks = list(
+        config.model.get('expert_blocks_source', config.expert_blocks)
+    )
+    if config.model.expert_blocks_auto and source_blocks and vision_layers != 12:
+        # Scale the window's relative starting depth, then preserve its
+        # configured offsets.  This maps [6, 7, 8] at 12 layers to the
+        # requested contiguous [12, 13, 14] window at 24 layers.
+        scale = vision_layers / 12.0
+        mapped_start = int(round(source_blocks[0] * scale))
+        mapped_blocks = [
+            mapped_start + block_index - source_blocks[0]
+            for block_index in source_blocks
+        ]
+    else:
+        mapped_blocks = source_blocks
+    if mapped_blocks != sorted(set(mapped_blocks)):
+        raise ValueError(
+            f"expert_blocks must be strictly increasing and unique: {mapped_blocks}"
+        )
+    if any(index < 0 or index >= vision_layers for index in mapped_blocks):
+        raise ValueError(
+            f"expert_blocks {mapped_blocks} are outside vision layer range "
+            f"[0, {vision_layers - 1}]"
+        )
+    return source_blocks, mapped_blocks
+
+
+def apply_clip_architecture(config, architecture):
+    if config.model.backbone not in ('ViT-B/16', 'ViT-L/14'):
+        raise ValueError(f"Unsupported CLIP backbone: {config.model.backbone}")
+    expected_patch_size = int(config.model.backbone.rsplit('/', 1)[1])
+    if architecture.patch_size != expected_patch_size:
+        raise ValueError(
+            f"Configured backbone {config.model.backbone} expects patch size "
+            f"{expected_patch_size}, but checkpoint uses {architecture.patch_size}"
+        )
+    source_blocks, mapped_blocks = _mapped_expert_blocks(
+        config,
+        architecture.vision_layers,
+    )
+    config.model.expert_blocks_source = source_blocks
+    config.expert_blocks = mapped_blocks
+    for key in (
+        'patch_size',
+        'vision_width',
+        'vision_layers',
+        'vision_heads',
+        'embed_dim',
+        'text_width',
+        'text_heads',
+        'text_layers',
+        'vocab_size',
+        'source_context_length',
+    ):
+        config.model[key] = getattr(architecture, key)
+    config.model.pretrained_grid_size = list(
+        architecture.pretrained_grid_size
+    )
+    return architecture
+
+
+def configure_backbone_from_checkpoint(config, checkpoint_path=None):
+    state_dict, source_description = _checkpoint_model_state(
+        config,
+        checkpoint_path,
+    )
+    architecture = infer_clip_architecture(state_dict)
+    apply_clip_architecture(config, architecture)
+    config.model.architecture_source = source_description
+    return architecture
+
+
+def architecture_from_config(config):
+    return ClipArchitecture(
+        patch_size=config.model.patch_size,
+        vision_width=config.model.vision_width,
+        vision_layers=config.model.vision_layers,
+        vision_heads=config.model.vision_heads,
+        embed_dim=config.model.embed_dim,
+        text_width=config.model.text_width,
+        text_heads=config.model.text_heads,
+        text_layers=config.model.text_layers,
+        vocab_size=config.model.vocab_size,
+        source_context_length=config.model.source_context_length,
+        pretrained_grid_size=tuple(config.model.pretrained_grid_size),
+    )
 
 
 class CLIP(nn.Module):
@@ -52,8 +371,14 @@ class CLIP(nn.Module):
                 f"Unsupported experiment.nrw_mode: {config.experiment.nrw_mode}"
             )
 
-        self.visual_emb_layer = VisualEmbeddingLayer(ratio=0.3)
-        self.textual_emb_layer = TexualEmbeddingLayer(ratio=0.3)
+        self.visual_emb_layer = VisualEmbeddingLayer(
+            input_dim=self.embed_dim,
+            ratio=0.3,
+        )
+        self.textual_emb_layer = TexualEmbeddingLayer(
+            input_dim=self.embed_dim,
+            ratio=0.3,
+        )
 
         if config.experiment.id:
             self.classifier = nn.Linear(self.embed_dim, num_classes)
@@ -840,8 +1165,26 @@ class CLIP(nn.Module):
 
 
 def clip_vitb(config, num_classes=11003):
+    if 'vision_width' not in config.model:
+        configure_backbone_from_checkpoint(config)
+    architecture = architecture_from_config(config)
     image_encode = visual_transformer(config)
-    text_encode = text_transformers(config)
+    text_encode = TextTransformer(
+        config,
+        context_length=config.experiment.text_length,
+        transformer_width=architecture.text_width,
+        transformer_heads=architecture.text_heads,
+        transformer_layers=architecture.text_layers,
+        positional_embedding_flag=True,
+        checkpoint=False,
+        embed_dim=architecture.embed_dim,
+    )
+    if text_encode.token_embedding.num_embeddings != architecture.vocab_size:
+        text_encode.token_embedding = nn.Embedding(
+            architecture.vocab_size,
+            architecture.text_width,
+        )
+        nn.init.normal_(text_encode.token_embedding.weight, std=0.02)
     text_encode.transformer.checkpoint = config.experiment.grad_checkpoint
     model = CLIP(config, image_encode, text_encode, num_classes, config.experiment.ritc_eps)
     return model
