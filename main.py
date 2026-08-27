@@ -28,6 +28,12 @@ from options import get_args
 from text_utils.logger import setup_logger
 
 
+CSLS_CONFIG_DEFAULTS = {
+    "csls": False,
+    "csls_k": 10,
+}
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="TAG-PR training")
     parser.add_argument(
@@ -274,6 +280,22 @@ def build_parser():
         help="override experiment.rerank_lambda (default: config value)",
     )
     parser.add_argument(
+        "--csls",
+        action="store_true",
+        help="enable CSLS hubness correction (default: config value)",
+    )
+    parser.add_argument(
+        "--no_csls",
+        action="store_true",
+        help="disable CSLS correction (overrides config and --csls)",
+    )
+    parser.add_argument(
+        "--csls_k",
+        type=int,
+        default=None,
+        help="override experiment.csls_k (default: config value)",
+    )
+    parser.add_argument(
         "--eval_only",
         action="store_true",
         help="load --resume and run one evaluation without training",
@@ -295,6 +317,9 @@ def build_parser():
 
 
 def apply_cli_overrides(config, args):
+    for key, default_value in CSLS_CONFIG_DEFAULTS.items():
+        if key not in config.experiment:
+            config.experiment[key] = default_value
     overrides = []
     override_specs = [
         (args.backbone, config.model, "backbone", "model.backbone"),
@@ -434,6 +459,12 @@ def apply_cli_overrides(config, args):
             "rerank_lambda",
             "experiment.rerank_lambda",
         ),
+        (
+            args.csls_k,
+            config.experiment,
+            "csls_k",
+            "experiment.csls_k",
+        ),
     ]
     for new_value, section, key, dotted_key in override_specs:
         if new_value is None:
@@ -473,6 +504,11 @@ def apply_cli_overrides(config, args):
         new_value = not args.no_rerank
         config.experiment.rerank = new_value
         overrides.append(("experiment.rerank", old_value, new_value))
+    if args.no_csls or args.csls:
+        old_value = config.experiment.csls
+        new_value = not args.no_csls
+        config.experiment.csls = new_value
+        overrides.append(("experiment.csls", old_value, new_value))
     return overrides
 
 
@@ -530,6 +566,7 @@ def configure_experiment(config, args):
             args.rerank_k1,
             args.rerank_k2,
             args.rerank_lambda,
+            args.csls_k,
         )
     ) or any(
         (
@@ -545,6 +582,8 @@ def configure_experiment(config, args):
             args.no_view_prompt,
             args.rerank,
             args.no_rerank,
+            args.csls,
+            args.no_csls,
             args.dry_run,
         )
     ) or args.config != "config/config.yaml"
@@ -620,6 +659,8 @@ def log_cli_overrides(logger, overrides, config=None):
         "experiment.rerank_lambda effective: %r",
         config.experiment.rerank_lambda,
     )
+    logger.info("experiment.csls effective: %r", config.experiment.csls)
+    logger.info("experiment.csls_k effective: %r", config.experiment.csls_k)
     logger.info("model.backbone effective: %r", config.model.backbone)
     logger.info(
         "model.expert_blocks_auto effective: %r",
@@ -1047,6 +1088,16 @@ def test_tse_with_rerank(model, data_loader, config, logger):
     query_gallery_distance = (
         1.0 - similarities.float()
     ).mul_(0.5).clamp_(0.0, 1.0)
+    csls_result = None
+    if config.experiment.csls:
+        from misc.hubness import evaluate_csls_scores
+
+        csls_result = evaluate_csls_scores(
+            similarities,
+            dataset,
+            config.experiment.csls_k,
+            logger,
+        )
     del similarities
     if config.experiment.view_prompt:
         del text_features_by_view, text_tse_features_by_view
@@ -1098,12 +1149,22 @@ def test_tse_with_rerank(model, data_loader, config, logger):
         dataset.img2person,
         dataset.txt2person,
     )
-    return raw_result, reranked_result
+    return raw_result, reranked_result, csls_result
 
 
 def evaluate_model(model, data_loader, config, logger):
     if config.experiment.rerank:
         return test_tse_with_rerank(model, data_loader, config, logger)
+    if config.experiment.csls:
+        from misc.hubness import test_tse_with_csls
+
+        result, csls_result = test_tse_with_csls(
+            model,
+            data_loader,
+            config,
+            logger,
+        )
+        return result, None, csls_result
     if config.experiment.view_prompt:
         result = test_tse_view_prompt(
             model,
@@ -1118,10 +1179,15 @@ def evaluate_model(model, data_loader, config, logger):
             config.experiment.text_length,
             config.device,
         )
-    return result, None
+    return result, None, None
 
 
-def log_evaluation_results(logger, result, reranked_result=None):
+def log_evaluation_results(
+    logger,
+    result,
+    reranked_result=None,
+    csls_result=None,
+):
     logger.info(
         'Acc@1 {top1:.5f} Acc@5 {top5:.5f} Acc@10 {top10:.5f} mAP {mAP:.5f}'.format(
             top1=result['r1'],
@@ -1140,6 +1206,16 @@ def log_evaluation_results(logger, result, reranked_result=None):
                 mAP=reranked_result['mAP'],
             )
         )
+    if csls_result is not None:
+        logger.info(
+            'CSLS Acc@1 {top1:.5f} Acc@5 {top5:.5f} '
+            'Acc@10 {top10:.5f} mAP {mAP:.5f}'.format(
+                top1=csls_result['r1'],
+                top5=csls_result['r5'],
+                top10=csls_result['r10'],
+                mAP=csls_result['mAP'],
+            )
+        )
 
 
 RERANK_METRICS_HEADER = METRICS_HEADER + [
@@ -1149,16 +1225,26 @@ RERANK_METRICS_HEADER = METRICS_HEADER + [
     "mAP_rr",
 ]
 
+CSLS_METRICS_COLUMNS = [
+    "R1_csls",
+    "R5_csls",
+    "R10_csls",
+    "mAP_csls",
+]
 
-def initialize_metrics(experiment, rerank):
-    if not rerank:
+
+def initialize_metrics(experiment, rerank, csls=False):
+    if not rerank and not csls:
         experiment.initialize_metrics()
         return
     if not experiment.enabled:
         return
     metrics_path = experiment.directory / "metrics_by_epoch.csv"
+    header = list(RERANK_METRICS_HEADER if rerank else METRICS_HEADER)
+    if csls:
+        header.extend(CSLS_METRICS_COLUMNS)
     with metrics_path.open("w", encoding="utf-8", newline="") as handle:
-        csv.writer(handle).writerow(RERANK_METRICS_HEADER)
+        csv.writer(handle).writerow(header)
         handle.flush()
         os.fsync(handle.fileno())
 
@@ -1172,8 +1258,9 @@ def append_metrics(
     peak_mem_alloc_gb,
     peak_mem_reserved_gb,
     reranked_result=None,
+    csls_result=None,
 ):
-    if reranked_result is None:
+    if reranked_result is None and csls_result is None:
         experiment.append_metrics(
             epoch,
             result['r1'],
@@ -1189,24 +1276,37 @@ def append_metrics(
     if not experiment.enabled:
         return
     metrics_path = experiment.directory / "metrics_by_epoch.csv"
-    with metrics_path.open("a", encoding="utf-8", newline="") as handle:
-        csv.writer(handle).writerow(
+    row = [
+        epoch,
+        result['r1'],
+        result['r5'],
+        result['r10'],
+        result['mAP'],
+        train_loss,
+        epoch_time_sec,
+        peak_mem_alloc_gb,
+        peak_mem_reserved_gb,
+    ]
+    if reranked_result is not None:
+        row.extend(
             [
-                epoch,
-                result['r1'],
-                result['r5'],
-                result['r10'],
-                result['mAP'],
-                train_loss,
-                epoch_time_sec,
-                peak_mem_alloc_gb,
-                peak_mem_reserved_gb,
                 reranked_result['r1'],
                 reranked_result['r5'],
                 reranked_result['r10'],
                 reranked_result['mAP'],
             ]
         )
+    if csls_result is not None:
+        row.extend(
+            [
+                csls_result['r1'],
+                csls_result['r5'],
+                csls_result['r10'],
+                csls_result['mAP'],
+            ]
+        )
+    with metrics_path.open("a", encoding="utf-8", newline="") as handle:
+        csv.writer(handle).writerow(row)
         handle.flush()
         os.fsync(handle.fileno())
 
@@ -1311,7 +1411,11 @@ def run(
     log_cli_overrides(logger, cli_overrides, config)
     logger.info(f'\n{config}')
     if experiment is not None:
-        initialize_metrics(experiment, config.experiment.rerank)
+        initialize_metrics(
+            experiment,
+            config.experiment.rerank,
+            config.experiment.csls,
+        )
 
     training_start_time = time.time()
     train_loader = None
@@ -1386,17 +1490,23 @@ def run(
                 logger,
             )
             model.to(config.device)
-            eval_result, reranked_result = evaluate_model(
+            eval_result, reranked_result, csls_result = evaluate_model(
                 model,
                 dataloader['test_loader'],
                 config,
                 logger,
             )
-            log_evaluation_results(logger, eval_result, reranked_result)
+            log_evaluation_results(
+                logger,
+                eval_result,
+                reranked_result,
+                csls_result,
+            )
             torch.cuda.empty_cache()
             return {
                 'original': eval_result,
                 'reranked': reranked_result,
+                'csls': csls_result,
             }
 
         model.to(config.device)
@@ -1546,7 +1656,7 @@ def run(
                     else nullcontext()
                 )
                 with ema_context:
-                    eval_result, reranked_result = evaluate_model(
+                    eval_result, reranked_result, csls_result = evaluate_model(
                         model_without_ddp,
                         dataloader['test_loader'],
                         config,
@@ -1558,7 +1668,12 @@ def run(
                     eval_result['r10'],
                     eval_result['mAP'],
                 )
-                log_evaluation_results(logger, eval_result, reranked_result)
+                log_evaluation_results(
+                    logger,
+                    eval_result,
+                    reranked_result,
+                    csls_result,
+                )
                 torch.cuda.empty_cache()
 
             epoch_peak_alloc_gb, epoch_peak_reserved_gb = _cuda_peak_memory_gb()
@@ -1587,6 +1702,7 @@ def run(
                         epoch_peak_alloc_gb,
                         epoch_peak_reserved_gb,
                         reranked_result,
+                        csls_result,
                     )
                 if best_metrics is None or best_metrics['r1'] < rank_1:
                     best_metrics = {
@@ -1678,6 +1794,8 @@ def main(argv=None):
             parser.error("rerank_k2 must be in [1, rerank_k1 + 1]")
         if not 0.0 <= config.experiment.rerank_lambda <= 1.0:
             parser.error("rerank_lambda must be in [0, 1]")
+    if config.experiment.csls and config.experiment.csls_k < 1:
+        parser.error("csls_k must be positive")
 
     try:
         experiment_directory, path_override = configure_experiment(config, args)
