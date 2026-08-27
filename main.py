@@ -31,6 +31,7 @@ from text_utils.logger import setup_logger
 CSLS_CONFIG_DEFAULTS = {
     "csls": False,
     "csls_k": 10,
+    "csls_mode": "query",
 }
 
 
@@ -296,6 +297,12 @@ def build_parser():
         help="override experiment.csls_k (default: config value)",
     )
     parser.add_argument(
+        "--csls_mode",
+        choices=("query", "gallery"),
+        default=None,
+        help="override experiment.csls_mode (default: config value)",
+    )
+    parser.add_argument(
         "--eval_only",
         action="store_true",
         help="load --resume and run one evaluation without training",
@@ -465,6 +472,12 @@ def apply_cli_overrides(config, args):
             "csls_k",
             "experiment.csls_k",
         ),
+        (
+            args.csls_mode,
+            config.experiment,
+            "csls_mode",
+            "experiment.csls_mode",
+        ),
     ]
     for new_value, section, key, dotted_key in override_specs:
         if new_value is None:
@@ -567,6 +580,7 @@ def configure_experiment(config, args):
             args.rerank_k2,
             args.rerank_lambda,
             args.csls_k,
+            args.csls_mode,
         )
     ) or any(
         (
@@ -661,6 +675,7 @@ def log_cli_overrides(logger, overrides, config=None):
     )
     logger.info("experiment.csls effective: %r", config.experiment.csls)
     logger.info("experiment.csls_k effective: %r", config.experiment.csls_k)
+    logger.info("experiment.csls_mode effective: %r", config.experiment.csls_mode)
     logger.info("model.backbone effective: %r", config.model.backbone)
     logger.info(
         "model.expert_blocks_auto effective: %r",
@@ -823,7 +838,13 @@ class ModelEMA:
 
 
 @torch.no_grad()
-def test_tse_view_prompt(model, data_loader, max_length, device):
+def test_tse_view_prompt(
+    model,
+    data_loader,
+    max_length,
+    device,
+    output_dir=None,
+):
     """Evaluate text twice and select scores using each gallery image's view."""
     from text_utils.tokenizer import tokenize
 
@@ -916,6 +937,7 @@ def test_tse_view_prompt(model, data_loader, max_length, device):
         similarities,
         dataset.img2person,
         dataset.txt2person,
+        output_dir=output_dir,
     )
 
 
@@ -924,7 +946,13 @@ def _fused_retrieval_features(*features):
 
 
 @torch.no_grad()
-def test_tse_with_rerank(model, data_loader, config, logger):
+def test_tse_with_rerank(
+    model,
+    data_loader,
+    config,
+    logger,
+    output_dir=None,
+):
     """Evaluate raw scores and their label-free k-reciprocal re-ranking."""
     from text_utils.tokenizer import tokenize
     from misc.rerank import (
@@ -1083,6 +1111,7 @@ def test_tse_with_rerank(model, data_loader, config, logger):
         similarities,
         dataset.img2person,
         dataset.txt2person,
+        output_dir=output_dir,
     )
     # The normalized cosine distance is symmetric, non-negative, and bounded.
     query_gallery_distance = (
@@ -1097,6 +1126,10 @@ def test_tse_with_rerank(model, data_loader, config, logger):
             dataset,
             config.experiment.csls_k,
             logger,
+            mode=config.experiment.csls_mode,
+            gallery_global_features=image_features,
+            gallery_tse_features=image_tse_features,
+            output_dir=output_dir,
         )
     del similarities
     if config.experiment.view_prompt:
@@ -1148,13 +1181,20 @@ def test_tse_with_rerank(model, data_loader, config, logger):
         reranked_distance.neg_(),
         dataset.img2person,
         dataset.txt2person,
+        output_dir=output_dir,
     )
     return raw_result, reranked_result, csls_result
 
 
-def evaluate_model(model, data_loader, config, logger):
+def evaluate_model(model, data_loader, config, logger, output_dir=None):
     if config.experiment.rerank:
-        return test_tse_with_rerank(model, data_loader, config, logger)
+        return test_tse_with_rerank(
+            model,
+            data_loader,
+            config,
+            logger,
+            output_dir=output_dir,
+        )
     if config.experiment.csls:
         from misc.hubness import test_tse_with_csls
 
@@ -1163,6 +1203,7 @@ def evaluate_model(model, data_loader, config, logger):
             data_loader,
             config,
             logger,
+            output_dir=output_dir,
         )
         return result, None, csls_result
     if config.experiment.view_prompt:
@@ -1171,6 +1212,7 @@ def evaluate_model(model, data_loader, config, logger):
             data_loader,
             config.experiment.text_length,
             config.device,
+            output_dir=output_dir,
         )
     else:
         result = test_tse(
@@ -1178,6 +1220,7 @@ def evaluate_model(model, data_loader, config, logger):
             data_loader,
             config.experiment.text_length,
             config.device,
+            output_dir=output_dir,
         )
     return result, None, None
 
@@ -1416,6 +1459,14 @@ def run(
             config.experiment.rerank,
             config.experiment.csls,
         )
+    if experiment is not None and experiment.enabled:
+        evaluation_output_dir = experiment.directory
+    elif eval_only and resume_path is not None:
+        # An unmanaged eval-only run still identifies its experiment through
+        # the checkpoint, whose sibling metrics file belongs in this folder.
+        evaluation_output_dir = Path(resume_path).expanduser().resolve().parent
+    else:
+        evaluation_output_dir = None
 
     training_start_time = time.time()
     train_loader = None
@@ -1495,6 +1546,7 @@ def run(
                 dataloader['test_loader'],
                 config,
                 logger,
+                output_dir=evaluation_output_dir,
             )
             log_evaluation_results(
                 logger,
@@ -1661,6 +1713,7 @@ def run(
                         dataloader['test_loader'],
                         config,
                         logger,
+                        output_dir=evaluation_output_dir,
                     )
                 rank_1, rank_5, rank_10, map = (
                     eval_result['r1'],
@@ -1796,6 +1849,11 @@ def main(argv=None):
             parser.error("rerank_lambda must be in [0, 1]")
     if config.experiment.csls and config.experiment.csls_k < 1:
         parser.error("csls_k must be positive")
+    if (
+        config.experiment.csls
+        and config.experiment.csls_mode not in ("query", "gallery")
+    ):
+        parser.error("csls_mode must be 'query' or 'gallery'")
 
     try:
         experiment_directory, path_override = configure_experiment(config, args)

@@ -75,6 +75,58 @@ def csls_correct(
     return corrected, penalties
 
 
+def _validate_gallery_features(global_features, tse_features, k):
+    if global_features.ndim != 2 or tse_features.ndim != 2:
+        raise ValueError("gallery features must be two-dimensional")
+    if global_features.shape != tse_features.shape:
+        raise ValueError("global and TSE gallery feature shapes must match")
+    if global_features.device != tse_features.device:
+        raise ValueError("global and TSE gallery features must share a device")
+    if global_features.dtype != tse_features.dtype:
+        raise ValueError("global and TSE gallery features must share a dtype")
+    if not global_features.is_floating_point():
+        raise TypeError("gallery features must use a floating-point dtype")
+    gallery_size = global_features.shape[0]
+    if gallery_size < 2:
+        raise ValueError("gallery mode requires at least two gallery samples")
+    if isinstance(k, bool) or not isinstance(k, int):
+        raise TypeError("csls_k must be an integer")
+    if not 1 <= k < gallery_size:
+        raise ValueError(f"csls_k must be in [1, {gallery_size - 1}]")
+
+
+@torch.no_grad()
+def gallery_similarity_matrix(global_features, tse_features):
+    """Build fused gallery-gallery scores on the query-gallery score scale."""
+    if global_features.ndim != 2 or tse_features.ndim != 2:
+        raise ValueError("gallery features must be two-dimensional")
+    if global_features.shape != tse_features.shape:
+        raise ValueError("global and TSE gallery feature shapes must match")
+    if global_features.device != tse_features.device:
+        raise ValueError("global and TSE gallery features must share a device")
+    if global_features.dtype != tse_features.dtype:
+        raise ValueError("global and TSE gallery features must share a dtype")
+    similarities = global_features @ global_features.t()
+    similarities.addmm_(tse_features, tse_features.t()).mul_(0.5)
+    return similarities
+
+
+@torch.no_grad()
+def gallery_topk_mean(global_features, tse_features, k):
+    """Return gallery-only r(g), excluding every sample's self-match."""
+    _validate_gallery_features(global_features, tse_features, k)
+    similarities = gallery_similarity_matrix(global_features, tse_features)
+    similarities.fill_diagonal_(float("-inf"))
+    topk_values = torch.topk(
+        similarities,
+        k,
+        dim=0,
+        largest=True,
+        sorted=True,
+    ).values
+    return topk_values.mean(dim=0)
+
+
 @torch.no_grad()
 def top1_hubness(similarities, top_n=10):
     """Return the largest top-1 selection counts and number of used galleries."""
@@ -114,8 +166,29 @@ def _log_hubness_summary(logger, before, after):
     logger.info("END HUBNESS SUMMARY")
 
 
+def _log_penalty_summary(logger, mode, penalties):
+    values = penalties.float()
+    logger.info(
+        "CSLS mode=%s r(g) mean=%.6f std=%.6f min=%.6f max=%.6f",
+        mode,
+        values.mean().item(),
+        values.std(unbiased=False).item(),
+        values.min().item(),
+        values.max().item(),
+    )
+
+
 @torch.no_grad()
-def evaluate_csls_scores(similarities, dataset, k, logger):
+def evaluate_csls_scores(
+    similarities,
+    dataset,
+    k,
+    logger,
+    mode="query",
+    gallery_global_features=None,
+    gallery_tse_features=None,
+    output_dir=None,
+):
     """Evaluate an already fused query-gallery matrix after CSLS."""
     from misc.eval import metric_eval
 
@@ -128,21 +201,43 @@ def evaluate_csls_scores(similarities, dataset, k, logger):
         CSLS_QUERY_BLOCK_SIZE,
     )
     try:
-        corrected, _ = csls_correct(
-            similarities,
-            k,
-            query_block_size=CSLS_QUERY_BLOCK_SIZE,
-            inplace=True,
-        )
+        if mode == "query":
+            corrected, penalties = csls_correct(
+                similarities,
+                k,
+                query_block_size=CSLS_QUERY_BLOCK_SIZE,
+                inplace=True,
+            )
+        elif mode == "gallery":
+            if gallery_global_features is None or gallery_tse_features is None:
+                raise ValueError("gallery mode requires global and TSE features")
+            penalties = gallery_topk_mean(
+                gallery_global_features,
+                gallery_tse_features,
+                k,
+            )
+            corrected = similarities
+            corrected.mul_(2.0).sub_(penalties.unsqueeze(0))
+        else:
+            raise ValueError("csls_mode must be 'query' or 'gallery'")
     except torch.cuda.OutOfMemoryError as exc:
+        if mode == "gallery":
+            detail = (
+                "gallery mode requires a full gallery-gallery matrix; "
+                "free GPU memory or lower --test_batch_size"
+            )
+        else:
+            detail = (
+                "lower --test_batch_size, free GPU memory, or reduce "
+                "CSLS_QUERY_BLOCK_SIZE in misc/hubness.py"
+            )
         raise RuntimeError(
-            "CUDA out of memory during CSLS correction; lower "
-            "--test_batch_size, free GPU memory, or reduce "
-            "CSLS_QUERY_BLOCK_SIZE in misc/hubness.py"
+            f"CUDA out of memory during CSLS correction; {detail}"
         ) from exc
     if corrected.is_cuda:
         torch.cuda.synchronize(corrected.device)
     logger.info("CSLS correction completed in %.3f seconds", time.time() - started)
+    _log_penalty_summary(logger, mode, penalties)
 
     after_hubness = top1_hubness(corrected)
     _log_hubness_summary(logger, before_hubness, after_hubness)
@@ -150,11 +245,12 @@ def evaluate_csls_scores(similarities, dataset, k, logger):
         corrected,
         dataset.img2person,
         dataset.txt2person,
+        output_dir=output_dir,
     )
 
 
 @torch.no_grad()
-def test_tse_with_csls(model, data_loader, config, logger):
+def test_tse_with_csls(model, data_loader, config, logger, output_dir=None):
     """Evaluate raw fused global/TSE scores and their CSLS correction."""
     from misc.eval import metric_eval
     from text_utils.tokenizer import tokenize
@@ -290,11 +386,16 @@ def test_tse_with_csls(model, data_loader, config, logger):
         similarities,
         dataset.img2person,
         dataset.txt2person,
+        output_dir=output_dir,
     )
     csls_result = evaluate_csls_scores(
         similarities,
         dataset,
         config.experiment.csls_k,
         logger,
+        mode=config.experiment.csls_mode,
+        gallery_global_features=image_features,
+        gallery_tse_features=image_tse_features,
+        output_dir=output_dir,
     )
     return raw_result, csls_result

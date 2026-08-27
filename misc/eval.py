@@ -1,11 +1,16 @@
+import warnings
+from pathlib import Path
+
 import torch
 import torch.nn.functional as F
+
 # import clip
+from misc.utils import get_rank
 from text_utils.tokenizer import tokenize
 
 
 @torch.no_grad()
-def test(model, data_loader, max_length, device):
+def test(model, data_loader, max_length, device, output_dir=None):
     # switch to evaluate mode
     model.eval()
 
@@ -30,13 +35,18 @@ def test(model, data_loader, max_length, device):
     image_feats = torch.cat(image_feats, dim=0)
 
     sims_matrix = text_feats @ image_feats.t()
-    eval_result = metric_eval(sims_matrix, dataset.img2person, dataset.txt2person)
+    eval_result = metric_eval(
+        sims_matrix,
+        dataset.img2person,
+        dataset.txt2person,
+        output_dir=output_dir,
+    )
 
     return eval_result
 
 # TSE evaluation
 @torch.no_grad()
-def test_tse(model, data_loader, max_length, device):
+def test_tse(model, data_loader, max_length, device, output_dir=None):
     # switch to evaluate mode
     model.eval()
 
@@ -71,13 +81,18 @@ def test_tse(model, data_loader, max_length, device):
     image_tse_feats = torch.cat(image_tse_feats, dim=0)
 
     sims_matrix = (text_feats @ image_feats.t() + text_tse_feats @ image_tse_feats.t()) / 2
-    eval_result = metric_eval(sims_matrix, dataset.img2person, dataset.txt2person)
+    eval_result = metric_eval(
+        sims_matrix,
+        dataset.img2person,
+        dataset.txt2person,
+        output_dir=output_dir,
+    )
 
     return eval_result
 
 
 @torch.no_grad()
-def metric_eval(scores_t2i, img2person, txt2person):
+def metric_eval(scores_t2i, img2person, txt2person, output_dir=None):
     device = scores_t2i.device
     img2person = img2person.to(device)
     txt2person = txt2person.to(device)
@@ -86,15 +101,31 @@ def metric_eval(scores_t2i, img2person, txt2person):
     pred_person = img2person[index]
     matches = (txt2person.view(-1, 1).eq(pred_person)).long()
 
-    import json
-    output_file = []
-    index = index.cpu().numpy()[:, :10]
-    for i, match in enumerate(matches):
-        match = match.cpu().numpy().tolist()
-        output_file.append({i: {'match': match[:10], 'pred': index[i].tolist()}})
-    output = json.dumps(output_file, indent=4)
-    with open('./output.json', 'w') as f:
-        f.write(output)
+    if get_rank() == 0:
+        import json
+        output_file = []
+        index_output = index.cpu().numpy()[:, :10]
+        for i, match in enumerate(matches):
+            match = match.cpu().numpy().tolist()
+            output_file.append({
+                i: {
+                    'match': match[:10],
+                    'pred': index_output[i].tolist(),
+                }
+            })
+        output = json.dumps(output_file, indent=4)
+        if output_dir is None:
+            warnings.warn(
+                "experiment directory unavailable; writing output.json "
+                "to the current working directory",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            output_path = Path('./output.json')
+        else:
+            output_path = Path(output_dir) / 'output.json'
+        with open(output_path, 'w') as f:
+            f.write(output)
 
     def acc_k(matches, k=1):
         matches_k = matches[:, :k].sum(dim=-1)
