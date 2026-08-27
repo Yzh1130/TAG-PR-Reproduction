@@ -78,8 +78,11 @@ def csls_correct(
 def _validate_gallery_features(global_features, tse_features, k):
     if global_features.ndim != 2 or tse_features.ndim != 2:
         raise ValueError("gallery features must be two-dimensional")
-    if global_features.shape != tse_features.shape:
-        raise ValueError("global and TSE gallery feature shapes must match")
+    if global_features.shape[0] != tse_features.shape[0]:
+        raise ValueError(
+            "global and TSE features must contain the same number of "
+            "gallery samples"
+        )
     if global_features.device != tse_features.device:
         raise ValueError("global and TSE gallery features must share a device")
     if global_features.dtype != tse_features.dtype:
@@ -100,8 +103,11 @@ def gallery_similarity_matrix(global_features, tse_features):
     """Build fused gallery-gallery scores on the query-gallery score scale."""
     if global_features.ndim != 2 or tse_features.ndim != 2:
         raise ValueError("gallery features must be two-dimensional")
-    if global_features.shape != tse_features.shape:
-        raise ValueError("global and TSE gallery feature shapes must match")
+    if global_features.shape[0] != tse_features.shape[0]:
+        raise ValueError(
+            "global and TSE features must contain the same number of "
+            "gallery samples"
+        )
     if global_features.device != tse_features.device:
         raise ValueError("global and TSE gallery features must share a device")
     if global_features.dtype != tse_features.dtype:
