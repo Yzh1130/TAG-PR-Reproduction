@@ -20,7 +20,7 @@ from experiment import (
 from misc.utils import get_rank
 from misc.build import load_checkpoint, cosine_scheduler, build_optimizer
 from misc.data import build_pedes_data
-from misc.eval import metric_eval, test_tse, test
+from misc.eval import metric_eval, similarity_dump_context, test_tse, test
 from misc.utils import parse_config, init_distributed_mode, set_seed, is_master, is_using_distributed, \
     AverageMeter
 from options import get_args
@@ -301,6 +301,17 @@ def build_parser():
         choices=("query", "gallery"),
         default=None,
         help="override experiment.csls_mode (default: config value)",
+    )
+    parser.add_argument(
+        "--dump_sim",
+        action="store_true",
+        help="dump raw query-gallery and gallery-gallery similarities",
+    )
+    parser.add_argument(
+        "--dump_sim_dtype",
+        choices=("float16", "float32"),
+        default="float16",
+        help="similarity dump dtype (default: float16)",
     )
     parser.add_argument(
         "--eval_only",
@@ -598,6 +609,7 @@ def configure_experiment(config, args):
             args.no_rerank,
             args.csls,
             args.no_csls,
+            args.dump_sim,
             args.dry_run,
         )
     ) or args.config != "config/config.yaml"
@@ -1186,7 +1198,48 @@ def test_tse_with_rerank(
     return raw_result, reranked_result, csls_result
 
 
-def evaluate_model(model, data_loader, config, logger, output_dir=None):
+def evaluate_model(
+    model,
+    data_loader,
+    config,
+    logger,
+    output_dir=None,
+    dump_sim=False,
+    dump_sim_dtype="float16",
+    dump_checkpoint_path=None,
+    dump_exp_name=None,
+):
+    if dump_sim:
+        if config.experiment.view_prompt:
+            score_description = (
+                "sim_qg = 0.5 * cosine(view-conditioned text_global, "
+                "image_global) + 0.5 * cosine(view-conditioned text_TSE, "
+                "image_TSE); each gallery column uses the text encoding for "
+                "that gallery image's cam_id and all features are "
+                "L2-normalized."
+            )
+        else:
+            score_description = (
+                "sim_qg = 0.5 * cosine(text_global, image_global) + "
+                "0.5 * cosine(text_TSE, image_TSE); all features are "
+                "L2-normalized."
+            )
+        with similarity_dump_context(
+            model,
+            output_dir,
+            dump_sim_dtype,
+            score_description,
+            checkpoint_path=dump_checkpoint_path,
+            exp_name=dump_exp_name,
+            logger=logger,
+        ):
+            return evaluate_model(
+                model,
+                data_loader,
+                config,
+                logger,
+                output_dir=output_dir,
+            )
     if config.experiment.rerank:
         return test_tse_with_rerank(
             model,
@@ -1444,6 +1497,9 @@ def run(
     config_path=None,
     eval_only=False,
     resume_path=None,
+    dump_sim=False,
+    dump_sim_dtype="float16",
+    exp_name=None,
 ):
     logger = setup_logger('TAG', distributed_rank=get_rank())
     logger.propagate = False
@@ -1467,6 +1523,12 @@ def run(
         evaluation_output_dir = Path(resume_path).expanduser().resolve().parent
     else:
         evaluation_output_dir = None
+    if dump_sim:
+        logger.info(
+            "Similarity matrix dumping enabled: dtype=%s output_dir=%s",
+            dump_sim_dtype,
+            evaluation_output_dir,
+        )
 
     training_start_time = time.time()
     train_loader = None
@@ -1547,6 +1609,10 @@ def run(
                 config,
                 logger,
                 output_dir=evaluation_output_dir,
+                dump_sim=dump_sim,
+                dump_sim_dtype=dump_sim_dtype,
+                dump_checkpoint_path=resume_path,
+                dump_exp_name=exp_name,
             )
             log_evaluation_results(
                 logger,
@@ -1714,6 +1780,9 @@ def run(
                         config,
                         logger,
                         output_dir=evaluation_output_dir,
+                        dump_sim=dump_sim,
+                        dump_sim_dtype=dump_sim_dtype,
+                        dump_exp_name=exp_name,
                     )
                 rank_1, rank_5, rank_10, map = (
                     eval_result['r1'],
@@ -1907,6 +1976,9 @@ def main(argv=None):
         config_path=args.config,
         eval_only=args.eval_only,
         resume_path=args.resume,
+        dump_sim=args.dump_sim,
+        dump_sim_dtype=args.dump_sim_dtype,
+        exp_name=args.exp_name,
     )
     return 0
 
