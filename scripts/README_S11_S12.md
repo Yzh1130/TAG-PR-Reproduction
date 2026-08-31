@@ -19,11 +19,15 @@ torchvision, tokenizer and model dependencies. No faiss, SciPy or sklearn.
 - `_s11_groups.py`: group-disjoint crossfit, whole-ID scans, held-out k selection.
 - `_s12_features.py`: original text/image evaluation representations, strict
   checkpoint loading, reproducibility and full archived-matrix parity guards.
+- `_s12_reconstruct.py`: opt-in float64 Gram factorization, text-coordinate
+  least squares and blockwise residuals; no Torch or image encoder calls.
 - `test_S11_S12.py`: independent CPU mock and injected torch-CPU feature tests.
+- `test_S12_reconstruction.py`: numerical/reference, CLI-path, WARN/STOP,
+  immutable-input and reconstruction-output tests.
 
 Run `python scripts/S11_offline_stats.py --help` and
 `python scripts/S12_inductive_bank.py --help` for all arguments.
-When copying tools to `/root/autodl-tmp/scripts/`, copy **all seven Python files**
+When copying tools to `/root/autodl-tmp/scripts/`, copy **all nine Python files**
 together. S11 does not need the repository on `PYTHONPATH`; S12 accepts `--repo`
 when these files are outside the checkout.
 
@@ -137,7 +141,7 @@ explicit; no reseeding between the two train-text passes and no RNG search.
 
 Use existing `pre_caption(max_words)`, tokenizer/context length, `encode_text`
 and `textual_emb_layer(..., training=False)`, normalizing global/TSE separately.
-Both view-prompt configurations are supported. Compare the two consecutive
+Both view-prompt configurations are supported by the default direct path. Compare the two consecutive
 float32 extractions bitwise, including signed zero; print mismatching positions
 and stop on a discrepancy. This stage does not call the image encoder.
 
@@ -145,7 +149,9 @@ Image caches may use `image_feat/image_tse_feat`, `image_feats/image_tse_feats`
 or `global_features/tse_features` in a recognized `.npz`. Otherwise extract the
 gallery once using the existing eval dataset and validation transform. Different
 global/TSE embedding widths are supported. In both cases recompute the complete
-test qg matrix in blocks and require max absolute error **strictly below 1e-5**.
+test qg matrix in blocks and require max absolute error **strictly below
+`--parity-tol` (default 1e-5)**. The separate Gram branch below has an explicitly
+different acceptance rule; the default direct guard is not relaxed.
 Check shape, finite values, and full row/element coverage. A mismatch produces
 JSON/log diagnostics and stops **before** bank corrections; stochastic image
 MoE routing, wrong config, weights or batching are possible causes, not assumed
@@ -184,6 +190,96 @@ convention; mAP accumulates float64. Exact positive-rank counting avoids sorting
 every negative when there are few positives; tests compare against full sorting,
 including ties, source exclusion, and a full-sort fallback for many positives.
 
+## S12 opt-in recovery from an archived gallery Gram matrix
+
+Use this branch when the dump contains `sim_qg.npy` / `sim_gg.npy` but no gallery
+features, and stochastic image routing prevents an identical fresh extraction.
+It does **not** rerun the image encoder or read `output.json` as features.
+Existing training/evaluation/model/data code is unchanged.
+
+| Argument | Default | Meaning |
+|---|---|---|
+| `--reconstruct-gallery-from-gg` | off | Explicitly select this recovery protocol |
+| `--gg-rank` | `1536` | Positive integer, or `auto` to retain eigenvalues `> lambda_max * 1e-8` |
+| `--parity-tol` | `1e-5` | Numerical residual warning threshold in recovery; strict stop threshold in direct mode |
+| `--score-block-size` | `256` | Rows per score/residual block and float32 output write |
+
+The existing FP32 text encoder is reused unchanged. **All subsequent recovery
+linear algebra is float64**, including branch concatenation, symmetrization,
+eigendecomposition, pseudoinverses, coordinate fitting and score products. Only
+final score blocks are converted to float32 and written immediately to memmaps.
+
+1. Decompose `(sim_gg + sim_gg.T)/2`. Clip every negative eigenvalue to zero and
+   retain the requested largest components: `G = U_r * sqrt(lambda_r)`.
+   Report residuals against the **original**, not symmetrized, archive.
+2. Solve `T = sim_qg @ G @ pinv(G.T @ G, rcond=1e-10)` in query blocks.
+3. Extract both train and test texts **twice consecutively**, preserving the
+   strict bitwise checks (including signed zero) and never calling the image
+   encoder. Concatenate `[global/sqrt(2), TSE/sqrt(2)]` without renormalization.
+4. Fit `W = pinv(T_test_raw, rcond=1e-10) @ T`. This is unconstrained least
+   squares, **not orthogonal Procrustes**. A single SVD per pseudoinverse supplies
+   both the pinv and its rank diagnostics; tests compare to `numpy.linalg.pinv`.
+5. Write/evaluate all of `T_test_raw @ W @ G.T`. Only after its gate passes,
+   write the training bank `(T_train_raw @ W) @ G.T` and run the existing scan.
+
+The repository's L/14 text branches actually have widths **768 global + 1024
+TSE = 1792**, not 1536. Widths are read from the extracted arrays; no columns are
+truncated or reshaped to force the assumption. `--gg-rank 1536` controls only the
+recovered coordinate rank. `auto` can select a different rank. A rank larger than
+the number of gallery items is rejected rather than silently reduced.
+
+This single-map branch explicitly rejects `view_prompt=true`: one query then
+has two gallery-view-conditioned text vectors, which the specified formula
+cannot represent. The original direct path still supports view prompts.
+
+### Acceptance and JSON audit
+
+The timestamped JSON contains `gallery_reconstruction` with:
+
+- `a_gram_spectrum`: original symmetry max/relative error, negative eigenvalue
+  count/max magnitude, selected rank, and retained nonnegative trace-energy
+  ratio. The squared-eigenvalue energy ratio is also reported separately.
+- `b_gram_residual`: `G @ G.T - archived_gg` max/relative Frobenius error.
+- `c_coordinate_residual`: `T @ G.T - archived_qg` max/relative error;
+  `coordinate_solver` records the explicit pinv cutoff/rank.
+- `d_procrustes_residual`: `T_test_raw @ W - T` max/relative error. This field
+  uses the request's name; `mapping_solver` explicitly identifies the actual
+  unconstrained least-squares formula and records its rank/cutoff.
+- `e_end_to_end`: full `T_test_raw @ W @ G.T - archived_qg` errors **before and
+  after float32 conversion**, both full-set R1/R5/R10/mAP values, and their
+  differences in percentage points. The gate evaluates the saved float32 file.
+- `gate`: PASS/WARN/STOP, exact correct-count/R1 difference, and individual
+  correct-to-incorrect / incorrect-to-correct / changed-top1 counts.
+
+The hard gate is **absolute aggregate R1 difference <= 0.02 percentage points**:
+for 16504 queries, a net three-query difference passes (0.0181774115366 pp),
+four fails (0.0242365487155 pp). This is a *net correct-count* limit, not a limit
+on individual prediction flips. Equal R1 does not prove identical rankings.
+If (b), (c), or either version of (e) exceeds `--parity-tol` but the R1 gate
+passes, print **WARN**, retain the residuals in JSON, and continue. If the R1
+gate fails, save diagnostics/logs and exit nonzero **before creating a training
+bank or correction results**. The reconstructed test-score file remains an
+audit artifact under `--out`; no archive is overwritten.
+
+Missing `sim_meta.json` is allowed **only in the opt-in branch**, with an
+explicit stdout/JSON provenance warning. The supplied checkpoint/config is used,
+and all residuals are measured; absence of metadata is not treated as verified
+checkpoint provenance. `output.json` remains untouched. Existing metadata that
+declares inconsistent global/TSE scoring or a different checkpoint still fails.
+
+Every degradation is explicit: negative clipping, truncation, rank-deficient
+text mapping and numerical gate warnings appear in JSON/stdout. Fitted training
+scores can exceed [-1,1] because `W` is unconstrained. They are finite-checked,
+reported with min/max/out-of-range count, and **not clipped or renormalized**.
+The default direct branch retains its original cosine-range validation.
+
+**Scientific scope:** `W` uses the complete archived test qg and freshly
+extracted test text. The resulting train-text bank can be evaluated offline,
+but this recovery-and-calibration pipeline is **not fully query-independent
+inductive calibration**. Both JSON bank regimes and stdout mark this dependency.
+Passing a test-query R1 gate does not certify mapping generalization to training
+texts or an exact orthogonal recovery.
+
 ## Memory and timing
 
 No dense corrected full-matrix copies or full ranking matrices are retained.
@@ -195,6 +291,16 @@ Image/test features and model weights add to this. Inputs use read-only memmaps.
 S12 records extraction time, correction-scan time and CUDA allocated peak.
 All 352 exact metric evaluations may take longer than the suggested five minutes;
 no real-GPU runtime or peak is claimed from a mock.
+
+Recovery runs EVD/SVD on the CPU after releasing the model. With 8252 gallery
+items, each dense float64 Gram/eigenvector matrix is about 520 MiB; LAPACK needs
+additional workspace. At rank1536, `G` is about 97 MiB and test coordinates about
+193 MiB. Raw float64 train text at width1792 is about 546 MiB. A 256x8252 float64
+score block is about 16.1 MiB. Full qg/bank output arrays are disk-backed float32
+(about 520 MiB / 1.23 GiB); a full float64 bank is never created. These are array
+size estimates, not measured real-run peaks. EVD/SVD and all 352 metric passes
+may take substantial CPU time depending on BLAS and thread configuration;
+reconstruction elapsed time is recorded separately.
 
 ## Commands on AutoDL
 
@@ -229,15 +335,67 @@ python /root/autodl-tmp/scripts/S12_inductive_bank.py \
   --out /root/autodl-tmp/experiments/_e1 --tag fk32
 ```
 
+For the feature-less 8/30 archive, replace the last command with this **explicit
+recovery** run (no `--gallery-features` or image re-extraction):
+
+```bash
+python /root/autodl-tmp/scripts/S12_inductive_bank.py \
+  --sim /root/autodl-tmp/experiments/_dump/20260830_dump_fk32/sim_qg.npy \
+  --sim-gg /root/autodl-tmp/experiments/_dump/20260830_dump_fk32/sim_gg.npy \
+  --anno /root/autodl-tmp/datasets/TAG-PEDES/test_reid.json \
+  --resume /root/autodl-tmp/experiments/20260827_l14_final_keep \
+  --config /root/autodl-tmp/cfg_l14.yaml --backbone ViT-L/14 \
+  --repo "$REPO" --reconstruct-gallery-from-gg --gg-rank 1536 \
+  --parity-tol 1e-5 --score-block-size 256 \
+  --out /root/autodl-tmp/experiments/_e1 --tag fk32_gg1536
+```
+
+Use `--gg-rank auto --tag fk32_ggauto` for the explicit spectral-threshold
+alternative. Sync `_s12_reconstruct.py` together with the updated S12 entrypoint;
+copying only the entrypoint is insufficient. No original evidence file is edited.
+
 ## Local verification (mock, not paper results)
 
 ```bash
 python -m unittest scripts.test_S11_S12 -v
+python -m unittest scripts.test_S11_S12 scripts.test_S12_reconstruction -v
 python scripts/S12_inductive_bank.py --self-test
 ```
 
 Local run: `Ran 11 tests in 18.009s — OK`; both CLI help commands and
-compilation of all seven Python files also passed.
+compilation of the original seven Python files also passed.
+
+Recovery extension, combined regression run: **25 tests in 30.515s — OK**.
+The 200x100 qg / 300x100 bank recovery fixture (seed2026, unequal global/TSE
+widths 4/6) produced:
+
+```text
+Gram reconstruction max abs error            4.254019492222483e-08
+test-coordinate max abs error                 3.477014309805071e-08
+text-mapping max abs error                    1.042380803895071e-08
+end-to-end float64 max abs / relative Frob     3.5371710449538796e-08 / 2.658947498201436e-08
+saved float32 qg max abs / relative Frob       5.960464477539063e-08 / 2.09506032303678e-08
+training bank vs known true scores max abs    3.583942465024137e-08
+T / W vs literal numpy pinv max abs           4.440892098500626e-16 / 1.1102230246251565e-16
+archived = rebuilt R1/R5/R10/mAP               1.0 / 9.0 / 20.5 / 5.70332580986575
+all four metric deltas                       0
+```
+
+The +0.001 constant-offset fixture has saved-qg max error
+`0.00100004673004`, R1 delta0 and correctly continues with **WARN**. An inconsistent
+archive fixture gives R1 delta -99 pp and correctly **STOPs**, saves all a–e
+diagnostics and creates no bank/correction. Exact 16504-query gate tests accept
+three and reject four net changed correct queries. The CLI integration tests
+cover absent metadata, no image calls, two passes for each text set, preserved
+default direct behavior, read-only input hashes and float32 outputs. These are
+mock tests, **not the 8/30 experiment's actual residuals or retrieval metrics**.
+
+A separate comparison loaded the original S12 source from git commit
+`52b3aa94a68af2eb9bfc1cd6b520d31179562780` and ran the same 11-bank/352-row mock
+scan through both versions with reconstruction disabled: all result rows were
+exactly equal, maximum metric error **0**. An out-of-range mapped-bank check
+confirmed that direct mode still rejects a constant1.2 bank, while explicit
+recovery processes it without clipping (all eight reduced-grid rows finite).
 
 200×100 S11 mock (seed2026), A–G all exercised including the explicit common-min
 alternative and literal infeasibility reporting:

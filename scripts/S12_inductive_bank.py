@@ -43,6 +43,18 @@ METHOD_SOURCES = {
 }
 
 
+def _gg_rank(value):
+    if str(value).lower() == "auto":
+        return "auto"
+    try:
+        rank = int(value)
+    except (TypeError, ValueError) as exc:
+        raise argparse.ArgumentTypeError("gg-rank must be a positive integer or 'auto'") from exc
+    if rank < 1:
+        raise argparse.ArgumentTypeError("gg-rank must be a positive integer or 'auto'")
+    return rank
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sim", default=str(DEFAULT_DUMP / "sim_qg.npy"), help="read-only float32 query-gallery scores")
@@ -62,12 +74,19 @@ def build_parser():
     parser.add_argument("--num-workers", default=2, type=int)
     parser.add_argument("--image-root", default=None, help="default config.image_dir")
     parser.add_argument("--gallery-features", default=None, help="optional read-only npz with image_feat/image_tse_feat; always validated against archived qg")
-    parser.add_argument("--score-block-size", default=256, type=int, help="FP32 text-gallery GEMM row block size")
+    parser.add_argument("--score-block-size", default=256, type=int,
+                        help="score row block size (direct FP32; reconstruction FP64 before FP32 disk output)")
+    parser.add_argument("--reconstruct-gallery-from-gg", action="store_true",
+                        help="explicit float64 Gram/least-squares reconstruction; bypass all image encoding (default off)")
+    parser.add_argument("--gg-rank", type=_gg_rank, default=1536,
+                        help="Gram rank, or auto: eigenvalue > max_eigenvalue*1e-8 (default 1536)")
+    parser.add_argument("--parity-tol", type=float, default=1e-5,
+                        help="max-absolute parity tolerance; reconstruction warns above it if |delta R1| <=0.02 pp")
     parser.add_argument("--self-test", action="store_true", help="run 200x100 NumPy mock scan without checkpoint/CUDA")
     return parser
 
 
-def _validate_matrix(values, name, columns=None):
+def _validate_matrix(values, name, columns=None, cosine_bounds=True):
     if values.ndim != 2 or min(values.shape) < 1 or not np.issubdtype(values.dtype, np.floating):
         raise ValueError(f"{name}: expected a nonempty 2D floating matrix, got {values.shape}/{values.dtype}")
     if columns is not None and values.shape[1] != columns:
@@ -76,7 +95,7 @@ def _validate_matrix(values, name, columns=None):
         block = values[start:start + 256]
         if not np.isfinite(block).all():
             raise ValueError(f"{name}: non-finite scores near row {start}")
-        if block.min() < -1.0001 or block.max() > 1.0001:
+        if cosine_bounds and (block.min() < -1.0001 or block.max() > 1.0001):
             raise ValueError(f"{name}: scores outside cosine-mixture range [-1,1]")
 
 
@@ -127,10 +146,11 @@ def _metric_summary(result):
 
 def run_corrections(sim, train_bank, sim_gg, ann, subset_sizes=(1000, 5000, 16504),
                     seeds=(2026, 2027, 2028), ks=(5, 10, 16, 20, 30),
-                    alphas=(0.25, 0.5, 0.75, 1.0), betas=(5, 10, 20, 50), progress=print):
+                    alphas=(0.25, 0.5, 0.75, 1.0), betas=(5, 10, 20, 50), progress=print,
+                    reconstructed_bank=False):
     """CPU correction engine, independent of model, training and GPU imports."""
     _validate_matrix(sim, "query-gallery")
-    _validate_matrix(train_bank, "training bank-gallery", sim.shape[1])
+    _validate_matrix(train_bank, "training bank-gallery", sim.shape[1], cosine_bounds=not reconstructed_bank)
     _validate_matrix(sim_gg, "gallery-gallery", sim.shape[1])
     if sim_gg.shape[0] != sim.shape[1]:
         raise ValueError("gallery-gallery matrix must be square with the same gallery order")
@@ -142,17 +162,24 @@ def run_corrections(sim, train_bank, sim_gg, ann, subset_sizes=(1000, 5000, 1650
     if progress:
         progress("RAW       no calibration bank                                     "
                  + " ".join(f"{baseline[key]:9.5f}" for key in ("R1", "R5", "R10", "mAP")))
-        progress("BANK REGIMES: test_full = transductive (requires complete test queries); "
-                 "train_* = inductive (offline training text only). All share the fixed test gallery.")
+        if reconstructed_bank:
+            progress("WARN BANK REGIMES: train_* uses training texts, but W was calibrated on COMPLETE TEST QUERIES. "
+                     "This reconstruction pipeline is NOT fully query-independent/inductive.")
+        else:
+            progress("BANK REGIMES: test_full = transductive (requires complete test queries); "
+                     "train_* = inductive (offline training text only). All share the fixed test gallery.")
     original_top1 = np.argmax(sim, axis=1)
     # Gallery-bank normalizers are independent of the query bank; compute once.
     gallery_stats = bank_statistics(sim_gg, (min(1, len(sim_gg)),), betas)
+    train_regime = ("train-text bank; reconstruction calibrated on full test queries (not fully inductive)"
+                    if reconstructed_bank else "inductive: offline training text bank")
     banks = [("test_full", "transductive: complete test query bank", sim, None, None),
-             ("train_full", "inductive: offline training text bank", train_bank, None, None)]
+             ("train_full", train_regime, train_bank, None, None)]
     for size in subset_sizes:
         for seed in seeds:
             rows = np.random.default_rng(seed).choice(len(train_bank), size=size, replace=False)
-            banks.append((f"train_{size}_seed{seed}", "inductive: offline training text subset", train_bank, rows, seed))
+            subset_regime = train_regime if reconstructed_bank else "inductive: offline training text subset"
+            banks.append((f"train_{size}_seed{seed}", subset_regime, train_bank, rows, seed))
     results, summaries = [], []
     for name, regime, values, selected, seed in banks:
         started = time.perf_counter()
@@ -212,15 +239,209 @@ class _Tee:
         self.buffer.flush()
 
 
-def _load_meta(sim_path):
+def _load_meta(sim_path, required=True):
     path = Path(sim_path).with_name("sim_meta.json")
     if not path.is_file():
-        raise FileNotFoundError(f"Archived provenance metadata is required: {path}")
+        if required:
+            raise FileNotFoundError(f"Archived provenance metadata is required: {path}")
+        warning = (f"sim_meta.json is absent: {path}; archived checkpoint/scoring provenance cannot be verified. "
+                   "Explicit Gram reconstruction will use the supplied checkpoint/config and report all residuals. "
+                   "output.json is retrieval results, NOT a feature cache, and is not read.")
+        print("WARN: " + warning)
+        return {"metadata_available": False, "status": "WARN", "warnings": [warning],
+                "checkpoint_provenance_verified": False}
     with path.open(encoding="utf-8") as stream:
         metadata = json.load(stream)
     if metadata.get("sim_gg_composition_matches_sim_qg") is False:
         raise ValueError("Archived sim_gg does not match qg global/TSE composition; DualIS comparison would be confounded")
     return metadata
+
+
+def _reconstruction_acceptance(residuals, archived_eval, reconstructed_eval, tolerance=1e-5):
+    """R1-only hard gate requested for reconstruction, NOT for direct extraction.
+
+    Use exact correct-count differences, avoiding rounding at the 0.02 pp
+    boundary. Also expose individual flips: equal R1 is not identical rankings.
+    """
+    if not np.isfinite(tolerance) or tolerance <= 0:
+        raise ValueError("parity-tol must be positive and finite")
+    old, new = archived_eval["details"], reconstructed_eval["details"]
+    n = archived_eval["n_query"]
+    if n < 1 or n != reconstructed_eval["n_query"] or not np.array_equal(old["query_indices"], new["query_indices"]):
+        raise ValueError("Reconstruction acceptance needs the SAME complete ordered query set")
+    old_correct, new_correct = np.asarray(old["correct"], dtype=bool), np.asarray(new["correct"], dtype=bool)
+    if old_correct.shape != (n,) or new_correct.shape != (n,):
+        raise ValueError("Parity correct-count arrays do not cover all evaluation queries")
+    delta_count = int(new_correct.sum()) - int(old_correct.sum())
+    delta_pp = 100.0 * delta_count / n
+    numerical_warnings = []
+    for name, residual in residuals.items():
+        maximum = float(residual["max_abs_error"])
+        if not np.isfinite(maximum) or maximum < 0:
+            raise ValueError(f"Invalid reconstruction residual in {name}")
+        if maximum > tolerance:
+            numerical_warnings.append(f"{name}: max_abs_error={maximum:.12g} exceeds parity_tol={tolerance:.12g}")
+    passed = abs(delta_pp) <= 0.02
+    return {
+        "status": "STOP" if not passed else ("WARN" if numerical_warnings else "PASS"),
+        "passed": passed, "hard_gate": "abs(reconstructed R1 - archived R1) <= 0.02 percentage points",
+        "r1_tolerance_pp": 0.02, "r1_delta_pp": delta_pp, "net_correct_count_delta": delta_count,
+        "n_query": n, "max_allowed_net_count_change": int(np.floor(n * 0.02 / 100)),
+        "absolute_tolerance": tolerance, "warnings": numerical_warnings,
+        "correct_to_incorrect": int((old_correct & ~new_correct).sum()),
+        "incorrect_to_correct": int((~old_correct & new_correct).sum()),
+        "changed_top1_predictions": int(np.count_nonzero(np.asarray(old["top1"]) != np.asarray(new["top1"]))),
+        "note": "Aggregate R1 acceptance does not certify identical scores, per-query predictions or training-bank generalization",
+    }
+
+
+def _reconstructed_bank(args, out, run_name, report, sim, sim_gg, ann, train_features, test_features):
+    try:
+        from ._s12_reconstruct import (PINV_RCOND, ResidualAccumulator, concatenate_text_features,
+                                       coordinate_texts, fit_text_mapping, iter_mapped_scores, reconstruct_gallery)
+    except ImportError:
+        from _s12_reconstruct import (PINV_RCOND, ResidualAccumulator, concatenate_text_features,
+                                      coordinate_texts, fit_text_mapping, iter_mapped_scores, reconstruct_gallery)
+
+    started = time.perf_counter()
+    block_size = args.score_block_size
+    raw_test = concatenate_text_features(test_features)
+    raw_train = concatenate_text_features(train_features)
+    if len(raw_test) != sim.shape[0] or raw_test.shape[1] != raw_train.shape[1]:
+        raise ValueError("Raw train/test text shapes do not match each other or the complete archived qg")
+    if sim.shape != (len(ann.query_ids), len(ann.gallery_ids)):
+        raise ValueError("Archived qg shape does not match the complete annotation order")
+    reconstruction = {
+        "enabled": True, "status": "running", "computation_dtype": "float64", "output_dtype": "float32",
+        "score_block_size": block_size, "pinv_rcond": PINV_RCOND,
+        "raw_text_representation": "concatenate(global/sqrt(2), TSE/sqrt(2)); no truncation or re-normalization",
+        "text_global_width": int(test_features["text_feat"].shape[1]),
+        "text_tse_width": int(test_features["text_tse_feat"].shape[1]),
+        "test_raw_shape": list(raw_test.shape), "train_raw_shape": list(raw_train.shape),
+        "image_encoding": "bypassed; neither image features nor an image forward are used",
+        "alignment_uses_complete_test_queries": True,
+        "pure_query_independent_inductive_pipeline": False,
+        "warnings": [],
+    }
+    report["gallery_reconstruction"] = reconstruction
+    report["gallery_source"] = "float64 factorization of archived sim_gg; no image encoder/cache"
+    print("GRAM RECONSTRUCTION SETTINGS " + json.dumps(reconstruction, sort_keys=True))
+    if raw_test.shape[1] != 1536:
+        message = (f"Actual concatenated text width is {raw_test.shape[1]} "
+                   f"({reconstruction['text_global_width']} global + {reconstruction['text_tse_width']} TSE), "
+                   "not the assumed 1536; gg-rank controls ONLY the reconstruction coordinate width.")
+        reconstruction["warnings"].append(message)
+        print("WARN: " + message)
+
+    print("GRAM RECONSTRUCTION a/b: float64 symmetric eigendecomposition and original-Gram residual")
+    gallery, gram_report = reconstruct_gallery(sim_gg, rank=args.gg_rank, block_size=block_size)
+    reconstruction["a_gram_spectrum"] = gram_report["spectrum"]
+    reconstruction["b_gram_residual"] = gram_report["residual"]
+    reconstruction["warnings"].extend(gram_report["spectrum"]["warnings"])
+    print("GRAM SPECTRUM " + json.dumps(gram_report["spectrum"], sort_keys=True))
+    print("GRAM RESIDUAL b " + json.dumps(gram_report["residual"], sort_keys=True))
+
+    print("GRAM RECONSTRUCTION c: test coordinates from archived qg with pinv rcond=1e-10")
+    coordinates, coordinate_report = coordinate_texts(sim, gallery, block_size, rcond=PINV_RCOND)
+    reconstruction["c_coordinate_residual"] = coordinate_report["residual"]
+    reconstruction["coordinate_solver"] = {k: v for k, v in coordinate_report.items() if k != "residual"}
+    print("COORDINATE RESIDUAL c " + json.dumps(coordinate_report, sort_keys=True))
+
+    print("GRAM RECONSTRUCTION d: unconstrained least-squares W (not orthogonal Procrustes)")
+    mapping, mapping_report = fit_text_mapping(raw_test, coordinates, block_size, rcond=PINV_RCOND)
+    reconstruction["d_procrustes_residual"] = mapping_report["residual"]
+    reconstruction["mapping_solver"] = {k: v for k, v in mapping_report.items() if k != "residual"}
+    reconstruction["warnings"].extend(mapping_report["warnings"])
+    print("MAPPING RESIDUAL d " + json.dumps(mapping_report, sort_keys=True))
+    del coordinates
+
+    # Keep an auditable float32 test reconstruction. Measure BEFORE conversion
+    # as well as after it; the hard gate uses the actual on-disk float32 scores.
+    out = safe_output_dir(out)
+    qg_path = out / f"{run_name}_reconstructed_test_qg.npy"
+    if qg_path.exists():
+        raise FileExistsError(f"Refusing to overwrite reconstructed test scores: {qg_path}")
+    qg_output = np.lib.format.open_memmap(qg_path, mode="w+", dtype=np.float32, shape=sim.shape)
+    residual64, residual32 = ResidualAccumulator(), ResidualAccumulator()
+    next_row = 0
+    try:
+        for start, stop, block in iter_mapped_scores(raw_test, mapping, gallery, block_size):
+            if start != next_row or block.shape != (stop - start, sim.shape[1]):
+                raise RuntimeError("Reconstructed qg skipped rows or has wrong shape")
+            reference = np.asarray(sim[start:stop], dtype=np.float64)
+            residual64.update(block, reference, start)
+            output_block = block.astype(np.float32)
+            residual32.update(output_block, reference, start)
+            qg_output[start:stop] = output_block
+            next_row = stop
+        if next_row != sim.shape[0] or residual64.compared_elements != sim.size:
+            raise RuntimeError("Reconstructed qg did not cover the ENTIRE archive")
+        qg_output.flush()
+    finally:
+        del qg_output
+    reconstruction["e_end_to_end"] = {
+        **residual64.result(), "float32_output_residual": residual32.result(),
+        "reconstructed_qg_file": str(qg_path), "reconstructed_qg_dtype": "float32",
+    }
+    rebuilt = np.load(qg_path, mmap_mode="r", allow_pickle=False)
+    archived_metrics, rebuilt_metrics = evaluate(sim, ann), evaluate(rebuilt, ann)
+    metrics_delta = {key: float(rebuilt_metrics[key] - archived_metrics[key]) for key in ("R1", "R5", "R10", "mAP")}
+    reconstruction["e_end_to_end"].update(
+        archive_metrics=_metric_summary(archived_metrics), reconstructed_metrics=_metric_summary(rebuilt_metrics),
+        metric_deltas_pp=metrics_delta, metric_scoring="entire saved float32 reconstructed qg; original archive unchanged")
+    gate = _reconstruction_acceptance({"b": gram_report["residual"], "c": coordinate_report["residual"],
+                                       "e_float64": residual64.result(), "e_saved_float32": residual32.result()},
+                                      archived_metrics, rebuilt_metrics, args.parity_tol)
+    reconstruction["gate"] = gate
+    reconstruction["warnings"].extend(gate["warnings"])
+    print("END-TO-END RESIDUAL e " + json.dumps(reconstruction["e_end_to_end"], sort_keys=True))
+    print("RECONSTRUCTION R1 GATE " + json.dumps(gate, sort_keys=True))
+    for warning in reconstruction["warnings"]:
+        print("WARN: " + warning)
+    del rebuilt, archived_metrics, rebuilt_metrics, raw_test
+    if not gate["passed"]:
+        reconstruction.update(status="STOP", elapsed_sec=time.perf_counter() - started)
+        error = RuntimeError(f"STOP: reconstructed R1 differs by {gate['r1_delta_pp']:.10g} pp; "
+                             "allowed absolute difference is <=0.02 pp. No training bank/correction is produced.")
+        error.reconstruction_report = reconstruction
+        raise error
+
+    # Preserve the requested linear scores. A fitted W is not constrained to
+    # be orthogonal, so extrapolated bank scores need not be bounded cosines.
+    bank_path = out / f"{run_name}_sim_bank_g.npy"
+    if bank_path.exists():
+        raise FileExistsError(f"Refusing to overwrite reconstructed training bank: {bank_path}")
+    bank_shape = (len(raw_train), len(gallery))
+    bank = np.lib.format.open_memmap(bank_path, mode="w+", dtype=np.float32, shape=bank_shape)
+    minimum, maximum, outside, next_row = float("inf"), float("-inf"), 0, 0
+    try:
+        for start, stop, block in iter_mapped_scores(raw_train, mapping, gallery, block_size):
+            if start != next_row or block.shape != (stop - start, bank_shape[1]):
+                raise RuntimeError("Reconstructed bank skipped rows or has wrong shape")
+            minimum, maximum = min(minimum, float(block.min())), max(maximum, float(block.max()))
+            outside += int(np.count_nonzero((block < -1.0001) | (block > 1.0001)))
+            output_block = block.astype(np.float32)
+            if not np.isfinite(output_block).all():
+                raise ValueError("Reconstructed training bank overflows float32; cannot save finite output")
+            bank[start:stop] = output_block
+            next_row = stop
+        if next_row != bank_shape[0]:
+            raise RuntimeError("Reconstructed bank did not cover every training caption")
+        bank.flush()
+    finally:
+        del bank
+    reconstruction["bank_scores"] = dict(shape=list(bank_shape), dtype="float32", min=minimum, max=maximum,
+                                          count_outside_cosine_noise_bounds=outside, clipping=False, renormalization=False)
+    if outside:
+        warning = (f"Least-squares training bank has {outside} scores outside [-1.0001,1.0001], "
+                   f"range=[{minimum:.9g},{maximum:.9g}]. Preserved without clipping/re-normalization; these are mapped scores, not guaranteed cosines.")
+        reconstruction["warnings"].append(warning)
+        print("WARN: " + warning)
+    reconstruction.update(status="WARN" if reconstruction["warnings"] else "PASS", elapsed_sec=time.perf_counter() - started)
+    print("GRAM RECONSTRUCTION SUMMARY " + json.dumps({"status": reconstruction["status"], "gate": gate,
+                                                        "bank_scores": reconstruction["bank_scores"],
+                                                        "elapsed_sec": reconstruction["elapsed_sec"]}, sort_keys=True))
+    return np.load(bank_path, mmap_mode="r", allow_pickle=False)
 
 
 def _run_real(args, out, run_name, report):
@@ -237,7 +458,9 @@ def _run_real(args, out, run_name, report):
     _validate_matrix(sim_gg, "gallery-gallery", sim.shape[1])
     if sim_gg.shape != (sim.shape[1], sim.shape[1]) or sim_gg.dtype != np.float32:
         raise ValueError(f"Expected float32 square gallery matrix {(sim.shape[1], sim.shape[1])}; got {sim_gg.shape}/{sim_gg.dtype}")
-    metadata = _load_meta(sim_path)
+    if args.reconstruct_gallery_from_gg and args.gg_rank != "auto" and args.gg_rank > sim.shape[1]:
+        raise ValueError(f"gg-rank={args.gg_rank} exceeds gallery size {sim.shape[1]}")
+    metadata = _load_meta(sim_path, required=not args.reconstruct_gallery_from_gg)
     checkpoint = resolve_checkpoint(args.resume)
     recorded_checkpoint = metadata.get("checkpoint_path")
     if recorded_checkpoint and Path(recorded_checkpoint).expanduser().resolve() != checkpoint:
@@ -249,6 +472,10 @@ def _run_real(args, out, run_name, report):
     model, config, provenance = load_model(args.config, checkpoint, args.backbone, args.device,
                                           train_info["identities"], args.seed, args.repo)
     report["feature_provenance"] = provenance
+    if args.reconstruct_gallery_from_gg and config.experiment.view_prompt:
+        raise ValueError("Gram reconstruction needs one text vector per query; view_prompt=true has "
+                         "gallery-view-conditioned text scores and is not supported by this explicit single-map formula. "
+                         "The default direct-extraction path still supports view prompts.")
     report["extraction_seed"] = provenance["seed"]
     print("FEATURE EXTRACTION SETTINGS " + json.dumps(provenance, sort_keys=True))
     import torch
@@ -272,29 +499,46 @@ def _run_real(args, out, run_name, report):
     # Test text has no image-side routing either. Fresh extraction supplies the
     # exact same global/TSE text construction for the mandatory archive guard.
     test_features = extract_text_features(model, test_texts, **kwargs)
-    gallery, archive_feature_path = discover_gallery_features(sim_path.parent, args.gallery_features)
-    if gallery is None:
-        print("No archived image features: extracting gallery ONCE, then requiring qg max_abs_error < 1e-5.")
-        gallery = extract_gallery_features(model, config, args.anno, args.image_root or config.image_dir,
-                                           args.device, args.image_batch_size, args.num_workers)
-        gallery_source = "one fresh image extraction; no retries or RNG search"
-    else:
-        gallery_source = archive_feature_path
-    report["gallery_source"] = gallery_source
-    report["qg_parity"] = verify_query_gallery(test_features, gallery, ann.gallery_views, sim,
-                                               args.device, args.score_block_size)
     bank_path = out / f"{run_name}_sim_bank_g.npy"
-    train_bank = write_bank_similarity(bank_path, first, gallery, ann.gallery_views, args.device, args.score_block_size)
+    if args.reconstruct_gallery_from_gg:
+        test_second = extract_text_features(model, test_texts, **kwargs)
+        report["consecutive_test_text_extraction"] = assert_identical_features(test_features, test_second)
+        del test_second
+        if torch.device(args.device).type == "cuda":
+            report["feature_peak_cuda_allocated_bytes"] = int(torch.cuda.max_memory_allocated())
+        # Neither gallery-cache discovery nor image extraction occurs in this branch.
+        # Free the full model before CPU float64 eigen/SVD work.
+        del model
+        if torch.device(args.device).type == "cuda":
+            torch.cuda.empty_cache()
+        train_bank = _reconstructed_bank(args, out, run_name, report, sim, sim_gg, ann, first, test_features)
+        del first, test_features
+    else:
+        gallery, archive_feature_path = discover_gallery_features(sim_path.parent, args.gallery_features)
+        if gallery is None:
+            print(f"No archived image features: extracting gallery ONCE, then requiring qg max_abs_error < {args.parity_tol}.")
+            gallery = extract_gallery_features(model, config, args.anno, args.image_root or config.image_dir,
+                                               args.device, args.image_batch_size, args.num_workers)
+            gallery_source = "one fresh image extraction; no retries or RNG search"
+        else:
+            gallery_source = archive_feature_path
+        report["gallery_source"] = gallery_source
+        report["qg_parity"] = verify_query_gallery(test_features, gallery, ann.gallery_views, sim,
+                                                   args.device, args.score_block_size, tolerance=args.parity_tol)
+        train_bank = write_bank_similarity(bank_path, first, gallery, ann.gallery_views, args.device, args.score_block_size)
+        if torch.device(args.device).type == "cuda":
+            report["feature_peak_cuda_allocated_bytes"] = int(torch.cuda.max_memory_allocated())
+        del model, first, test_features, gallery
+        if torch.device(args.device).type == "cuda":
+            torch.cuda.empty_cache()
     report["bank_matrix"] = {"path": str(bank_path), "shape": list(train_bank.shape), "dtype": str(train_bank.dtype),
                              "bytes": bank_path.stat().st_size}
-    if torch.device(args.device).type == "cuda":
-        report["feature_peak_cuda_allocated_bytes"] = int(torch.cuda.max_memory_allocated())
-    del model, first, test_features, gallery
-    if torch.device(args.device).type == "cuda":
-        torch.cuda.empty_cache()
     print("METHOD    BANK                    HYPERPARAMETERS                      R@1       R@5      R@10       mAP")
     started = time.perf_counter()
-    report["corrections"] = run_corrections(sim, train_bank, sim_gg, ann)
+    if args.reconstruct_gallery_from_gg:
+        report["corrections"] = run_corrections(sim, train_bank, sim_gg, ann, reconstructed_bank=True)
+    else:
+        report["corrections"] = run_corrections(sim, train_bank, sim_gg, ann)
     report["correction_scan_elapsed_sec"] = time.perf_counter() - started
 
 
@@ -354,6 +598,10 @@ def self_test():
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
+    if not np.isfinite(args.parity_tol) or args.parity_tol <= 0:
+        parser.error("--parity-tol must be positive and finite")
+    if args.reconstruct_gallery_from_gg and args.gallery_features:
+        parser.error("--reconstruct-gallery-from-gg cannot be combined with --gallery-features")
     if args.self_test:
         try:
             self_test()
@@ -380,12 +628,16 @@ def main(argv=None):
     with redirect_stdout(_Tee(sys.stdout, buffer)):
         try:
             _run_real(args, out, run_name, report)
-            report["status"] = "complete"
+            warnings = (report.get("gallery_reconstruction", {}).get("warnings", []) or
+                        report.get("archive_metadata", {}).get("warnings", []))
+            report["status"] = "complete_with_warnings" if args.reconstruct_gallery_from_gg and warnings else "complete"
         except Exception as exc:
             failure = exc
             report["status"], report["error"] = "stopped", f"{type(exc).__name__}: {exc}"
             if hasattr(exc, "parity_report"):
                 report["qg_parity"] = exc.parity_report
+            if hasattr(exc, "reconstruction_report"):
+                report["gallery_reconstruction"] = exc.reconstruction_report
             print("S12 STOPPED: " + report["error"])
         report["elapsed_sec"] = time.perf_counter() - started
         print(f"S12 SUMMARY status={report['status']} elapsed_sec={report['elapsed_sec']:.3f}")
