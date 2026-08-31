@@ -43,6 +43,68 @@ REGIME_WARNING = (
     "queries. Training-bank gains here are archived-matrix offline simulations, "
     "not evidence of a fully query-independent inductive pipeline."
 )
+FRESH_BANK_NOTE = (
+    "The bank filename contains '_fresh': classified by the E3 filename "
+    "convention as a fresh-forward training bank, without a test-fitted W. "
+    "This filename classification does not verify the extraction provenance; "
+    "retain the corresponding E3 JSON as evidence."
+)
+
+
+def _parse_extra_config(value):
+    """Parse an optional bank:alpha:k without changing fixed a/b/c settings."""
+    if not isinstance(value, str) or len(value.split(":")) != 3:
+        raise ValueError("extra config must be BANK:ALPHA:K, e.g. train_full:0.5:10")
+    bank_name, alpha, k = value.split(":")
+    if bank_name not in ("train_full", "test_full"):
+        raise ValueError("extra config BANK must be train_full or test_full")
+    try:
+        alpha, k = float(alpha), int(k)
+    except ValueError as exc:
+        raise ValueError("extra config ALPHA must be a number and K a positive integer") from exc
+    if not np.isfinite(alpha) or alpha < 0:
+        raise ValueError("extra config ALPHA must be finite and nonnegative")
+    if k < 1:
+        raise ValueError("extra config K must be a positive integer")
+    return bank_name, alpha, k
+
+
+def _extra_config_arg(value):
+    try:
+        _parse_extra_config(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
+    return value
+
+
+def _config_label(index):
+    label = ""
+    while index >= 0:
+        index, digit = divmod(index, 26)
+        label = chr(ord("a") + digit) + label
+        index -= 1
+    return label
+
+
+def _extra_config_provenance(args, argv):
+    """New optional-config audit only; legacy invocations retain their schema.
+
+    SHA-256 requires reading the complete inputs. This additional IO and the
+    git dependency are deliberately incurred only by explicit --extra-config.
+    """
+    try:
+        from ._analysis_audit import git_head, sha256_16
+    except ImportError:
+        from _analysis_audit import git_head, sha256_16
+    return {
+        "argv": list(sys.argv if argv is None else [str(Path(__file__)), *argv]),
+        "seeds": {"bootstrap": int(args.seed)},
+        "git_HEAD": git_head(),
+        "inputs": {name: {"path": str(Path(value).expanduser().resolve()),
+                          "sha256_16": sha256_16(Path(value).expanduser())}
+                   for name, value in (("sim", args.sim), ("bank", args.bank), ("anno", args.anno))},
+        "scope": "present only when --extra-config is explicitly provided; all bootstrap comparisons use the recorded seed",
+    }
 
 
 def build_parser():
@@ -61,6 +123,10 @@ def build_parser():
                         help="paired percentile bootstrap repeats (default 10000)")
     parser.add_argument("--score-block-size", type=int, default=256,
                         help="bank rows per exact streaming column top-k block")
+    parser.add_argument("--extra-config", action="append", type=_extra_config_arg,
+                        default=argparse.SUPPRESS,
+                        metavar="BANK:ALPHA:K",
+                        help="append d/e/... after unchanged a/b/c; repeatable; BANK is train_full or test_full (e.g. train_full:0.5:10)")
     return parser
 
 
@@ -105,7 +171,8 @@ def _paired_results(ann, first, second, repeats, seed):
     return results
 
 
-def run_analysis(sim, bank, ann, bootstrap=10000, seed=2026, block_size=256, progress=print):
+def run_analysis(sim, bank, ann, bootstrap=10000, seed=2026, block_size=256, progress=print,
+                 extra_configs=None, fresh_bank=False):
     """Fix all column penalties first; bootstrap only paired binary outcomes."""
     if isinstance(bootstrap, bool) or not isinstance(bootstrap, (int, np.integer)) or bootstrap < 1:
         raise ValueError("bootstrap repeats must be a positive integer")
@@ -119,10 +186,19 @@ def run_analysis(sim, bank, ann, bootstrap=10000, seed=2026, block_size=256, pro
     bank_info = _finite_matrix(bank, "training bank-gallery", sim.shape[1], block_size)
     if len(bank) < 30 or len(sim) < 10:
         raise ValueError("fixed S13 configurations require >=30 training bank rows and >=10 test queries")
-    warnings = [REGIME_WARNING]
+    extras = tuple((_config_label(len(CONFIGURATIONS) + index), *_parse_extra_config(value))
+                   for index, value in enumerate(extra_configs or ()))
+    for label, bank_name, _, k in extras:
+        n_bank = len(bank) if bank_name == "train_full" else len(sim)
+        if k > n_bank:
+            raise ValueError(f"extra config {label}: k={k} exceeds {bank_name} rows={n_bank}")
+    warnings = [] if fresh_bank else [REGIME_WARNING]
     if bank_info["min"] < -1.0001 or bank_info["max"] > 1.0001:
-        warnings.append("Mapped S12 bank scores extend beyond [-1,1]; finite values are used unchanged, without clipping or renormalization.")
+        warnings.append(("Fresh bank" if fresh_bank else "Mapped S12 bank") +
+                        " scores extend beyond [-1,1]; finite values are used unchanged, without clipping or renormalization.")
     if progress:
+        if fresh_bank:
+            progress("S13 INFO: " + FRESH_BANK_NOTE)
         for warning in warnings:
             progress("S13 WARN: " + warning)
         progress("S13 fixing train top-30/top-10 and test top-10 penalties from complete banks; no bootstrap recalibration.")
@@ -134,6 +210,18 @@ def run_analysis(sim, bank, ann, bootstrap=10000, seed=2026, block_size=256, pro
         "b": train_top[:10].mean(axis=0, dtype=np.float32),
         "c": test_top.mean(axis=0, dtype=np.float32),
     }
+    extra_penalties = {("train_full", 30): penalties["a"],
+                       ("train_full", 10): penalties["b"],
+                       ("test_full", 10): penalties["c"]}
+    for label, bank_name, _, k in extras:
+        key = (bank_name, k)
+        if key not in extra_penalties:
+            top = train_top if bank_name == "train_full" else test_top
+            if k > len(top):
+                values = bank if bank_name == "train_full" else sim
+                top = topk_values(values, k, block_size=block_size)
+            extra_penalties[key] = top[:k].mean(axis=0, dtype=np.float32)
+        penalties[label] = extra_penalties[key]
     for penalty in penalties.values():
         penalty.flags.writeable = False
     penalty_elapsed = time.perf_counter() - started
@@ -141,18 +229,20 @@ def run_analysis(sim, bank, ann, bootstrap=10000, seed=2026, block_size=256, pro
     if raw["n_query"] != len(ann.query_ids) or raw["skipped_no_positive"]:
         raise ValueError("S13 requires the full annotated query set, without source exclusions")
     comparisons, corrected = {}, {}
-    for label, bank_name, alpha, k in CONFIGURATIONS:
+    for label, bank_name, alpha, k in CONFIGURATIONS + extras:
         if progress:
             progress(f"S13 {label}: {bank_name}, alpha={alpha}, k={k}; evaluating once then paired bootstrap x{bootstrap}.")
         result = evaluate(sim, ann, penalty=penalties[label], alpha=alpha)
         corrected[label] = result
         comparisons[label] = {
             "bank": bank_name, "alpha": alpha, "k": k,
-            "regime": "transductive: complete test-query bank" if label == "c" else "S12 reconstructed training-bank offline simulation (test-calibrated W)",
+            "regime": ("transductive: complete test-query bank" if bank_name == "test_full" else
+                       "E3 fresh-forward training-bank inductive pipeline (filename convention; provenance not verified)" if fresh_bank else
+                       "S12 reconstructed training-bank offline simulation (test-calibrated W)"),
             "metrics": compact_metrics(result),
             "observed_delta_R1_pp": float(100.0 * (np.asarray(result["details"]["correct"], dtype=np.int64)
                                                     - np.asarray(raw["details"]["correct"], dtype=np.int64)).mean()),
-            "penalty": _penalty_summary(penalties[label], len(sim) if label == "c" else len(bank), k),
+            "penalty": _penalty_summary(penalties[label], len(sim) if bank_name == "test_full" else len(bank), k),
             "bootstrap": _paired_results(ann, raw, result, bootstrap, seed),
         }
     difference = _paired_results(ann, corrected["c"], corrected["a"], bootstrap, seed)
@@ -174,8 +264,13 @@ def run_analysis(sim, bank, ann, bootstrap=10000, seed=2026, block_size=256, pro
         },
         "formula": "corrected s = s - alpha * mean(topk(bank[:,g])); alpha=.5 is ranking-equivalent to 2*s-r(g)",
         "source_image_exclusion": False, "labels_used_for_bank_penalty": False,
-        "pure_query_independent_inductive_pipeline": False,
-        "training_bank_provenance_note": REGIME_WARNING, "warnings": warnings,
+        "pure_query_independent_inductive_pipeline": bool(fresh_bank),
+        "training_bank_provenance_note": FRESH_BANK_NOTE if fresh_bank else REGIME_WARNING,
+        "warnings": warnings,
+        **({"training_bank_provenance_classification": {
+            "source": "bank filename contains '_fresh' (case-insensitive)",
+            "verified": False, "scope": "train_full configurations only; test_full remains transductive",
+        }} if fresh_bank else {}),
         "penalty_elapsed_sec": penalty_elapsed, "score_block_size": int(block_size),
     }
 
@@ -237,7 +332,11 @@ def main(argv=None):
             bank = load_matrix(args.bank)
             report["inputs"] = {"sim": provenance(args.sim), "bank": provenance(args.bank),
                                 "annotation_path": str(input_paths[2]), "matrix_mode": "read-only memory map"}
-            report.update(run_analysis(sim, bank, ann, args.bootstrap, args.seed, args.score_block_size))
+            if hasattr(args, "extra_config"):
+                report["extra_config_provenance"] = _extra_config_provenance(args, argv)
+            report.update(run_analysis(sim, bank, ann, args.bootstrap, args.seed, args.score_block_size,
+                                       extra_configs=getattr(args, "extra_config", None),
+                                       fresh_bank="_fresh" in Path(args.bank).name.lower()))
             report["status"] = "complete_with_warnings" if report["warnings"] else "complete"
             print_results(report)
         except Exception as exc:
