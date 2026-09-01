@@ -329,6 +329,21 @@ def build_parser():
         action="store_true",
         help="resolve configuration and write pre-run archives without training",
     )
+    parser.add_argument(
+        "--external_split",
+        choices=("val", "test"),
+        default=None,
+        help="external-dataset evaluation split override (default: config value)",
+    )
+    parser.add_argument(
+        "--smoke",
+        type=int,
+        nargs="?",
+        const=200,
+        default=None,
+        metavar="N",
+        help="external-dataset engineering smoke run; optional N defaults to 200 steps",
+    )
     # Retain the previously accepted option even though the baseline does not use it.
     parser.add_argument("--simplified", action="store_true", help=argparse.SUPPRESS)
     return parser
@@ -1907,6 +1922,31 @@ def main(argv=None):
     if args.resume is not None and not args.eval_only:
         parser.error("--resume is currently supported only with --eval_only")
     config, overrides = resolve_runtime_config(args)
+    dataset_name = str(getattr(config, "dataset_name", "TAG-PEDES"))
+    if dataset_name.lower().replace("_", "-") not in (
+        "tag-pedes",
+        "tagpedes",
+    ):
+        if args.dry_run:
+            parser.error("--dry_run is not supported for external datasets; use --smoke")
+        if args.smoke is not None and args.smoke < 1:
+            parser.error("--smoke N requires a positive number of training steps")
+        from datasets.external.runtime import run_external
+
+        return run_external(
+            config,
+            cli_overrides=overrides,
+            config_path=args.config,
+            eval_only=args.eval_only,
+            resume_path=args.resume,
+            exp_name=args.exp_name,
+            external_split=args.external_split,
+            smoke=args.smoke,
+            output_root=args.output_dir,
+            argv=argv,
+        )
+    if args.external_split is not None or args.smoke is not None:
+        parser.error("--external_split and --smoke require an external dataset config")
     if config.experiment.dhn_margin < 0:
         parser.error("dhn_margin must be non-negative")
     if config.experiment.rerank:

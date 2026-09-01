@@ -21,6 +21,44 @@ _ACTIVE_SIMILARITY_DUMP = ContextVar(
 )
 
 
+def compose_global_local_similarity(
+    text_global,
+    text_local,
+    image_global,
+    image_local,
+):
+    """Compose the two normalized retrieval branches used by ``test_tse``.
+
+    This helper is intentionally side-effect free.  The existing TAG-PEDES
+    evaluation continues to execute its original expression below; external
+    adapters call this helper so their score definition cannot drift from the
+    established equal-weight global/TSE contract.
+    """
+    if not all(torch.is_tensor(value) for value in (
+        text_global,
+        text_local,
+        image_global,
+        image_local,
+    )):
+        raise TypeError("similarity inputs must all be torch tensors")
+    if text_global.ndim != 2 or text_local.ndim != 2:
+        raise ValueError("text similarity features must be two-dimensional")
+    if image_global.ndim != 2 or image_local.ndim != 2:
+        raise ValueError("image similarity features must be two-dimensional")
+    if text_global.shape[0] != text_local.shape[0]:
+        raise ValueError("global/local text row counts differ")
+    if image_global.shape[0] != image_local.shape[0]:
+        raise ValueError("global/local image row counts differ")
+    if text_global.shape[1] != image_global.shape[1]:
+        raise ValueError("global text/image feature dimensions differ")
+    if text_local.shape[1] != image_local.shape[1]:
+        raise ValueError("local text/image feature dimensions differ")
+    return (
+        text_global @ image_global.t()
+        + text_local @ image_local.t()
+    ) / 2
+
+
 class _StreamingStats:
     def __init__(self):
         self.count = 0

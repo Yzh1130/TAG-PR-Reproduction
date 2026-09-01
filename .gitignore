@@ -150,6 +150,12 @@ logs/
 config/config.local.yaml
 dataset/
 datasets/
+!datasets/
+datasets/*
+!datasets/__init__.py
+!datasets/external/
+datasets/external/*
+!datasets/external/*.py
 data/
 checkpoints/
 outputs/
