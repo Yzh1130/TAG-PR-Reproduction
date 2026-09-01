@@ -133,10 +133,10 @@ experiments_ext/{dataset}_{backbone}_{split}_seed{seed}_{UTC timestamp}/
 Output roots beneath `_archive_evidence/`, `_dump/`, or any `_e1*` directory
 are rejected.  The following files are required:
 
-- `feats_text_global.npy`: normalized `float32 [nq, D]` text global features;
-- `feats_text_local.npy`: normalized `float32 [nq, D]` text TSE features;
-- `feats_img_global.npy`: normalized `float32 [ng, D]` gallery global features;
-- `feats_img_local.npy`: normalized `float32 [ng, D]` gallery local features;
+- `feats_text_global.npy`: normalized `float32 [nq, D_global]` text global features;
+- `feats_text_local.npy`: normalized `float32 [nq, D_local]` text TSE features;
+- `feats_img_global.npy`: normalized `float32 [ng, D_global]` gallery global features;
+- `feats_img_local.npy`: normalized `float32 [ng, D_local]` gallery local features;
 - `sim_qg.npy`: `float32 [nq, ng]` final similarity matrix;
 - `meta.json`, `output.json`, and `pid_remap_table.json`;
 - `config_used.yaml`, `git_commit.txt`, `run_command.txt`, and
@@ -161,7 +161,8 @@ under `strict_score_recomputation`.
 
 `output.json` contains the top 50 gallery row indices, one-based ranks, and
 identity-match flags for every query.  `meta.json` records dataset, split,
-protocol, backbone, seed, epoch, `nq`, `ng`, feature dimension `D`, remapped
+protocol, backbone, seed, epoch, `nq`, `ng`, feature dimensions `D_global` and
+`D_local`, remapped
 query/gallery PID lists, source-gallery row indices,
 `gallery_identity_image_index` (remapped PID to ordered global gallery rows),
 optional view/source labels, ordered gallery paths, a digest of ordered query texts, the PID-map
@@ -174,6 +175,9 @@ By default every adapter also emits the complete training-caption bank as
 images additionally produce `feats_extra_img_global.npy`,
 `feats_extra_img_local.npy`, and `extra_meta.json`.  CUHK and ICFG have no
 extra-image protocol, so no extra-image files are created for them.
+Bank and extra-image global features use `D_global`; their local features use
+`D_local`.  The two branch dimensions are validated independently and need not
+be equal (the current ViT-B/16 path produces 512 and 1024 respectively).
 For AERI, `extra_meta.json` preserves the annotation-order ground paths together
 with their remapped `pid` and `view="ground"` labels.
 

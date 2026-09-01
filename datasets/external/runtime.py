@@ -881,7 +881,6 @@ def _dump_evaluation(
         bundle.train_pid_remap,
         protocol.pid_remap,
     )
-    dimension = int(text_global.shape[1])
     meta = {
         "dataset": bundle.dataset,
         "split": split,
@@ -891,7 +890,8 @@ def _dump_evaluation(
         "epoch": int(epoch),
         "nq": len(protocol.query_texts),
         "ng": len(protocol.gallery_paths),
-        "D": dimension,
+        "D_global": int(text_global.shape[1]),
+        "D_local": int(text_local.shape[1]),
         "query_pid": protocol.query_pid,
         "gallery_pid": protocol.gallery_pid,
         "gallery_identity_image_index": gallery_identity_image_index(

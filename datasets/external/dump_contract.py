@@ -202,8 +202,6 @@ def write_core_features(
         raise ValueError("global text/image dimensions differ")
     if arrays["text_local"].shape[1] != arrays["image_local"].shape[1]:
         raise ValueError("local text/image dimensions differ")
-    if arrays["text_global"].shape[1] != arrays["text_local"].shape[1]:
-        raise ValueError("external dump contract requires a common feature D")
     paths = _feature_paths(directory)
     for key, path in paths.items():
         _exclusive_npy(path, arrays[key])
@@ -352,6 +350,26 @@ def write_optional_features(
 ):
     directory = Path(directory)
     written = {}
+    core_paths = _feature_paths(directory)
+
+    def _expected_width(branch):
+        path = core_paths[f"text_{branch}"]
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"cannot validate optional {branch} features before core dump: {path}"
+            )
+        values = np.load(path, mmap_mode="r", allow_pickle=False)
+        if values.ndim != 2:
+            raise ValueError(f"persisted core {branch} features are not 2-D")
+        return int(values.shape[1])
+
+    def _validate_width(values, name, branch):
+        expected = _expected_width(branch)
+        if values.shape[1] != expected:
+            raise ValueError(
+                f"{name}: expected {branch} width {expected}, got {values.shape[1]}"
+            )
+
     if (bank_global is None) != (bank_local is None):
         raise ValueError("bank global/local features must be provided together")
     if bank_global is not None:
@@ -359,6 +377,8 @@ def write_optional_features(
         bank_local = validate_features(
             bank_local, "bank_text_local", bank_global.shape[0]
         )
+        _validate_width(bank_global, "bank_text_global", "global")
+        _validate_width(bank_local, "bank_text_local", "local")
         for name, values in (
             ("feats_bank_text_global.npy", bank_global),
             ("feats_bank_text_local.npy", bank_local),
@@ -372,6 +392,8 @@ def write_optional_features(
         extra_local = validate_features(
             extra_local, "extra_img_local", extra_global.shape[0]
         )
+        _validate_width(extra_global, "extra_img_global", "global")
+        _validate_width(extra_local, "extra_img_local", "local")
         if extra_meta is None:
             raise ValueError("extra image features require extra_meta")
         for name, values in (

@@ -53,11 +53,11 @@ class ExternalDumpContractTest(unittest.TestCase):
 
     def test_complete_200_by_100_mock_dump(self):
         rng = np.random.default_rng(2026)
-        nq, ng, width = 200, 100, 16
-        text_global = _normalized(rng, nq, width)
-        text_local = _normalized(rng, nq, width)
-        image_global = _normalized(rng, ng, width)
-        image_local = _normalized(rng, ng, width)
+        nq, ng, global_width, local_width = 200, 100, 8, 16
+        text_global = _normalized(rng, nq, global_width)
+        text_local = _normalized(rng, nq, local_width)
+        image_global = _normalized(rng, ng, global_width)
+        image_local = _normalized(rng, ng, local_width)
         gallery_pid = np.arange(ng) % 20
         query_pid = np.arange(nq) % 20
         with tempfile.TemporaryDirectory() as temporary:
@@ -100,14 +100,16 @@ class ExternalDumpContractTest(unittest.TestCase):
             self.assertEqual(len(first["pred"]), 50)
             self.assertEqual(first["rank"], list(range(1, 51)))
 
-            bank = _normalized(rng, 37, width)
-            extra = _normalized(rng, 11, width)
+            bank_global = _normalized(rng, 37, global_width)
+            bank_local = _normalized(rng, 37, local_width)
+            extra_global = _normalized(rng, 11, global_width)
+            extra_local = _normalized(rng, 11, local_width)
             written = write_optional_features(
                 directory,
-                bank_global=bank,
-                bank_local=bank.copy(),
-                extra_global=extra,
-                extra_local=extra.copy(),
+                bank_global=bank_global,
+                bank_local=bank_local,
+                extra_global=extra_global,
+                extra_local=extra_local,
                 extra_meta={
                     "n": 11,
                     "paths": [f"ground/{index}.jpg" for index in range(11)],
@@ -117,6 +119,18 @@ class ExternalDumpContractTest(unittest.TestCase):
             )
             self.assertIn("feats_bank_text_global.npy", written)
             self.assertIn("extra_meta.json", written)
+            self.assertEqual(
+                written["feats_bank_text_global.npy"], [37, global_width]
+            )
+            self.assertEqual(
+                written["feats_bank_text_local.npy"], [37, local_width]
+            )
+            self.assertEqual(
+                written["feats_extra_img_global.npy"], [11, global_width]
+            )
+            self.assertEqual(
+                written["feats_extra_img_local.npy"], [11, local_width]
+            )
             persisted_extra = json.loads(
                 (directory / "extra_meta.json").read_text(encoding="utf-8")
             )
@@ -167,6 +181,44 @@ class ExternalDumpContractTest(unittest.TestCase):
                 write_optional_features(directory, bank_global=feature)
         self.assertEqual(text_sha256_16(["a", "bc"]), text_sha256_16(["a", "bc"]))
         self.assertNotEqual(text_sha256_16(["a", "bc"]), text_sha256_16(["ab", "c"]))
+
+    def test_optional_widths_match_their_corresponding_core_branches(self):
+        rng = np.random.default_rng(91)
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            write_core_features(
+                directory,
+                _normalized(rng, 4, 8),
+                _normalized(rng, 4, 16),
+                _normalized(rng, 3, 8),
+                _normalized(rng, 3, 16),
+            )
+            with self.assertRaisesRegex(ValueError, "global width 8"):
+                write_optional_features(
+                    directory,
+                    bank_global=_normalized(rng, 5, 9),
+                    bank_local=_normalized(rng, 5, 16),
+                )
+            with self.assertRaisesRegex(ValueError, "local width 16"):
+                write_optional_features(
+                    directory,
+                    bank_global=_normalized(rng, 5, 8),
+                    bank_local=_normalized(rng, 5, 15),
+                )
+            with self.assertRaisesRegex(ValueError, "global width 8"):
+                write_optional_features(
+                    directory,
+                    extra_global=_normalized(rng, 2, 9),
+                    extra_local=_normalized(rng, 2, 16),
+                    extra_meta={"n": 2},
+                )
+            with self.assertRaisesRegex(ValueError, "local width 16"):
+                write_optional_features(
+                    directory,
+                    extra_global=_normalized(rng, 2, 8),
+                    extra_local=_normalized(rng, 2, 15),
+                    extra_meta={"n": 2},
+                )
 
 
 if __name__ == "__main__":
