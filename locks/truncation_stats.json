@@ -1,0 +1,86 @@
+{
+  "max_words": 77,
+  "usable_body_tokens": 75,
+  "stats": {
+    "CUHK/train": {
+      "n": 68126,
+      "mean": 26.93,
+      "p50": 24,
+      "p95": 46,
+      "max": 108,
+      "truncated_fraction": 0.002143
+    },
+    "CUHK/test": {
+      "n": 6156,
+      "mean": 27.0,
+      "p50": 24,
+      "p95": 45,
+      "max": 113,
+      "truncated_fraction": 0.002437
+    },
+    "ICFG/train": {
+      "n": 34674,
+      "mean": 39.9,
+      "p50": 39,
+      "p95": 57,
+      "max": 85,
+      "truncated_fraction": 0.000692
+    },
+    "ICFG/test": {
+      "n": 19848,
+      "mean": 39.36,
+      "p50": 39,
+      "p95": 56,
+      "max": 87,
+      "truncated_fraction": 0.000605
+    },
+    "AERI/train": {
+      "n": 76007,
+      "mean": 47.26,
+      "p50": 47,
+      "p95": 71,
+      "max": 131,
+      "truncated_fraction": 0.026274
+    },
+    "AERI/test": {
+      "n": 6141,
+      "mean": 43.02,
+      "p50": 41,
+      "p95": 69,
+      "max": 118,
+      "truncated_fraction": 0.028008
+    },
+    "TBAPR/AG-ReID/train": {
+      "n": 8154,
+      "mean": 55.95,
+      "p50": 56,
+      "p95": 70,
+      "max": 101,
+      "truncated_fraction": 0.016556
+    },
+    "TBAPR/AG-ReID/test": {
+      "n": 1149,
+      "mean": 55.19,
+      "p50": 55,
+      "p95": 70,
+      "max": 89,
+      "truncated_fraction": 0.016536
+    },
+    "TBAPR/G2APS-AG/train": {
+      "n": 23186,
+      "mean": 56.38,
+      "p50": 56,
+      "p95": 70,
+      "max": 98,
+      "truncated_fraction": 0.016303
+    },
+    "TBAPR/G2APS-AG/test": {
+      "n": 2051,
+      "mean": 55.35,
+      "p50": 55,
+      "p95": 71,
+      "max": 93,
+      "truncated_fraction": 0.021941
+    }
+  }
+}

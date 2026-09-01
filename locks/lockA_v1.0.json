@@ -1,0 +1,340 @@
+{
+  "lock_id": "lockA_v1.0",
+  "lock_type": "outcome-blinded prospective analysis lock",
+  "not_a_preregistration": true,
+  "status": "LOCKED",
+  "scope": "External validation of hubness correction on four datasets (CUHK-PEDES, ICFG-PEDES, AERI-PEDES, TBAPR/TBAGPR)",
+  "created_utc": "2026-09-01T12:11:44Z",
+  "git_commit": "d2d255ab62700bf4edd840a32edfa4b8dd426ec9",
+  "information_observed_at_lock_time": [
+    "dataset structure, counts, identity/image split intersections (S1, S2)",
+    "path resolution rules (all rate=1.0)",
+    "cohort splits under the pre-specified rule (identity lists only, no outcomes)",
+    "text token-length and truncation statistics",
+    "engineering smoke: loader runs, batch shapes, pid alignment, loss finite, GPU memory, sim matrix shape/dtype, peak RAM",
+    "NO retrieval metric, NO hubness statistic, NO CSLS result of any kind"
+  ],
+  "hypothesis": {
+    "H": "The paired gain of CSLS (delta R@1) is governed by hub concentration in the gallery: higher concentration yields larger gain; when the gallery is small, the query-gallery distribution is homogeneous, or hub structure is weak, the gain approaches zero or becomes negative.",
+    "falsifiable_prediction": "Within each dataset, increasing distractor scale increases hub concentration and increases delta R@1.",
+    "negative_results_are_evidence": true
+  },
+  "unified_training_recipe": {
+    "backbone": "ViT-B/16",
+    "hr_moe": false,
+    "optimizer": "AdamW",
+    "lr": 0.0001,
+    "weight_decay": 0.02,
+    "epochs": 10,
+    "reporting": "fixed-last epoch",
+    "max_words": 77,
+    "global_batch": 320,
+    "seeds": [
+      0
+    ],
+    "evaluation": "once at epoch 10 only",
+    "permitted_dataset_specific_adaptations": [
+      "classifier head dimension = number of training identities",
+      "path parsing rules",
+      "TBAPR identity namespace remapping following official AGData offset",
+      "protocol-required sample construction per official annotations"
+    ],
+    "no_sota_comparison": true
+  },
+  "primary_metric": "delta R@1 = R@1(transductive CSLS) - R@1(no post-processing), paired on the same similarity matrix",
+  "secondary_metrics": [
+    "R@5",
+    "R@10",
+    "mAP"
+  ],
+  "csls_parameters": {
+    "transductive_main": {
+      "alpha": 0.5,
+      "k": 10
+    },
+    "inductive_main": {
+      "alpha": 0.5,
+      "k": 10,
+      "bank": "training-set captions of the same dataset"
+    },
+    "no_test_set_tuning": true,
+    "cuhk_validation_only_selection": {
+      "grid_alpha": [
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "grid_k": [
+        5,
+        10,
+        16,
+        20,
+        30
+      ],
+      "selection_split": "CUHK official val (1000 identities, disjoint from test in identity and image)",
+      "test_evaluated_once": true
+    },
+    "post_hoc_test_grids": "sensitivity only, never reported as main result"
+  },
+  "hubness_metrics": {
+    "primary": [
+      "k-occurrence skewness S_Nk at k=10 (Radovanovic et al.)",
+      "Gini coefficient of top-1 counts",
+      "null-normalized distinct top-1 ratio (denominator = Monte-Carlo null under random ranking at the same nq/ng, 1000 draws, seed 2026)"
+    ],
+    "reported_but_not_cross_dataset_comparable": [
+      "raw distinct top-1 ratio",
+      "max top-1 frequency"
+    ]
+  },
+  "bootstrap": {
+    "primary": "identity-clustered paired bootstrap, 10000 resamples, seed 2026",
+    "sensitivity": "query-level paired bootstrap",
+    "no_p_value_inflation": "report CIs; p-values only where already defined in the paper"
+  },
+  "distractor_scale_experiment": {
+    "rationale": "Positive union equals the full official gallery in all four datasets (every gallery image is a positive of some query), so distractors must come from held-out identities.",
+    "cohort_rule": {
+      "fraction": 0.3,
+      "rng": "numpy.random.default_rng(2026)",
+      "procedure": "A = rng.choice(sorted(test_identities), size=round(0.30*n_ids), replace=False); B = test_identities minus A",
+      "queries_Q": "all official test captions of identities in A (fixed across all D)",
+      "positives_P": "all official gallery images of identities in A, including each query's source image (fixed across all D)",
+      "pool": "all official gallery images of identities in B",
+      "tbapr_note": "cohort split is performed on the official MERGED 529 identities, not per subset",
+      "aeri_note": "distractor-scale runs on the official aerial-only gallery (5525)"
+    },
+    "D_levels": [
+      250,
+      500,
+      1000,
+      2000,
+      "full_pool"
+    ],
+    "skip_rule": "if D > pool size, that level is skipped; skipping is determined solely by the cohort split and is outcome-independent",
+    "cross_dataset_aligned_levels": [
+      250,
+      500,
+      1000,
+      2000
+    ],
+    "cohort_file": "_locks/cohort_splits_seed2026.json",
+    "replicate_seeds": [
+      2026,
+      2027,
+      2028,
+      2029,
+      2030
+    ],
+    "covariates_reported": [
+      "K",
+      "nq",
+      "positive_union",
+      "mean positives per query",
+      "D",
+      "ng",
+      "positive/distractor ratio",
+      "nq/ng"
+    ],
+    "csls_computation_rule": {
+      "statement": "r(g) depends only on the query set and column g, not on which other columns are present. r(g) is computed ONCE using cohort query set Q (NOT the full official query set).",
+      "mandatory_assertion": "On first S7 run, assert that CSLS scores obtained by slicing the precomputed r equal bitwise those obtained by recomputing on Gallery(D,seed), for at least one dataset x D x seed. If the assertion fails, stop and report."
+    },
+    "cancelled": "total-gallery-aligned ng~3000 protocol (infeasible: ICFG cohort positives alone exceed 3000)",
+    "cohort_realized": {
+      "CUHK-PEDES": {
+        "n_identities": 1000,
+        "K": 300,
+        "nq": 1828,
+        "positive_union": 910,
+        "pool": 2164,
+        "mean_pos_per_query": 0.4978,
+        "D_levels_feasible": [
+          250,
+          500,
+          1000,
+          2000,
+          "full_pool"
+        ],
+        "cohort_A_sha256_16": "613814dcad76e570"
+      },
+      "ICFG-PEDES": {
+        "n_identities": 1000,
+        "K": 300,
+        "nq": 5958,
+        "positive_union": 5958,
+        "pool": 13890,
+        "mean_pos_per_query": 1.0,
+        "D_levels_feasible": [
+          250,
+          500,
+          1000,
+          2000,
+          "full_pool"
+        ],
+        "cohort_A_sha256_16": "9d75dd92b35c1f75"
+      },
+      "AERI-PEDES": {
+        "n_identities": 1000,
+        "K": 300,
+        "nq": 1850,
+        "positive_union": 1668,
+        "pool": 3857,
+        "mean_pos_per_query": 0.9016,
+        "D_levels_feasible": [
+          250,
+          500,
+          1000,
+          2000,
+          "full_pool"
+        ],
+        "cohort_A_sha256_16": "ce93b5b11aea2812"
+      },
+      "TBAPR-merged": {
+        "n_identities": 529,
+        "K": 159,
+        "nq": 931,
+        "positive_union": 920,
+        "pool": 2216,
+        "mean_pos_per_query": 0.9882,
+        "D_levels_feasible": [
+          250,
+          500,
+          1000,
+          2000,
+          "full_pool"
+        ],
+        "cohort_A_sha256_16": "f80b561c1fcc25e9"
+      }
+    }
+  },
+  "dataset_protocols": {
+    "CUHK-PEDES": {
+      "queries": 6156,
+      "gallery": 3074,
+      "role": "small-gallery endpoint; only validation-only parameter selection"
+    },
+    "ICFG-PEDES": {
+      "queries": 19848,
+      "gallery": 19848,
+      "role": "large-gallery endpoint; nq/ng=1.0",
+      "known_defect": "one duplicated image path with two conflicting identities (id 1 and id 5), both in train; kept as-is, disclosed"
+    },
+    "AERI-PEDES": {
+      "official_queries": 6141,
+      "official_gallery": 5525,
+      "training": "(aerial_img, caption); ground_img NOT used; this is the W/O Ground single-image setting supported by the official work",
+      "mechanism_analysis": [
+        "mixed gallery 5525+4220=9745 (constructed by this paper)",
+        "pure cross-view sub-protocol"
+      ],
+      "role": "primary aerial-ground external validation",
+      "unconfirmed": "which view the manually annotated test captions describe (NEED OFFICIAL CONFIRMATION); both directions reported without labelling either as the cross-view direction"
+    },
+    "TBAPR": {
+      "official_merged": {
+        "queries": 3200,
+        "gallery_rows": 3200,
+        "identities": 529
+      },
+      "training": "(img, caption); pair_img NOT used; official evaluator never encodes pair_img",
+      "sensitivity": [
+        "AG-ReID-only",
+        "G2APS-only",
+        "G2APS unique-text dedup",
+        "G2APS gallery dedup"
+      ],
+      "role": "supplementary / sensitivity external evidence only",
+      "disclosed_defects": [
+        "val and test overlap",
+        "filename-level P-token overlap between train and test (54 tokens); official identity is the JSON pid field and the relation between filename tokens and physical identities is not documented",
+        "high exact-text reuse across identities in G2APS"
+      ]
+    }
+  },
+  "seed_policy": {
+    "default": "one seed (seed 0) per external dataset",
+    "trigger": "if a dataset's delta R@1 has the opposite sign to the other three AND its identity-clustered 95% CI crosses zero, add ONE seed for that dataset",
+    "constraints": [
+      "the first seed's result is never replaced and never pooled into main tables",
+      "the second seed appears only in a robustness footnote and changes no main-table number",
+      "whatever the second seed shows is reported",
+      "no seeds are added under any other circumstance"
+    ]
+  },
+  "reporting_policy": {
+    "all_results_reported": "negative, null and adverse results are reported in full",
+    "spearman": "descriptive/exploratory appendix statistic only; units are not independent; must not appear in abstract, contributions or conclusions",
+    "primary_cross_dataset_evidence": "per-dataset slope sign and CI of (distractor scale -> hubness -> delta R@1), four independent directional tests",
+    "external_absolute_performance": "single-run descriptive; not compared against any published number; training-seed robustness is supported separately by the TAG-PEDES three-model replication (+1.03/+1.07/+0.86)",
+    "text_truncation_rates": "reported per dataset"
+  },
+  "engineering_constraints": {
+    "sim_matrix": "float32, memmap; no full np.sort copy",
+    "topk": "chunked row-wise and column-wise",
+    "bootstrap_inputs": "per-query ranks/correctness/top-k indices only; similarity matrix never reopened",
+    "distractor_scale": "column indexing + chunked argpartition; per-level output is an int32 rank vector only",
+    "peak_ram": "recorded via ru_maxrss in every analysis JSON; hard limit 8 GB, exceed = abort"
+  },
+  "amendment_protocol": {
+    "allowed_reason": "technical infeasibility only; never because a result is unfavourable",
+    "procedure": "create lockA_amendment_00N.json recording original clause, new clause, technical reason, timestamp, git commit, and the list of information already observed; original file and hash retained permanently; version bumped",
+    "hard_deadline": "no amendment to Lock-A is permitted after Lock-B is created"
+  },
+  "text_truncation": {
+    "file": "_locks/truncation_stats.json",
+    "summary": {
+      "CUHK/train": 0.002143,
+      "CUHK/test": 0.002437,
+      "ICFG/train": 0.000692,
+      "ICFG/test": 0.000605,
+      "AERI/train": 0.026274,
+      "AERI/test": 0.028008,
+      "TBAPR/AG-ReID/train": 0.016556,
+      "TBAPR/AG-ReID/test": 0.016536,
+      "TBAPR/G2APS-AG/train": 0.016303,
+      "TBAPR/G2APS-AG/test": 0.021941
+    },
+    "note": "max truncation 2.80% (AERI test); CUHK/ICFG below 0.3%; reported as a footnote"
+  },
+  "s4a_engineering_smoke": {
+    "commit": "d2d255ab62700bf4edd840a32edfa4b8dd426ec9",
+    "results": {
+      "aeri": {
+        "all_checks_true": true,
+        "train_samples": 76007,
+        "num_classes": 3522,
+        "truncated_by_context_ratio": 0.019472,
+        "sha256_16": "431705e2ae8e43ff"
+      },
+      "cuhkpedes": {
+        "all_checks_true": true,
+        "train_samples": 68126,
+        "num_classes": 11003,
+        "truncated_by_context_ratio": 0.001292,
+        "sha256_16": "269a8af7e483c9d0"
+      },
+      "icfgpedes": {
+        "all_checks_true": true,
+        "train_samples": 34674,
+        "num_classes": 3102,
+        "truncated_by_context_ratio": 0.000173,
+        "sha256_16": "4039d76ea772328d"
+      },
+      "tbapr": {
+        "all_checks_true": true,
+        "train_samples": 31340,
+        "num_classes": 1180,
+        "truncated_by_context_ratio": 0.005775,
+        "sha256_16": "27d188befb78b654"
+      }
+    },
+    "note": "engineering-only; no retrieval metric or hub statistic was computed or observed"
+  },
+  "referenced_files_sha256": {
+    "cohort_splits_seed2026.json": "ccfab591f0e9da01178abf7ee1e8800e738a4df14f9f985beec2bf9845af6133",
+    "truncation_stats.json": "91dec547744f2e44ce50b128edca3fc1b2114e8c4f17ad9874d0a9e609bfa647"
+  },
+  "post_lock_policy": "Engineering-only commits after this lock are permitted provided they do not alter any locked analysis clause; every S5/S7 run archives its own git_commit.txt."
+}
