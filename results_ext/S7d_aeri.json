@@ -1,0 +1,331 @@
+{
+  "run": "aeri_ViT-B-16_test_seed0_20260901T142211175107Z",
+  "alpha": 0.5,
+  "k": 10,
+  "protocols": {
+    "T2A_official": {
+      "ng": 5525,
+      "baseline": {
+        "r1": 37.03,
+        "r5": 56.505,
+        "r10": 66.52,
+        "mAP": 37.208
+      },
+      "transductive": {
+        "r1": 36.444,
+        "r5": 56.163,
+        "r10": 65.738,
+        "mAP": 37.203
+      },
+      "trans_delta_r1": -0.586,
+      "trans_ci": [
+        -1.279,
+        0.084
+      ],
+      "inductive": {
+        "r1": 37.437,
+        "r5": 56.489,
+        "r10": 65.999,
+        "mAP": 37.237
+      },
+      "ind_delta_r1": 0.407,
+      "ind_ci": [
+        -0.451,
+        1.261
+      ],
+      "excess_skew_N10": 0.813,
+      "distinct_top1": 0.5191,
+      "max_top1": 22,
+      "ground_share_gallery": 0.0,
+      "top1_ground_share_all": 0.0,
+      "top1_ground_share_correct": 0.0,
+      "top1_ground_share_wrong": 0.0
+    },
+    "T2G_ground_only": {
+      "ng": 4220,
+      "baseline": {
+        "r1": 36.916,
+        "r5": 56.603,
+        "r10": 65.771,
+        "mAP": 34.137
+      },
+      "transductive": {
+        "r1": 37.779,
+        "r5": 59.437,
+        "r10": 68.425,
+        "mAP": 35.901
+      },
+      "trans_delta_r1": 0.863,
+      "trans_ci": [
+        0.097,
+        1.667
+      ],
+      "inductive": {
+        "r1": 38.023,
+        "r5": 58.183,
+        "r10": 67.302,
+        "mAP": 34.756
+      },
+      "ind_delta_r1": 1.107,
+      "ind_ci": [
+        0.18,
+        2.042
+      ],
+      "excess_skew_N10": 2.1283,
+      "distinct_top1": 0.4761,
+      "max_top1": 66,
+      "ground_share_gallery": 1.0,
+      "top1_ground_share_all": 1.0,
+      "top1_ground_share_correct": 1.0,
+      "top1_ground_share_wrong": 1.0
+    },
+    "T2M_mixed": {
+      "ng": 9745,
+      "baseline": {
+        "r1": 40.954,
+        "r5": 61.293,
+        "r10": 70.721,
+        "mAP": 32.566
+      },
+      "transductive": {
+        "r1": 40.677,
+        "r5": 61.13,
+        "r10": 70.689,
+        "mAP": 33.262
+      },
+      "trans_delta_r1": -0.277,
+      "trans_ci": [
+        -0.988,
+        0.449
+      ],
+      "inductive": {
+        "r1": 41.606,
+        "r5": 62.123,
+        "r10": 70.949,
+        "mAP": 32.969
+      },
+      "ind_delta_r1": 0.652,
+      "ind_ci": [
+        -0.216,
+        1.524
+      ],
+      "excess_skew_N10": 0.9244,
+      "distinct_top1": 0.3441,
+      "max_top1": 12,
+      "ground_share_gallery": 0.43304258594150846,
+      "top1_ground_share_all": 0.31753786028334147,
+      "top1_ground_share_correct": 0.3996023856858847,
+      "top1_ground_share_wrong": 0.2606177606177606
+    },
+    "T2A_size_controlled_4220": {
+      "seeds": [
+        2026,
+        2027,
+        2028,
+        2029,
+        2030
+      ],
+      "runs": [
+        {
+          "ng": 4220,
+          "baseline": {
+            "r1": 36.948,
+            "r5": 56.896,
+            "r10": 67.302,
+            "mAP": 37.773
+          },
+          "transductive": {
+            "r1": 36.46,
+            "r5": 56.652,
+            "r10": 66.455,
+            "mAP": 37.861
+          },
+          "trans_delta_r1": -0.488,
+          "trans_ci": [
+            -1.232,
+            0.26
+          ],
+          "inductive": {
+            "r1": 36.981,
+            "r5": 56.864,
+            "r10": 66.683,
+            "mAP": 37.744
+          },
+          "ind_delta_r1": 0.033,
+          "ind_ci": [
+            -0.832,
+            0.891
+          ],
+          "excess_skew_N10": 0.7344,
+          "distinct_top1": 0.5931,
+          "max_top1": 24,
+          "ground_share_gallery": 0.0,
+          "top1_ground_share_all": 0.0,
+          "top1_ground_share_correct": 0.0,
+          "top1_ground_share_wrong": 0.0
+        },
+        {
+          "ng": 4220,
+          "baseline": {
+            "r1": 36.997,
+            "r5": 58.085,
+            "r10": 67.595,
+            "mAP": 38.044
+          },
+          "transductive": {
+            "r1": 36.737,
+            "r5": 57.401,
+            "r10": 67.123,
+            "mAP": 38.138
+          },
+          "trans_delta_r1": -0.26,
+          "trans_ci": [
+            -0.945,
+            0.408
+          ],
+          "inductive": {
+            "r1": 37.502,
+            "r5": 57.222,
+            "r10": 67.22,
+            "mAP": 38.013
+          },
+          "ind_delta_r1": 0.505,
+          "ind_ci": [
+            -0.329,
+            1.34
+          ],
+          "excess_skew_N10": 0.795,
+          "distinct_top1": 0.5905,
+          "max_top1": 28,
+          "ground_share_gallery": 0.0,
+          "top1_ground_share_all": 0.0,
+          "top1_ground_share_correct": 0.0,
+          "top1_ground_share_wrong": 0.0
+        },
+        {
+          "ng": 4220,
+          "baseline": {
+            "r1": 36.883,
+            "r5": 57.694,
+            "r10": 66.927,
+            "mAP": 38.261
+          },
+          "transductive": {
+            "r1": 36.46,
+            "r5": 56.961,
+            "r10": 66.667,
+            "mAP": 38.299
+          },
+          "trans_delta_r1": -0.423,
+          "trans_ci": [
+            -1.066,
+            0.228
+          ],
+          "inductive": {
+            "r1": 37.421,
+            "r5": 57.238,
+            "r10": 66.813,
+            "mAP": 38.325
+          },
+          "ind_delta_r1": 0.538,
+          "ind_ci": [
+            -0.292,
+            1.385
+          ],
+          "excess_skew_N10": 0.7721,
+          "distinct_top1": 0.5972,
+          "max_top1": 22,
+          "ground_share_gallery": 0.0,
+          "top1_ground_share_all": 0.0,
+          "top1_ground_share_correct": 0.0,
+          "top1_ground_share_wrong": 0.0
+        },
+        {
+          "ng": 4220,
+          "baseline": {
+            "r1": 36.769,
+            "r5": 57.124,
+            "r10": 67.09,
+            "mAP": 38.219
+          },
+          "transductive": {
+            "r1": 36.33,
+            "r5": 56.554,
+            "r10": 66.634,
+            "mAP": 38.158
+          },
+          "trans_delta_r1": -0.439,
+          "trans_ci": [
+            -1.168,
+            0.259
+          ],
+          "inductive": {
+            "r1": 36.655,
+            "r5": 56.75,
+            "r10": 67.025,
+            "mAP": 38.17
+          },
+          "ind_delta_r1": -0.114,
+          "ind_ci": [
+            -0.959,
+            0.731
+          ],
+          "excess_skew_N10": 0.7727,
+          "distinct_top1": 0.6,
+          "max_top1": 23,
+          "ground_share_gallery": 0.0,
+          "top1_ground_share_all": 0.0,
+          "top1_ground_share_correct": 0.0,
+          "top1_ground_share_wrong": 0.0
+        },
+        {
+          "ng": 4220,
+          "baseline": {
+            "r1": 36.46,
+            "r5": 57.027,
+            "r10": 66.602,
+            "mAP": 37.443
+          },
+          "transductive": {
+            "r1": 35.711,
+            "r5": 56.326,
+            "r10": 66.276,
+            "mAP": 37.453
+          },
+          "trans_delta_r1": -0.749,
+          "trans_ci": [
+            -1.407,
+            -0.065
+          ],
+          "inductive": {
+            "r1": 36.655,
+            "r5": 56.245,
+            "r10": 66.146,
+            "mAP": 37.367
+          },
+          "ind_delta_r1": 0.195,
+          "ind_ci": [
+            -0.619,
+            1.005
+          ],
+          "excess_skew_N10": 0.7488,
+          "distinct_top1": 0.5967,
+          "max_top1": 14,
+          "ground_share_gallery": 0.0,
+          "top1_ground_share_all": 0.0,
+          "top1_ground_share_correct": 0.0,
+          "top1_ground_share_wrong": 0.0
+        }
+      ],
+      "mean_r1": 36.811,
+      "sd_r1": 0.192,
+      "mean_trans_delta": -0.472,
+      "mean_ind_delta": 0.231
+    }
+  },
+  "_meta": {
+    "peak_rss_gb": 1.684144,
+    "elapsed_sec": 252.3,
+    "caveat": "AERI test captions are identity-level; which view they were annotated from is NOT confirmed. Neither direction is labelled 'cross-view'."
+  }
+}

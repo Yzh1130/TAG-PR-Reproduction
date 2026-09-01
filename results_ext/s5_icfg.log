@@ -1,0 +1,43 @@
+ICFG DUPLICATE SUMMARY
+path: test/2868/2868_005_05_0114afternoon_0833_1_ex.jpg
+rows: [3, 21]
+ids: [1, 5]
+preserved_as_independent_training_samples: true
+END ICFG DUPLICATE SUMMARY
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z
+EXTERNAL ADAPTER SUMMARY train_samples=34674 num_classes=3102 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+External epoch[1/10] batch[50/108] loss=9.825073
+External epoch[1/10] batch[100/108] loss=9.534794
+External epoch 1/10 complete; evaluation deferred to epoch 10
+External epoch[2/10] batch[50/108] loss=9.176496
+External epoch[2/10] batch[100/108] loss=8.802853
+External epoch 2/10 complete; evaluation deferred to epoch 10
+External epoch[3/10] batch[50/108] loss=8.636064
+External epoch[3/10] batch[100/108] loss=8.288624
+External epoch 3/10 complete; evaluation deferred to epoch 10
+External epoch[4/10] batch[50/108] loss=7.825423
+External epoch[4/10] batch[100/108] loss=7.680965
+External epoch 4/10 complete; evaluation deferred to epoch 10
+External epoch[5/10] batch[50/108] loss=7.284506
+External epoch[5/10] batch[100/108] loss=7.385505
+External epoch 5/10 complete; evaluation deferred to epoch 10
+External epoch[6/10] batch[50/108] loss=6.745217
+External epoch[6/10] batch[100/108] loss=6.753842
+External epoch 6/10 complete; evaluation deferred to epoch 10
+External epoch[7/10] batch[50/108] loss=6.551188
+External epoch[7/10] batch[100/108] loss=6.627179
+External epoch 7/10 complete; evaluation deferred to epoch 10
+External epoch[8/10] batch[50/108] loss=6.132981
+External epoch[8/10] batch[100/108] loss=6.218716
+External epoch 8/10 complete; evaluation deferred to epoch 10
+External epoch[9/10] batch[50/108] loss=6.153714
+External epoch[9/10] batch[100/108] loss=5.923545
+External epoch 9/10 complete; evaluation deferred to epoch 10
+External epoch[10/10] batch[50/108] loss=5.790777
+External epoch[10/10] batch[100/108] loss=5.795115
+External epoch 10/10 complete; evaluation deferred to epoch 10
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:43:24.479671198 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

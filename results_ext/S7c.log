@@ -1,0 +1,31 @@
+CUHK val run : cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z
+CUHK test run: cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z
+  val nq=6158 ng=3078 | test nq=6156 ng=3074
+
+  [transductive] VAL grid ΔR@1 (rows α, cols k=[5, 10, 16, 20, 30]):
+    α=0.25  +0.34  +0.24  +0.28  +0.21  +0.23
+    α=0.50  -0.16  +0.03  +0.10  +0.06  +0.19
+    α=0.75  -1.43  -0.73  -0.42  -0.29  -0.13
+    α=1.00  -3.36  -1.79  -0.89  -0.63  -0.31
+  [transductive] val baseline R@1=73.76  selected (α,k)=(0.25, 5)  val Δ=+0.34  | literature default (0.5,10) val Δ=+0.03
+  [transductive] TEST (evaluated once): selected (0.25, 5) Δ=+0.55 idCI=[0.082, 1.022] | default (0.5,10) Δ=+0.99 idCI=[0.399, 1.617]
+
+  [inductive] VAL grid ΔR@1 (rows α, cols k=[5, 10, 16, 20, 30]):
+    α=0.25  -0.03  -0.16  -0.10  -0.06  +0.06
+    α=0.50  -0.23  -0.15  +0.02  +0.05  +0.05
+    α=0.75  -0.68  -0.57  -0.34  -0.42  -0.39
+    α=1.00  -1.93  -1.22  -0.96  -0.73  -0.52
+  [inductive] val baseline R@1=73.76  selected (α,k)=(0.25, 30)  val Δ=+0.06  | literature default (0.5,10) val Δ=-0.15
+  [inductive] TEST (evaluated once): selected (0.25, 30) Δ=+0.10 idCI=[-0.245, 0.441] | default (0.5,10) Δ=+0.11 idCI=[-0.392, 0.619]
+
+=== POST-HOC TEST GRIDS (sensitivity upper bound only; NOT results) ===
+  cuhkpedes  transductive best test (α,k)=(1.0, 30) Δ=+1.28 | default Δ=+0.99 | #(α,k) with Δ>0: 17/20 | min Δ=-2.84
+  cuhkpedes  inductive    best test (α,k)=(0.25, 5) Δ=+0.34 | default Δ=+0.11 | #(α,k) with Δ>0: 10/20 | min Δ=-1.06
+  icfgpedes  transductive best test (α,k)=(0.25, 30) Δ=+0.36 | default Δ=-0.47 | #(α,k) with Δ>0: 5/20 | min Δ=-5.29
+  icfgpedes  inductive    best test (α,k)=(0.5, 30) Δ=+0.52 | default Δ=+0.26 | #(α,k) with Δ>0: 12/20 | min Δ=-1.90
+  aeri       transductive best test (α,k)=(0.25, 30) Δ=+0.54 | default Δ=-0.59 | #(α,k) with Δ>0: 7/20 | min Δ=-6.95
+  aeri       inductive    best test (α,k)=(0.25, 30) Δ=+0.64 | default Δ=+0.41 | #(α,k) with Δ>0: 11/20 | min Δ=-3.57
+  tbapr      transductive best test (α,k)=(0.75, 16) Δ=+1.62 | default Δ=+1.31 | #(α,k) with Δ>0: 17/20 | min Δ=-2.66
+  tbapr      inductive    best test (α,k)=(0.5, 30) Δ=+0.78 | default Δ=+0.50 | #(α,k) with Δ>0: 14/20 | min Δ=-1.03
+
+peak RSS 3.68 GB, elapsed 150.0s; wrote /root/autodl-tmp/_e_ext/s7c/S7c_valselect.json

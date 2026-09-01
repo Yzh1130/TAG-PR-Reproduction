@@ -1,0 +1,203 @@
+nohup: ignoring input
+S5 START 2026-09-01T13:28:39Z commit=5131eae
+
+################ S5 train: icfg  2026-09-01T13:28:39Z ################
+ICFG DUPLICATE SUMMARY
+path: test/2868/2868_005_05_0114afternoon_0833_1_ex.jpg
+rows: [3, 21]
+ids: [1, 5]
+preserved_as_independent_training_samples: true
+END ICFG DUPLICATE SUMMARY
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z
+EXTERNAL ADAPTER SUMMARY train_samples=34674 num_classes=3102 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+External epoch[1/10] batch[50/108] loss=9.825073
+External epoch[1/10] batch[100/108] loss=9.534794
+External epoch 1/10 complete; evaluation deferred to epoch 10
+External epoch[2/10] batch[50/108] loss=9.176496
+External epoch[2/10] batch[100/108] loss=8.802853
+External epoch 2/10 complete; evaluation deferred to epoch 10
+External epoch[3/10] batch[50/108] loss=8.636064
+External epoch[3/10] batch[100/108] loss=8.288624
+External epoch 3/10 complete; evaluation deferred to epoch 10
+External epoch[4/10] batch[50/108] loss=7.825423
+External epoch[4/10] batch[100/108] loss=7.680965
+External epoch 4/10 complete; evaluation deferred to epoch 10
+External epoch[5/10] batch[50/108] loss=7.284506
+External epoch[5/10] batch[100/108] loss=7.385505
+External epoch 5/10 complete; evaluation deferred to epoch 10
+External epoch[6/10] batch[50/108] loss=6.745217
+External epoch[6/10] batch[100/108] loss=6.753842
+External epoch 6/10 complete; evaluation deferred to epoch 10
+External epoch[7/10] batch[50/108] loss=6.551188
+External epoch[7/10] batch[100/108] loss=6.627179
+External epoch 7/10 complete; evaluation deferred to epoch 10
+External epoch[8/10] batch[50/108] loss=6.132981
+External epoch[8/10] batch[100/108] loss=6.218716
+External epoch 8/10 complete; evaluation deferred to epoch 10
+External epoch[9/10] batch[50/108] loss=6.153714
+External epoch[9/10] batch[100/108] loss=5.923545
+External epoch 9/10 complete; evaluation deferred to epoch 10
+External epoch[10/10] batch[50/108] loss=5.790777
+External epoch[10/10] batch[100/108] loss=5.795115
+External epoch 10/10 complete; evaluation deferred to epoch 10
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:43:24.479671198 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+################ done: icfg  2026-09-01T13:43:26Z ################
+/dev/md0        100G   76G   25G  76% /root/autodl-tmp
+
+################ S5 train: tbapr  2026-09-01T13:43:26Z ################
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z
+EXTERNAL ADAPTER SUMMARY train_samples=31340 num_classes=1180 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+External epoch[1/10] batch[50/97] loss=10.447958
+External epoch 1/10 complete; evaluation deferred to epoch 10
+External epoch[2/10] batch[50/97] loss=10.051592
+External epoch 2/10 complete; evaluation deferred to epoch 10
+External epoch[3/10] batch[50/97] loss=9.157902
+External epoch 3/10 complete; evaluation deferred to epoch 10
+External epoch[4/10] batch[50/97] loss=8.733124
+External epoch 4/10 complete; evaluation deferred to epoch 10
+External epoch[5/10] batch[50/97] loss=7.945362
+External epoch 5/10 complete; evaluation deferred to epoch 10
+External epoch[6/10] batch[50/97] loss=7.474141
+External epoch 6/10 complete; evaluation deferred to epoch 10
+External epoch[7/10] batch[50/97] loss=7.095499
+External epoch 7/10 complete; evaluation deferred to epoch 10
+External epoch[8/10] batch[50/97] loss=6.670389
+External epoch 8/10 complete; evaluation deferred to epoch 10
+External epoch[9/10] batch[50/97] loss=6.589355
+External epoch 9/10 complete; evaluation deferred to epoch 10
+External epoch[10/10] batch[50/97] loss=6.388544
+External epoch 10/10 complete; evaluation deferred to epoch 10
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:56:01.024309606 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+################ done: tbapr  2026-09-01T13:56:02Z ################
+/dev/md0        100G   78G   23G  78% /root/autodl-tmp
+
+################ S5 train: cuhk  2026-09-01T13:56:02Z ################
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z
+EXTERNAL ADAPTER SUMMARY train_samples=68126 num_classes=11003 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+External epoch[1/10] batch[50/212] loss=10.547499
+External epoch[1/10] batch[100/212] loss=9.358809
+External epoch[1/10] batch[150/212] loss=9.740341
+External epoch[1/10] batch[200/212] loss=10.048114
+External epoch 1/10 complete; evaluation deferred to epoch 10
+External epoch[2/10] batch[50/212] loss=9.603453
+External epoch[2/10] batch[100/212] loss=9.627392
+External epoch[2/10] batch[150/212] loss=9.739729
+External epoch[2/10] batch[200/212] loss=9.796216
+External epoch 2/10 complete; evaluation deferred to epoch 10
+External epoch[3/10] batch[50/212] loss=8.839528
+External epoch[3/10] batch[100/212] loss=8.940400
+External epoch[3/10] batch[150/212] loss=8.929452
+External epoch[3/10] batch[200/212] loss=8.678865
+External epoch 3/10 complete; evaluation deferred to epoch 10
+External epoch[4/10] batch[50/212] loss=8.205454
+External epoch[4/10] batch[100/212] loss=8.437247
+External epoch[4/10] batch[150/212] loss=8.038592
+External epoch[4/10] batch[200/212] loss=8.092946
+External epoch 4/10 complete; evaluation deferred to epoch 10
+External epoch[5/10] batch[50/212] loss=7.480310
+External epoch[5/10] batch[100/212] loss=7.363661
+External epoch[5/10] batch[150/212] loss=7.477175
+External epoch[5/10] batch[200/212] loss=7.520324
+External epoch 5/10 complete; evaluation deferred to epoch 10
+External epoch[6/10] batch[50/212] loss=7.036562
+External epoch[6/10] batch[100/212] loss=6.874598
+External epoch[6/10] batch[150/212] loss=6.853457
+External epoch[6/10] batch[200/212] loss=7.014019
+External epoch 6/10 complete; evaluation deferred to epoch 10
+External epoch[7/10] batch[50/212] loss=6.380573
+External epoch[7/10] batch[100/212] loss=6.327961
+External epoch[7/10] batch[150/212] loss=6.424858
+External epoch[7/10] batch[200/212] loss=6.358648
+External epoch 7/10 complete; evaluation deferred to epoch 10
+External epoch[8/10] batch[50/212] loss=5.977980
+External epoch[8/10] batch[100/212] loss=6.115956
+External epoch[8/10] batch[150/212] loss=5.999137
+External epoch[8/10] batch[200/212] loss=6.087821
+External epoch 8/10 complete; evaluation deferred to epoch 10
+External epoch[9/10] batch[50/212] loss=5.891697
+External epoch[9/10] batch[100/212] loss=5.748491
+External epoch[9/10] batch[150/212] loss=5.795069
+External epoch[9/10] batch[200/212] loss=5.811900
+External epoch 9/10 complete; evaluation deferred to epoch 10
+External epoch[10/10] batch[50/212] loss=5.762079
+External epoch[10/10] batch[100/212] loss=5.759306
+External epoch[10/10] batch[150/212] loss=5.730815
+External epoch[10/10] batch[200/212] loss=5.567828
+External epoch 10/10 complete; evaluation deferred to epoch 10
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 22:22:00.578242185 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+################ done: cuhk  2026-09-01T14:22:02Z ################
+/dev/md0        100G   80G   21G  80% /root/autodl-tmp
+
+################ S5 train: aeri  2026-09-01T14:22:02Z ################
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z
+EXTERNAL ADAPTER SUMMARY train_samples=76007 num_classes=3522 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+External epoch[1/10] batch[50/237] loss=11.123390
+External epoch[1/10] batch[100/237] loss=10.271530
+External epoch[1/10] batch[150/237] loss=9.807898
+External epoch[1/10] batch[200/237] loss=10.002411
+External epoch 1/10 complete; evaluation deferred to epoch 10
+External epoch[2/10] batch[50/237] loss=9.936165
+External epoch[2/10] batch[100/237] loss=9.684377
+External epoch[2/10] batch[150/237] loss=9.401549
+External epoch[2/10] batch[200/237] loss=9.039349
+External epoch 2/10 complete; evaluation deferred to epoch 10
+External epoch[3/10] batch[50/237] loss=8.552776
+External epoch[3/10] batch[100/237] loss=8.381762
+External epoch[3/10] batch[150/237] loss=8.175108
+External epoch[3/10] batch[200/237] loss=7.517836
+External epoch 3/10 complete; evaluation deferred to epoch 10
+External epoch[4/10] batch[50/237] loss=7.167647
+External epoch[4/10] batch[100/237] loss=6.799611
+External epoch[4/10] batch[150/237] loss=6.767858
+External epoch[4/10] batch[200/237] loss=6.472834
+External epoch 4/10 complete; evaluation deferred to epoch 10
+External epoch[5/10] batch[50/237] loss=5.763552
+External epoch[5/10] batch[100/237] loss=5.516083
+External epoch[5/10] batch[150/237] loss=5.467948
+External epoch[5/10] batch[200/237] loss=5.056567
+External epoch 5/10 complete; evaluation deferred to epoch 10
+External epoch[6/10] batch[50/237] loss=4.713207
+External epoch[6/10] batch[100/237] loss=4.597906
+External epoch[6/10] batch[150/237] loss=4.496070
+External epoch[6/10] batch[200/237] loss=4.454298
+External epoch 6/10 complete; evaluation deferred to epoch 10
+External epoch[7/10] batch[50/237] loss=4.216015
+External epoch[7/10] batch[100/237] loss=4.097396
+External epoch[7/10] batch[150/237] loss=3.904675
+External epoch[7/10] batch[200/237] loss=3.902059
+External epoch 7/10 complete; evaluation deferred to epoch 10
+External epoch[8/10] batch[50/237] loss=3.796341
+External epoch[8/10] batch[100/237] loss=3.594254
+External epoch[8/10] batch[150/237] loss=3.561148
+External epoch[8/10] batch[200/237] loss=3.591836
+External epoch 8/10 complete; evaluation deferred to epoch 10
+External epoch[9/10] batch[50/237] loss=3.559882
+External epoch[9/10] batch[100/237] loss=3.582084
+External epoch[9/10] batch[150/237] loss=3.462903
+External epoch[9/10] batch[200/237] loss=3.314223
+External epoch 9/10 complete; evaluation deferred to epoch 10
+External epoch[10/10] batch[50/237] loss=3.399447
+External epoch[10/10] batch[100/237] loss=3.444264
+External epoch[10/10] batch[150/237] loss=3.360236
+External epoch[10/10] batch[200/237] loss=3.329964
+External epoch 10/10 complete; evaluation deferred to epoch 10
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 22:51:56.139961281 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+################ done: aeri  2026-09-01T14:51:58Z ################
+/dev/md0        100G   82G   19G  82% /root/autodl-tmp
+S5 ALL DONE 2026-09-01T14:51:58Z
