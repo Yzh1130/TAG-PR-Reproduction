@@ -188,9 +188,20 @@ class ExternalConfigTests(unittest.TestCase):
 
     def test_smoke_parser_default_and_explicit_step_count(self):
         parser = main.build_parser()
-        self.assertIsNone(parser.parse_args([]).smoke)
+        defaults = parser.parse_args([])
+        self.assertIsNone(defaults.smoke)
+        self.assertFalse(defaults.smoke_save_checkpoint)
+        self.assertFalse(defaults.quiet_metrics)
         self.assertEqual(parser.parse_args(["--smoke"]).smoke, 200)
         self.assertEqual(parser.parse_args(["--smoke", "17"]).smoke, 17)
+        enabled = parser.parse_args([
+            "--smoke",
+            "17",
+            "--smoke_save_checkpoint",
+            "--quiet_metrics",
+        ])
+        self.assertTrue(enabled.smoke_save_checkpoint)
+        self.assertTrue(enabled.quiet_metrics)
 
     def test_default_tag_config_does_not_dispatch_external_runtime(self):
         class ReachedTagPath(Exception):
@@ -233,6 +244,36 @@ class ExternalConfigTests(unittest.TestCase):
         call = fake_runtime.run_external.call_args
         self.assertEqual(call.args[0].dataset_name, "cuhkpedes")
         self.assertEqual(call.kwargs["smoke"], 1)
+        self.assertFalse(call.kwargs["smoke_save_checkpoint"])
+        self.assertFalse(call.kwargs["quiet_metrics"])
+
+    def test_external_dispatch_forwards_smoke_checkpoint_and_quiet_metrics(self):
+        fake_runtime = types.ModuleType("datasets.external.runtime")
+        fake_runtime.run_external = mock.Mock(return_value=None)
+        with mock.patch.dict(sys.modules, {"datasets.external.runtime": fake_runtime}):
+            main.main([
+                "--config",
+                str(ROOT / "cfg_cuhk.yaml"),
+                "--smoke",
+                "1",
+                "--smoke_save_checkpoint",
+                "--quiet_metrics",
+            ])
+        kwargs = fake_runtime.run_external.call_args.kwargs
+        self.assertTrue(kwargs["smoke_save_checkpoint"])
+        self.assertTrue(kwargs["quiet_metrics"])
+
+    def test_smoke_checkpoint_flag_requires_smoke(self):
+        fake_runtime = types.ModuleType("datasets.external.runtime")
+        fake_runtime.run_external = mock.Mock()
+        with mock.patch.dict(sys.modules, {"datasets.external.runtime": fake_runtime}):
+            with self.assertRaises(SystemExit):
+                main.main([
+                    "--config",
+                    str(ROOT / "cfg_cuhk.yaml"),
+                    "--smoke_save_checkpoint",
+                ])
+        fake_runtime.run_external.assert_not_called()
 
 
 if __name__ == "__main__":

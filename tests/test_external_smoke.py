@@ -1,6 +1,8 @@
 import json
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -12,7 +14,9 @@ from datasets.external.runtime import (
     ExternalTrainDataset,
     assert_smoke_payload_blinded,
     count_token_overflow,
+    print_external_evaluation,
     run_smoke_protocol,
+    save_external_checkpoint,
 )
 from datasets.external.common import TrainSample
 
@@ -112,6 +116,53 @@ class ExternalSmokeTest(unittest.TestCase):
             self.assertEqual(saved, payload)
             self.assertEqual(saved["counts"]["completed_steps"], 3)
             self.assertGreaterEqual(saved["counts"]["evaluation_batches_checked"], 1)
+
+    def test_smoke_checkpoint_matches_last_checkpoint_schema_and_loads(self):
+        model = _MockModel()
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+        config = SimpleNamespace(name="mock")
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "checkpoint_smoke.pth"
+            save_external_checkpoint(path, model, optimizer, config, epoch=3)
+            checkpoint = torch.load(path, map_location="cpu", weights_only=False)
+            self.assertEqual(
+                set(checkpoint),
+                {"model", "optimizer", "config", "epoch"},
+            )
+            self.assertEqual(checkpoint["epoch"], 3)
+            restored = _MockModel()
+            restored.load_state_dict(checkpoint["model"], strict=True)
+            restored_optimizer = torch.optim.SGD(restored.parameters(), lr=0.01)
+            restored_optimizer.load_state_dict(checkpoint["optimizer"])
+            for expected, actual in zip(model.parameters(), restored.parameters()):
+                self.assertTrue(torch.equal(expected, actual))
+            with self.assertRaises(FileExistsError):
+                save_external_checkpoint(path, model, optimizer, config, epoch=3)
+
+    def test_quiet_metrics_prints_no_metric_values(self):
+        metrics = {"r1": 11.25, "r5": 22.5, "r10": 33.75, "mAP": 44.0}
+        output = io.StringIO()
+        with redirect_stdout(output):
+            print_external_evaluation(
+                metrics,
+                {"array_equal": True},
+                quiet_metrics=True,
+            )
+        self.assertEqual(
+            output.getvalue().splitlines(),
+            ["EVALUATION COMPLETE", "array_equal=True"],
+        )
+        self.assertFalse(any(str(value) in output.getvalue() for value in metrics.values()))
+
+        default_output = io.StringIO()
+        with redirect_stdout(default_output):
+            print_external_evaluation(
+                metrics,
+                {"array_equal": True},
+                quiet_metrics=False,
+            )
+        self.assertIn("R@1=11.25000", default_output.getvalue())
+        self.assertIn("mAP=44.00000", default_output.getvalue())
 
     def test_recursive_blinding_contract_rejects_metrics_and_nonintegers(self):
         with self.assertRaises(ValueError):

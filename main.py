@@ -344,6 +344,22 @@ def build_parser():
         metavar="N",
         help="external-dataset engineering smoke run; optional N defaults to 200 steps",
     )
+    parser.add_argument(
+        "--smoke_save_checkpoint",
+        action="store_true",
+        help=(
+            "save checkpoint_smoke.pth after an external smoke run "
+            "(default: False)"
+        ),
+    )
+    parser.add_argument(
+        "--quiet_metrics",
+        action="store_true",
+        help=(
+            "suppress external evaluation metric values on stdout while "
+            "retaining metric files (default: False)"
+        ),
+    )
     # Retain the previously accepted option even though the baseline does not use it.
     parser.add_argument("--simplified", action="store_true", help=argparse.SUPPRESS)
     return parser
@@ -1931,6 +1947,8 @@ def main(argv=None):
             parser.error("--dry_run is not supported for external datasets; use --smoke")
         if args.smoke is not None and args.smoke < 1:
             parser.error("--smoke N requires a positive number of training steps")
+        if args.smoke_save_checkpoint and args.smoke is None:
+            parser.error("--smoke_save_checkpoint requires --smoke [N]")
         from datasets.external.runtime import run_external
 
         return run_external(
@@ -1942,11 +1960,21 @@ def main(argv=None):
             exp_name=args.exp_name,
             external_split=args.external_split,
             smoke=args.smoke,
+            smoke_save_checkpoint=args.smoke_save_checkpoint,
+            quiet_metrics=args.quiet_metrics,
             output_root=args.output_dir,
             argv=argv,
         )
-    if args.external_split is not None or args.smoke is not None:
-        parser.error("--external_split and --smoke require an external dataset config")
+    if (
+        args.external_split is not None
+        or args.smoke is not None
+        or args.smoke_save_checkpoint
+        or args.quiet_metrics
+    ):
+        parser.error(
+            "--external_split, --smoke, --smoke_save_checkpoint, and "
+            "--quiet_metrics require an external dataset config"
+        )
     if config.experiment.dhn_margin < 0:
         parser.error("dhn_margin must be non-negative")
     if config.experiment.rerank:

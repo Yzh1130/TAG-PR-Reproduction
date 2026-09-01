@@ -194,6 +194,18 @@ any other retrieval result.  `smoke_engineering.json` recursively permits only
 boolean and integer leaves and contains engineering checks/counts only.  The
 runtime rejects result-like field names before writing it.
 
+`--smoke_save_checkpoint` is opt-in and valid only together with `--smoke`.
+After the requested optimizer steps it writes `checkpoint_smoke.pth` in that
+run directory using exactly the same `model` / `optimizer` / `config` / `epoch`
+schema as `checkpoint_last.pth`; it can be passed directly to
+`--eval_only --resume`. Without the flag, smoke behavior and output files are
+unchanged.
+
+External evaluation normally prints R@1/R@5/R@10/mAP and also preserves them
+under `meta.json.metrics`. `--quiet_metrics` leaves all files unchanged but
+replaces the terminal metric line with `EVALUATION COMPLETE` and the strict
+`array_equal` feature-to-similarity self-check result.
+
 ## Reproducible server commands
 
 Set the checkpoint explicitly; the configuration intentionally does not guess
@@ -224,6 +236,8 @@ torchrun --standalone --nproc_per_node=1 main.py --config cfg_cuhk.yaml --smoke 
 torchrun --standalone --nproc_per_node=1 main.py --config cfg_icfg.yaml --smoke 200
 torchrun --standalone --nproc_per_node=1 main.py --config cfg_aeri.yaml --smoke 200
 torchrun --standalone --nproc_per_node=1 main.py --config cfg_tbapr.yaml --smoke 200
+torchrun --standalone --nproc_per_node=1 main.py --config cfg_tbapr.yaml \
+  --smoke 200 --smoke_save_checkpoint
 ```
 
 Full ten-epoch runs:

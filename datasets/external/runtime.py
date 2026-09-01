@@ -576,6 +576,20 @@ def write_smoke_payload(directory, payload):
     return path
 
 
+def save_external_checkpoint(path, model, optimizer, config, epoch):
+    """Persist the common external checkpoint schema without overwriting."""
+    model_without_ddp = model.module if hasattr(model, "module") else model
+    path = Path(path)
+    with path.open("xb") as stream:
+        torch.save({
+            "model": model_without_ddp.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "config": config,
+            "epoch": int(epoch),
+        }, stream)
+    return path
+
+
 def run_smoke_protocol(
     model,
     train_loader,
@@ -756,6 +770,19 @@ def _train_full(model, loaders, config, device):
     return optimizer
 
 
+def print_external_evaluation(metrics, parity, quiet_metrics=False):
+    """Print evaluation completion without changing persisted metric data."""
+    if quiet_metrics:
+        print("EVALUATION COMPLETE")
+        print(f"array_equal={parity['array_equal']}")
+        return
+    print(
+        "External evaluation "
+        f"R@1={metrics['r1']:.5f} R@5={metrics['r5']:.5f} "
+        f"R@10={metrics['r10']:.5f} mAP={metrics['mAP']:.5f}"
+    )
+
+
 def _dump_evaluation(
     model,
     bundle,
@@ -770,6 +797,7 @@ def _dump_evaluation(
     resume_path,
     argv,
     exp_name,
+    quiet_metrics=False,
 ):
     text_global, text_local = extract_text_features(
         model,
@@ -888,11 +916,7 @@ def _dump_evaluation(
         "optional_files": optional,
     }
     write_meta(directory, meta)
-    print(
-        "External evaluation "
-        f"R@1={metrics['r1']:.5f} R@5={metrics['r5']:.5f} "
-        f"R@10={metrics['r10']:.5f} mAP={metrics['mAP']:.5f}"
-    )
+    print_external_evaluation(metrics, parity, quiet_metrics=quiet_metrics)
     return metrics
 
 
@@ -906,6 +930,8 @@ def run_external(
     exp_name=None,
     external_split=None,
     smoke=None,
+    smoke_save_checkpoint=False,
+    quiet_metrics=False,
     output_root=None,
     argv=None,
 ):
@@ -916,6 +942,8 @@ def run_external(
         raise ValueError("external --resume is supported only with --eval_only")
     if smoke is not None and eval_only:
         raise ValueError("--smoke and --eval_only are mutually exclusive")
+    if smoke_save_checkpoint and smoke is None:
+        raise ValueError("--smoke_save_checkpoint requires --smoke [N]")
     device = _initialize_runtime(config)
     assert_external_hyperparameters(config)
     # Resolve the effective per-rank batch before archiving so config_used.yaml
@@ -993,6 +1021,15 @@ def run_external(
             text_count=total,
             output_directory=directory if _master() else None,
         )
+        if _master() and smoke_save_checkpoint:
+            save_external_checkpoint(
+                directory / "checkpoint_smoke.pth",
+                model,
+                optimizer,
+                config,
+                # One-based epoch containing the final smoke optimizer step.
+                (int(smoke) - 1) // len(loaders["train_loader"]) + 1,
+            )
         if _dist_active():
             torch.distributed.barrier()
         return payload if _master() else None
@@ -1022,6 +1059,7 @@ def run_external(
             resume_path=resume_path,
             argv=argv,
             exp_name=exp_name,
+            quiet_metrics=quiet_metrics,
         )
         if _dist_active():
             torch.distributed.barrier()
@@ -1034,16 +1072,16 @@ def run_external(
             find_unused_parameters=True,
         )
     optimizer = _train_full(model, loaders, config, device)
-    model_without_ddp = model.module if hasattr(model, "module") else model
     checkpoint_path = directory / "checkpoint_last.pth"
     if _master():
-        with checkpoint_path.open("xb") as stream:
-            torch.save({
-                "model": model_without_ddp.state_dict(),
-                "optimizer": optimizer.state_dict(),
-                "config": config,
-                "epoch": 10,
-            }, stream)
+        save_external_checkpoint(
+            checkpoint_path,
+            model,
+            optimizer,
+            config,
+            epoch=10,
+        )
+        model_without_ddp = model.module if hasattr(model, "module") else model
         result = _dump_evaluation(
             model_without_ddp,
             bundle,
@@ -1058,6 +1096,7 @@ def run_external(
             resume_path=checkpoint_path,
             argv=argv,
             exp_name=exp_name,
+            quiet_metrics=quiet_metrics,
         )
     else:
         result = None
@@ -1077,7 +1116,9 @@ __all__ = [
     "extract_text_features",
     "is_external_dataset",
     "load_external_adapter",
+    "print_external_evaluation",
     "run_external",
     "run_smoke_protocol",
+    "save_external_checkpoint",
     "write_smoke_payload",
 ]
