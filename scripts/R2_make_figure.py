@@ -161,23 +161,68 @@ def load_panels(panel_specs, pool_specs, select_path=None):
     return sources, cases, selected
 
 
-def render_panels(cases, selected, path, font_path=None):
-    """Publication panels: English labels only; query text lives in selected JSON.
+ENGLISH_PANEL_HEADERS = ["Query source", "Before #1", "Before #2", "Before #3",
+                         "After #1", "After #2", "After #3", "Best positive"]
+CHINESE_PANEL_HEADERS = ["查询源图", "校正前#1", "校正前#2", "校正前#3",
+                         "校正后#1", "校正后#2", "校正后#3", "最优正样本"]
+
+
+def _chinese_panel_font(font_path):
+    """Use only the requested font for Chinese; never probe another CJK font."""
+    reason = None
+    if not font_path:
+        reason = "--labels zh requires an explicit --font with all header glyphs"
+    else:
+        try:
+            # choose_font checks every required CJK glyph against the font's
+            # replacement-glyph mask, rather than merely accepting a file path.
+            font, font_name = choose_font(CHINESE_PANEL_HEADERS, font_path, size=15)
+            if font is not None:
+                return font, font_name, None
+            reason = "requested font is unusable or lacks required Chinese header glyphs"
+        except (OSError, ValueError) as exc:
+            reason = str(exc)
+    print(f"WARNING: {reason}; falling back to English panel labels", flush=True)
+    # English fallback may use the requested font if it can be loaded. It must
+    # not silently substitute a different Chinese font for the requested one.
+    try:
+        font, font_name = choose_font(ENGLISH_PANEL_HEADERS, font_path, size=15)
+    except (OSError, ValueError):
+        font, font_name = None, None
+    if font is None:
+        font, font_name = choose_font(ENGLISH_PANEL_HEADERS, size=15)
+    if font is None:
+        font = ImageFont.load_default()
+    return font, font_name, reason
+
+
+def render_panels(cases, selected, path, font_path=None, labels="en"):
+    """Publication panels: optional Chinese headers; query text lives in JSON.
 
     Uses the legacy eight-image row layout, with a small panel/q label gutter.
     No textual data from annotations or free-form provenance is drawn in the image.
     """
     cell_width, image_height, gutter, header, row_height = 180, 200, 110, 35, 245
-    font, font_name = choose_font(["Query Before After Best positive"], font_path, size=15)
-    if font is None:
-        print("WARNING: no suitable font; using the built-in English font for panel labels")
-        font = ImageFont.load_default()
+    if labels not in ("en", "zh"):
+        raise ValueError("panel labels must be en or zh")
+    fallback = None
+    if labels == "zh":
+        font, font_name, fallback = _chinese_panel_font(font_path)
+    else:
+        # Keep the original English font resolution and drawing path unchanged.
+        font, font_name = choose_font(["Query Before After Best positive"], font_path, size=15)
+        if font is None:
+            print("WARNING: no suitable font; using the built-in English font for panel labels")
+            font = ImageFont.load_default()
+    rendered_labels = "zh" if labels == "zh" and fallback is None else "en"
     canvas = Image.new("RGB", (gutter + cell_width * 8, header + row_height * len(cases)), "white")
     draw = ImageDraw.Draw(canvas)
-    layout = {"query_text_drawn": False, "language": "English", "dpi": 300,
+    layout = {"query_text_drawn": False, "language": "Chinese" if rendered_labels == "zh" else "English", "dpi": 300,
               "font": font_name, "canvas_size": list(canvas.size), "rows": []}
-    roles = ["Query source", "Before #1", "Before #2", "Before #3",
-             "After #1", "After #2", "After #3", "Best positive"]
+    roles = CHINESE_PANEL_HEADERS if rendered_labels == "zh" else ENGLISH_PANEL_HEADERS
+    label_metadata = ({"requested_labels": labels, "rendered_labels": rendered_labels,
+                       "column_headers": roles, "label_font_fallback": fallback} if labels == "zh" else {})
+    layout.update(label_metadata)
     for col, role in enumerate(roles):
         draw.text((gutter + col * cell_width + 5, 5), role, fill="black", font=font)
     for row, (case, selection) in enumerate(zip(cases, selected)):
@@ -212,7 +257,7 @@ def render_panels(cases, selected, path, font_path=None):
         json.dump(layout, handle, ensure_ascii=False, indent=2, allow_nan=False)
         handle.write("\n")
     return {"png": str(path.resolve()), "pdf": str(pdf.resolve()), "layout_json": str(layout_path.resolve()),
-            "font": font_name, "n_rows": len(cases), "query_text_drawn": False, "dpi": 300}
+            "font": font_name, "n_rows": len(cases), "query_text_drawn": False, "dpi": 300, **label_metadata}
 
 
 def build_parser():
@@ -222,7 +267,9 @@ def build_parser():
     parser.add_argument("--panel", action="append", default=[], help="repeatable LETTER:QUERY[,QUERY...] with optional @LABEL/POOL_NAME")
     parser.add_argument("--tag", default="selected", help="explicit-panel output tag (default: selected)")
     parser.add_argument("--out", required=True)
-    parser.add_argument("--font", help="optional font file; legacy sheets may fall back to text-free; explicit panels always draw English labels, never query text")
+    parser.add_argument("--font", help="optional font file; required for Chinese panel headers; legacy sheets may fall back to text-free; query text is never drawn in explicit panels")
+    parser.add_argument("--labels", choices=("en", "zh"), default="en",
+                        help="explicit --panel header language (default: en); zh falls back to en with a warning if --font is unavailable or lacks required glyphs")
     return parser
 
 
@@ -245,6 +292,8 @@ def main(argv=None):
             if not re.fullmatch(r"[A-Za-z0-9_-]+", args.tag):
                 raise ValueError("--tag must contain only ASCII letters, digits, underscore or hyphen")
         else:
+            if args.labels != "en":
+                raise ValueError("--labels zh requires explicit --panel rows")
             if not args.select:
                 raise ValueError("supply legacy --select JSON or explicit --panel with --pool-json")
             if args.pool_json:
@@ -263,14 +312,14 @@ def main(argv=None):
                     inputs[role] = path
                     manifest.append({"gallery_index": image["gallery_index"], "path": str(path),
                                      "sha256_16": sha256_16(path), "bytes": path.stat().st_size})
-        if args.font:
+        if args.font and (args.labels == "en" or Path(args.font).is_file()):
             inputs["font"] = args.font
         output = output_directory(args.out, inputs.values())
         run = output / ("R2_manual_figure_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + "_" + uuid.uuid4().hex[:8])
         run.mkdir()
         conditions = list(dict.fromkeys(case["correction_condition"] for case in cases))
         if args.panel:
-            rendered = render_panels(cases, selected, run / f"selected_panel_{args.tag}.png", args.font)
+            rendered = render_panels(cases, selected, run / f"selected_panel_{args.tag}.png", args.font, args.labels)
         else:
             rendered = render_cases(cases, run / "selected_panel.png", selection.get("title", "Manually selected cases"),
                                     args.font, "; ".join(conditions))
@@ -280,7 +329,8 @@ def main(argv=None):
                   "manual_selection": selected, "selection_rule": ("explicit --panel saved-case list; no metric-based selection" if args.panel
                                                                        else "explicit --select human list; no metric-based selection"),
                   "correction_conditions": conditions, "rendered": rendered, "image_input_manifest": manifest,
-                  "text_fallback": ("explicit panels draw English labels with a built-in font fallback; query text only in JSON" if args.panel
+                  "text_fallback": (("explicit panels use the requested Chinese header font or warn and fall back to English; query text only in JSON" if args.labels == "zh"
+                                     else "explicit panels draw English labels with a built-in font fallback; query text only in JSON") if args.panel
                                     else "image-only panel and exact text/layout JSON if suitable Chinese font unavailable"),
                   "readable_log": (f"Manually selected {len(cases)} cases. conditions={conditions}; query_text_drawn=False" if args.panel
                                    else f"Manually selected {len(cases)} cases. conditions={conditions}; text_enabled={rendered['text_enabled']}")}

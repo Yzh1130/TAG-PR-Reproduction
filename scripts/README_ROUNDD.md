@@ -137,12 +137,35 @@ global matplotlib settings are restored. Missing font falls back to English
 labels with a warning. Outputs are PNG (300 dpi), PDF, point CSV, JSON and log.
 Existing figure output directories are preserved with timestamped new runs.
 
+## Figure 3: explicit R2 panel labels
+
+`scripts/R2_make_figure.py --labels {en,zh}` defaults to `en`, preserving the
+existing English header layout and legacy selection JSON reader. `zh` applies
+to explicit `--panel` rows only, and uses the explicitly supplied `--font`.
+The headers are 查询源图 / 校正前#1 #2 #3 / 校正后#1 #2 #3 / 最优正样本.
+Panel letters and query indices are unchanged; query text stays in the saved
+`selected_cases_<tag>.json`, never in the image. Each row keeps the existing
+source/top-3/top-3/best-positive layout and hit/miss frames.
+
+```text
+python scripts/R2_make_figure.py --pool-json "trans=ABSOLUTE_R2_POOL_JSON" --panel "a:446@trans" --panel "b:1421@trans" --labels zh --font C:\Windows\Fonts\simhei.ttf --tag fig3_zh --out NEW_FIGURE_OUTPUT_DIRECTORY
+```
+
+Every required Chinese header glyph is checked. Missing/unusable fonts or
+missing glyphs produce a stdout warning and English headers, rather than an
+unreported substitute Chinese font. Requested/rendered languages and the
+fallback reason are recorded in the layout and audited report. Inputs and old
+outputs are not modified. Round E tests use mock pools/images only: real R2
+pool JSONs are not available locally, so real-data figures remain to be run on
+the training machine.
+
 ## Tests
 
 ```text
 python -m unittest tests.test_roundd_fig5 tests.test_roundd_tag_tables tests.test_roundd_ext_tables tests.test_roundd_collection_tables tests.test_roundd_renderer_cli -v
 python -m unittest tests.test_rounde_renderer -v
 python -m unittest tests.test_rounde_pairs -v
+python -m unittest tests.test_rounde_r2_labels tests.test_roundc_r2 -v
 python -m unittest discover -s tests -v
 ```
 
