@@ -137,9 +137,9 @@ def _rank3(row):
     return np.argsort(-np.asarray(row), kind="stable")[:3]
 
 
-def make_case(query, sim, ann, texts, root, penalty, condition):
+def make_case(query, sim, ann, texts, root, penalty, condition, alpha=.5):
     before = np.asarray(sim[query], dtype=np.float32)
-    after = before - np.float32(.5) * penalty
+    after = before - np.float32(alpha) * penalty
     predicted_before, predicted_after = _rank3(before), _rank3(after)
     positives = np.flatnonzero(ann.gallery_ids == ann.query_ids[query])
     best_positive = int(positives[np.argmax(before[positives])])
@@ -161,15 +161,18 @@ def make_case(query, sim, ann, texts, root, penalty, condition):
             "correction_condition": condition}
 
 
-def analyze(sim, bank, ann, records, areas, root, s13, seed=2026, cases_per_pool=30):
+def analyze(sim, bank, ann, records, areas, root, s13, seed=2026, cases_per_pool=30,
+            inductive_alpha=.5, inductive_k=10, bank_label=None, bank_info=None):
     if seed < 0 or cases_per_pool < 1:
         raise ValueError("seed must be nonnegative; cases per pool positive")
-    if bank.ndim != 2 or bank.shape[1] != sim.shape[1] or bank.shape[0] < 10:
-        raise ValueError("bank needs >=10 rows and the same gallery columns as sim")
+    if not np.isfinite(inductive_alpha) or inductive_alpha < 0 or type(inductive_k) is not int or inductive_k < 1:
+        raise ValueError("inductive alpha must be finite/nonnegative and k a positive integer")
+    if bank.ndim != 2 or bank.shape[1] != sim.shape[1] or bank.shape[0] < inductive_k:
+        raise ValueError(f"bank needs >={inductive_k} rows and the same gallery columns as sim")
     raw = evaluate(sim, ann)
-    transductive_penalty, inductive_penalty = topk_mean(sim, 10), topk_mean(bank, 10)
+    transductive_penalty, inductive_penalty = topk_mean(sim, 10), topk_mean(bank, inductive_k)
     transductive = evaluate(sim, ann, penalty=transductive_penalty, alpha=.5)
-    inductive = evaluate(sim, ann, penalty=inductive_penalty, alpha=.5)
+    inductive = evaluate(sim, ann, penalty=inductive_penalty, alpha=inductive_alpha)
     c = s13["configurations"]["c"]
     if (c["bank"], c["alpha"], c["k"]) != ("test_full", .5, 10):
         raise ValueError("S13 configuration c must be test_full alpha=.5 k=10")
@@ -204,8 +207,11 @@ def analyze(sim, bank, ann, records, areas, root, s13, seed=2026, cases_per_pool
         selected = np.sort(rng.choice(candidates, size=min(cases_per_pool, len(candidates)), replace=False))
         is_inductive = name.startswith("inductive")
         penalty = inductive_penalty if is_inductive else transductive_penalty
-        condition = ("training-text bank CSLS alpha=.5 k=10" if is_inductive else "complete-test-query transductive CSLS alpha=.5 k=10")
-        cases = [make_case(int(q), sim, ann, attrs["texts"], root, penalty, condition) for q in selected]
+        condition = (("training-text bank CSLS alpha=.5 k=10" if inductive_alpha == .5 and inductive_k == 10
+                      else f"training-text bank CSLS alpha={inductive_alpha:g} k={inductive_k}")
+                     if is_inductive else "complete-test-query transductive CSLS alpha=.5 k=10")
+        cases = [make_case(int(q), sim, ann, attrs["texts"], root, penalty, condition,
+                           inductive_alpha if is_inductive else .5) for q in selected]
         pools[name] = {"candidate_count": len(candidates), "candidate_query_indices": candidates.tolist(),
                        "selected_count": len(selected), "seed": pool_seed,
                        "selected_query_indices": selected.tolist(), "cases": cases,
@@ -213,9 +219,12 @@ def analyze(sim, bank, ann, records, areas, root, s13, seed=2026, cases_per_pool
                        "correction_condition": condition}
     return {"tool": "R2_hard_case_pool", "status": "complete",
             "raw": compact_metrics(raw), "transductive": compact_metrics(transductive),
-            "inductive": compact_metrics(inductive), "annotation": ann.summary,
-            "training_bank_provenance_note": s13.get("training_bank_provenance_note",
-                "A training-bank label alone does not certify query independence; retain the supplying S12/E3 extraction JSON."),
+            "inductive": {**compact_metrics(inductive), "alpha": inductive_alpha, "k": inductive_k,
+                          "bank": bank_info, "bank_label": bank_label}, "annotation": ann.summary,
+            "training_bank_provenance_note": (f"User-supplied bank label: {bank_label}. "
+                "This label alone does not certify query independence; retain the supplying extraction JSON."
+                if bank_label is not None else s13.get("training_bank_provenance_note",
+                "A training-bank label alone does not certify query independence; retain the supplying S12/E3 extraction JSON.")),
             "inductive_label_scope": "training-text-bank correction; an S12 test-fitted W bank remains an offline simulation",
             "parity_gate": {"S13_configuration": "c", "passed_exact_R1": True, "expected_R1": expected,
                             "actual_R1": transductive["R1"], "raw_exact_R1": True},
@@ -240,6 +249,9 @@ def build_parser():
     parser.add_argument("--cases-per-pool", type=int, default=30)
     parser.add_argument("--sheet-page-size", type=int, default=6)
     parser.add_argument("--font", help="optional explicit font file; otherwise probe installed fonts")
+    parser.add_argument("--inductive-alpha", type=float, default=.5)
+    parser.add_argument("--inductive-k", type=int, default=10)
+    parser.add_argument("--bank-label", default=None, help="user-supplied provenance label, not a certification of query independence")
     return parser
 
 
@@ -259,7 +271,15 @@ def main(argv=None):
         with Path(args.s13_json).open(encoding="utf-8-sig") as handle:
             s13 = json.load(handle)
         _, areas, manifest = read_image_sizes(ann, args.image_root)
-        report = analyze(sim, bank, ann, records, areas, args.image_root, s13, args.seed, args.cases_per_pool)
+        try:
+            from ._analysis_audit import sha256_16
+        except ImportError:
+            from _analysis_audit import sha256_16
+        bank_path = Path(args.bank).expanduser().resolve()
+        bank_info = {"path": str(bank_path), "bytes": bank_path.stat().st_size,
+                     "sha256_16": sha256_16(bank_path)}
+        report = analyze(sim, bank, ann, records, areas, args.image_root, s13, args.seed, args.cases_per_pool,
+                         args.inductive_alpha, args.inductive_k, args.bank_label, bank_info)
         run = output / ("R2_case_sheets_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + "_" + uuid.uuid4().hex[:8])
         run.mkdir()
         for name, pool in report["pools"].items():
