@@ -145,6 +145,7 @@ cython_debug/
 ckpts/
 logs/
 *.log
+/roundA_logs/
 
 # TAG-PR local data and experiment artifacts
 config/config.local.yaml

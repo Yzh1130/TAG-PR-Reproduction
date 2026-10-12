@@ -9,6 +9,7 @@ import argparse
 import json
 import math
 from pathlib import Path
+import re
 import tempfile
 
 import numpy as np
@@ -159,13 +160,42 @@ def compare_evaluation(old_dir, new_dir, block_size=256):
             "note": "No provenance-byte comparison, numerical tolerance, router change or seed retry."}
 
 
-def read_trace(path):
-    result = []
+def read_trace(path, with_calibration=False):
+    """Read the whole trace; with_calibration controls evidence return shape only."""
+    result, calibration_skips = [], []
+    next_it = 0
     with Path(path).open(encoding="utf-8") as handle:
-        for line in handle:
+        for line_number, line in enumerate(handle, 1):
             if "DEBUG SKIPPED" in line:
-                raise ValueError(f"{path}: GradScaler skipped an overflow iteration; "
-                                 "the no-NaN/Inf short-run gate cannot pass")
+                if result:
+                    raise ValueError(f"{path}:{line_number}: GradScaler skip after the "
+                                     "first successful update is not allowed")
+                match = re.search(r"DEBUG SKIPPED overflow at iteration=(\d+)(.*)$", line.strip())
+                if match is None:
+                    raise ValueError(f"{path}:{line_number}: malformed DEBUG SKIPPED event")
+                logged_iteration = int(match.group(1))
+                # SKIPPED is logged after it += 1; DEBUG ITER captures it before.
+                iteration = logged_iteration - 1
+                if iteration != next_it:
+                    raise ValueError(f"{path}:{line_number}: calibration skips must be "
+                                     "contiguous from logged iteration=1")
+                scale_fields = {}
+                # Current training logs have no scales. Record only explicit
+                # fields if supplied; never infer defaults or presumed halving.
+                for field in match.group(2).strip().split():
+                    scale_match = re.fullmatch(r"(scale|scale_before|scale_after)=([^\s]+)", field)
+                    if scale_match is None or scale_match.group(1) in scale_fields:
+                        raise ValueError(f"{path}:{line_number}: unsupported/duplicate skip field {field!r}")
+                    value = float(scale_match.group(2))
+                    if not math.isfinite(value) or value <= 0:
+                        raise ValueError(f"{path}:{line_number}: invalid logged scale")
+                    scale_fields[scale_match.group(1)] = value
+                calibration_skips.append({
+                    "logged_iteration": logged_iteration, "it": iteration,
+                    "scale": scale_fields if scale_fields else "scale_not_logged",
+                })
+                next_it += 1
+                continue
             marker = "DEBUG ITER "
             if marker not in line:
                 continue
@@ -177,9 +207,22 @@ def read_trace(path):
             missing = set(TRACE_KEYS) - record.keys()
             if missing:
                 raise ValueError(f"{path}: missing trace fields {sorted(missing)}")
+            if type(record["it"]) is not int or record["it"] != next_it:
+                raise ValueError(f"{path}:{line_number}: successful iteration must be "
+                                 f"contiguous; expected it={next_it}, got {record['it']!r}")
             result.append(record)
+            next_it += 1
     if not result:
         raise ValueError(f"{path}: no DEBUG ITER trace; run the Round A debug path")
+    if with_calibration:
+        return result, {
+            "count": len(calibration_skips), "events": calibration_skips,
+            "first_successful_update": {
+                "update": result[0]["update"], "it": result[0]["it"],
+                "iteration_1based": result[0]["it"] + 1,
+            },
+            "post_first_success_skip_count": 0,
+        }
     return result
 
 
@@ -200,13 +243,18 @@ def validate_trace(records, expected_updates, expected_block):
 
 
 def compare_training(old_log, new_log, expected_updates):
-    baseline, blocked = read_trace(old_log), read_trace(new_log)
+    baseline, calibration0 = read_trace(old_log, with_calibration=True)
+    blocked, calibration80 = read_trace(new_log, with_calibration=True)
     validate_trace(baseline, expected_updates, 0)
     validate_trace(blocked, expected_updates, 80)
     # Different candidates deliberately change losses and gradient norms.
     # Only the unchanged schedule/protocol fields are exact parity targets.
     keys = ("it", "epoch", "lr", "alpha", "niter_per_ep", "loss_weights")
     differences = []
+    calibration_equal = calibration0["events"] == calibration80["events"]
+    if not calibration_equal:
+        differences.append({"field": "calibration_skips", "block0": calibration0["events"],
+                            "block80": calibration80["events"]})
     for number, (left, right) in enumerate(zip(baseline, blocked), 1):
         for key in keys:
             if left[key] != right[key]:
@@ -214,8 +262,21 @@ def compare_training(old_log, new_log, expected_updates):
                                     "block0": left[key], "block80": right[key]})
     return {"status": "PASS" if not differences else "FAIL", "gate": "short_training_protocol",
             "updates_per_run": expected_updates, "block_sizes": [0, 80],
-            "finite": True, "exactly_compared": list(keys),
+            "finite": True, "finite_scope": "successful_optimizer_updates_only",
+            "exactly_compared": list(keys),
             "differences": differences,
+            "numbering_convention": {
+                "canonical": "zero-based attempted iteration: it",
+                "DEBUG_SKIPPED": "logged iteration is post-increment; it = logged_iteration - 1",
+                "DEBUG_ITER": "it is captured pre-increment; already zero-based",
+                "human_iteration": "it + 1",
+            },
+            "calibration_skips": {
+                "rule": "only matching skips before the first successful update are allowed",
+                "matched": calibration_equal,
+                "block0": calibration0, "block80": calibration80,
+                "scale_evidence": "scale_not_logged means unavailable; no numerical scales were inferred",
+            },
             "losses_or_gradients_required_equal": False}
 
 
@@ -287,15 +348,89 @@ def run_mock():
             nonfinite_failure = True
         else:
             raise AssertionError("nonfinite trace was not rejected")
-        records[1]["finite"] = True
-        log_paths[1].write_text("DEBUG SKIPPED overflow at iteration=0\n" +
-            "\n".join("DEBUG ITER " + json.dumps(row) for row in records), encoding="utf-8")
+        def write_calibration_trace(path, block, count=6, scale_fields=""):
+            mock_records = [{
+                "update": i, "it": count + i - 1, "epoch": 0, "lr": [1e-4 * i],
+                "alpha": i / 10, "niter_per_ep": 20, "itc_block_size": block,
+                "loss_weights": {"nitc_ratio": 1.0}, "losses": {"itc_loss": float(i)},
+                "total_loss": float(i), "grad_norm": 0.5 * i, "finite": True,
+            } for i in range(1, 4)]
+            lines = [f"DEBUG SKIPPED overflow at iteration={i}{scale_fields}"
+                     for i in range(1, count + 1)]
+            lines.extend("DEBUG ITER " + json.dumps(row) for row in mock_records)
+            path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+        def require_rejected(text):
+            log_paths[1].write_text(text, encoding="utf-8")
+            try:
+                compare_training(*log_paths, 3)
+            except ValueError:
+                return True
+            raise AssertionError("invalid training trace was not rejected")
+
+        for path, block in zip(log_paths, (0, 80)):
+            write_calibration_trace(path, block)
+        calibration = compare_training(*log_paths, 3)
+        assert calibration["status"] == "PASS" and calibration["calibration_skips"]["matched"]
+        for name in ("block0", "block80"):
+            evidence = calibration["calibration_skips"][name]
+            assert evidence["count"] == 6
+            assert [event["logged_iteration"] for event in evidence["events"]] == list(range(1, 7))
+            assert [event["it"] for event in evidence["events"]] == list(range(6))
+            assert all(event["scale"] == "scale_not_logged" for event in evidence["events"])
+            assert evidence["first_successful_update"] == {"update": 1, "it": 6, "iteration_1based": 7}
+        valid_text = log_paths[1].read_text(encoding="utf-8")
+        write_calibration_trace(log_paths[1], 80, count=5)
+        calibration_difference = compare_training(*log_paths, 3)
+        assert calibration_difference["status"] == "FAIL"
+        assert calibration_difference["differences"][0]["field"] == "calibration_skips"
+        invalid_checks = {
+            "post_success_skip_rejected": require_rejected(valid_text.replace(
+                'DEBUG ITER {"update": 2', 'DEBUG SKIPPED overflow at iteration=8\nDEBUG ITER {"update": 2')),
+            "skip_after_final_success_rejected": require_rejected(
+                valid_text + "DEBUG SKIPPED overflow at iteration=10\n"),
+            "invalid_skip_number_rejected": require_rejected(valid_text.replace("iteration=1\n", "iteration=0\n")),
+            "duplicate_skip_rejected": require_rejected(valid_text.replace("iteration=2\n", "iteration=1\n")),
+            "skip_gap_rejected": require_rejected(valid_text.replace("iteration=2\n", "iteration=3\n")),
+            "first_success_number_mismatch_rejected": require_rejected(valid_text.replace('"it": 6', '"it": 5')),
+            "success_gap_rejected": require_rejected(valid_text.replace('"it": 7', '"it": 8')),
+            "malformed_skip_rejected": require_rejected(valid_text.replace("iteration=1\n", "iteration=unknown\n")),
+        }
+        # All unchanged schedule fields still require exact equality after calibration.
+        schedule_fields = {}
+        for field, replacement in (("epoch", 1), ("lr", [4e-4]), ("alpha", 0.75),
+                                   ("niter_per_ep", 21), ("loss_weights", {"nitc_ratio": 0.5})):
+            lines = valid_text.splitlines()
+            record = json.loads(lines[7].split("DEBUG ITER ", 1)[1])
+            record[field] = replacement
+            lines[7] = "DEBUG ITER " + json.dumps(record)
+            log_paths[1].write_text("\n".join(lines), encoding="utf-8")
+            difference = compare_training(*log_paths, 3)
+            assert difference["status"] == "FAIL"
+            assert any(item["field"] == field for item in difference["differences"])
+            schedule_fields[field] = True
+        assert require_rejected(valid_text.replace('"finite": true', '"finite": false', 1))
+        assert require_rejected(valid_text.replace('"grad_norm": 0.5', '"grad_norm": NaN', 1))
+        assert require_rejected(valid_text.replace('"update": 2', '"update": 3', 1))
         try:
-            compare_training(*log_paths, 3)
+            log_paths[1].write_text(valid_text, encoding="utf-8")
+            compare_training(*log_paths, 2)
         except ValueError:
-            overflow_failure = True
+            wrong_update_count_rejected = True
         else:
-            raise AssertionError("skipped overflow was not rejected")
+            raise AssertionError("wrong successful update count was not rejected")
+        # These are explicitly logged mock scales, not guesses about the real logs.
+        for path, block in zip(log_paths, (0, 80)):
+            write_calibration_trace(path, block, scale_fields=" scale_before=64 scale_after=32")
+        logged_scales = compare_training(*log_paths, 3)
+        assert logged_scales["status"] == "PASS"
+        assert logged_scales["calibration_skips"]["block0"]["events"][0]["scale"] == {
+            "scale_before": 64.0, "scale_after": 32.0,
+        }
+        write_calibration_trace(log_paths[1], 80, scale_fields=" scale_before=64 scale_after=16")
+        assert compare_training(*log_paths, 3)["status"] == "FAIL"
+        write_calibration_trace(log_paths[1], 80)
+        assert compare_training(*log_paths, 3)["status"] == "FAIL"
     return {"status": "PASS", "scope": "CPU mock only", "seed": 2026,
             "similarity_shape": [200, 100], "identical_eval": identical["status"],
             "one_ulp_matrix_difference_detected": divergent["status"] == "FAIL",
@@ -303,7 +438,16 @@ def run_mock():
             "full_precision_metric_difference_detected": metric_difference["status"] == "FAIL",
             "schedule_difference_detected": schedule_difference["status"] == "FAIL",
             "nonfinite_trace_rejected": nonfinite_failure,
-            "skipped_overflow_rejected": overflow_failure,
+            "matched_initial_calibration_allowed": calibration["status"] == "PASS",
+            "missing_scales_explicitly_recorded": True,
+            "calibration_count_difference_detected": calibration_difference["status"] == "FAIL",
+            **invalid_checks,
+            "schedule_checks_after_calibration": schedule_fields,
+            "nonfinite_after_calibration_rejected": True,
+            "nonsequential_update_rejected": True,
+            "wrong_update_count_rejected": wrong_update_count_rejected,
+            "explicit_logged_scales_preserved_and_compared": True,
+            "one_sided_scale_evidence_rejected": True,
             "mock_short_train_gate": train,
             "training_machine_AB_or_short_training_executed": False}
 

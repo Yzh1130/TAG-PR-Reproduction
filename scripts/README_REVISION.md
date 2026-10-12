@@ -67,7 +67,9 @@ bash scripts/revision/short_train_check.sh "$CONFIG" 0 3
 
 比较器要求两边恰好完成 N 次更新，损失/梯度有限；LR、alpha、iteration/epoch、每轮迭代数和损失权重逐步相同。两种候选集合的损失与梯度允许不同，不作为等价目标。再检查两边 `final_results.txt` 中 `run_status: debug_stopped` 与指定 N，且不存在未标记的 `checkpoint_best.pth`。启动器正常退出才会继续比较。
 
-若出现 `DEBUG SKIPPED` 的 GradScaler overflow，比较器明确失败；它不会只比较后续成功更新而把已发生的非有限梯度隐藏为“无 NaN/Inf”。日志仍保留供诊断，不调整 loss scale 或重试以迁就闸门。
+仅允许**首次成功优化更新之前**的 GradScaler 初始校准跳过，且两边跳过次数、逐条迭代号必须完全一致。比较器统一采用从零开始的 attempted iteration `it`：`DEBUG SKIPPED` 在 `it += 1` 后打印，故 `it = logged_iteration - 1`；`DEBUG ITER` 在递增前采集，原 `it` 不变。初始跳过必须从原日志 `iteration=1` 连续开始，随后成功更新的 `it` 也须连续；编号约定、两边逐条跳过记录、首次成功更新位置都写入比较 JSON。
+
+现有日志未记录 loss scale，逐条写入 `"scale_not_logged"`，不从默认值或假定减半规律推算。若输入日志显式带有 `scale` / `scale_before` / `scale_after` 字段，保存并逐条比较；单边缺失或数值不同不通过。**首次成功更新之后出现任何 `DEBUG SKIPPED`（包括最后一条成功更新之后）仍失败**。原有 N 次成功更新、LR、alpha、iteration/epoch、每轮迭代数、损失权重逐步一致及成功更新的 finite/数值有限检查均保持；通过不表示此前被跳过的梯度有限，也不证明未记录的 scale 相同。只重新比较已有日志，不改训练代码、GradScaler 参数或日志格式，不重跑训练。
 
 ```bash
 python scripts/revision/compare_eval_outputs.py train \
@@ -114,7 +116,7 @@ bash scripts/revision/ab_eval_gate.sh --help
 bash scripts/revision/short_train_check.sh --help
 ```
 
-comparator mock 使用 seed 2026 的 `200×100` 合成矩阵，验证完全相同值通过、一个 ULP 差异失败和三步合成日志的日程检查；mock 输出明确标记 CPU mock，不冒充真实训练机运行。shell 的 `--help` 和语法检查不运行 GPU。
+comparator mock 使用 seed 2026 的 `200×100` 合成矩阵，验证完全相同值通过、一个 ULP 差异失败和三步合成日志的日程检查；另覆盖相同初始校准跳过通过、次数/编号/scale 证据不同失败、成功后任意跳过失败，以及校准后原有日程/finite 检查。mock 输出明确标记 CPU mock，不冒充真实训练机运行。shell 的 `--help` 和语法检查不运行 GPU。
 
 实际 F6 的 A/B 闸门与短程训练日志/比较 JSON 必须由训练机运行后归档。多进程 B>0 尚未验证；显式放行只是未来实验入口。完整评测路由种子的复现条件还包括依赖/GPU/AMP/TF32、相同 checkpoint/config/数据顺序和 worker 设置，详见 DDP 审计；源码检查本身不证明这些运行条件已全部满足。
 
@@ -167,10 +169,28 @@ F4b actual CPU main loop: exit=0, updates=3, formal schedule[:3] exact
 D4 CPU: checkpoint contains model/optimizer/config/epoch/model_ema; final SHA256 recorded
 F5 MOCK: 200x100, two routers, 21 complete forwards, 14 original Gumbel calls/draw
   run_real mock gallery/train paths: head rows=11, hashes/source/provenance/errors PASS
-F6 comparator CPU mock: PASS; ULP/prediction/metric/LR/nonfinite/overflow differences rejected
+F6 comparator CPU mock: PASS; ULP/prediction/metric/LR/nonfinite differences rejected
+  matched initial calibration skips allowed; mismatched calibration or later skips rejected
 F6 real A/B gate and short GPU training: NOT RUN; waiting for training machine
 ```
 
 默认训练没有新增种子重置：原有 `set_seed(config)` 位置保持；新增四种 seed
 调用仅位于 `set_evaluation_seed`，其调用受 `eval_only and eval_seed is not None`
 限制。F4 同时执行冻结基线与当前入口验证调用次数，并检查训练 RNG 状态。
+
+## 已有训练机日志的重新比较（2026-10-12）
+
+本次只读取提供的 `roundA_logs/block0.log` 与 `block80.log`，没有重跑训练。
+两边均为六次初始 `DEBUG SKIPPED iteration=1..6`，未记录 scale；首个成功
+更新均为 `update=1, it=6`（第七次 attempted iteration）。此后各三十次
+`DEBUG ITER` 均 finite，无再次跳过；所有参数组 LR、alpha、iteration/epoch、
+每轮迭代数和损失权重逐步完全相同。比较器的新规则只接受这一匹配的校准前缀。
+日志与新的比较 JSON 保存在被忽略的 `roundA_logs/`，不提交原始运行日志。
+
+```bash
+python scripts/revision/compare_eval_outputs.py train \
+  --old-log roundA_logs/block0.log --new-log roundA_logs/block80.log \
+  --expected-updates 30 --out roundA_logs/comparison_calibration_NEW_TIMESTAMP.json
+```
+
+`NEW_TIMESTAMP` 替换为本次时间戳；输出文件必须不存在，禁止覆盖旧证据。
