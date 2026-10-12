@@ -127,6 +127,8 @@ def build_parser():
                         default=argparse.SUPPRESS,
                         metavar="BANK:ALPHA:K",
                         help="append d/e/... after unchanged a/b/c; repeatable; BANK is train_full or test_full (e.g. train_full:0.5:10)")
+    parser.add_argument("--summary-table", nargs="?", const="auto", default=argparse.SUPPRESS,
+                        metavar="JSON", help="optionally write a separate four-metric/identity-CI table; omitted path: new file under --out; unchanged a/b/c retained")
     return parser
 
 
@@ -297,6 +299,37 @@ def print_results(report):
     print("S13 p: two-sided bootstrap sign-tail probability (+1 correction), NOT a null-bootstrap p-value.")
 
 
+def build_summary_table(sim, bank, ann, bootstrap=10000, seed=2026, block_size=256):
+    """One model/matrix, fixed paired settings; no selection from test results."""
+    raw = evaluate(sim, ann)
+    settings = (("inductive_default", "train_full", 0.5, 10),
+                ("inductive_075_30", "train_full", 0.75, 30),
+                ("transductive_k10", "test_full", 0.5, 10))
+    train_top = topk_values(bank, 30, block_size=block_size)
+    test_top = topk_values(sim, 10, block_size=block_size)
+    fields = ("R1", "R5", "R10", "mAP")
+    rows = [{"setting": "uncorrected", "bank": None, "alpha": None, "k": None,
+             "metrics": {key: raw[key] for key in fields}, "delta_R1_pp": 0.0,
+             "identity_bootstrap": None}]
+    for label, bank_name, alpha, k in settings:
+        top = train_top if bank_name == "train_full" else test_top
+        penalty = top[:k].mean(axis=0, dtype=np.float32)
+        result = evaluate(sim, ann, penalty=penalty, alpha=alpha)
+        if not np.array_equal(raw["details"]["query_indices"], result["details"]["query_indices"]):
+            raise ValueError("summary-table requires the identical ordered query set")
+        stats = paired_test(raw["details"]["correct"], result["details"]["correct"],
+                            groups=ann.query_ids[raw["details"]["query_indices"]], repeats=bootstrap, seed=seed)
+        rows.append({"setting": label, "bank": bank_name, "alpha": alpha, "k": k,
+                     "metrics": {key: result[key] for key in fields},
+                     "delta_R1_pp": stats["observed_delta_pp"], "identity_bootstrap": stats})
+    return {"status": "complete", "rows": rows, "n_query": len(ann.query_ids),
+            "n_gallery": len(ann.gallery_ids), "formula": "S - alpha*mean(top-k(bank[:,g]))",
+            "calibration_frozen_before_bootstrap": True, "source_image_exclusion": False,
+            "selection_from_test_metrics": False,
+            "interval_scope": "paired whole-identity percentile CI; conditional on each supplied matrix and fixed bank",
+            "a_b_c_legacy_configurations_changed": False}
+
+
 class _Tee:
     def __init__(self, first, second):
         self.first, self.second = first, second
@@ -339,6 +372,26 @@ def main(argv=None):
                                        fresh_bank="_fresh" in Path(args.bank).name.lower()))
             report["status"] = "complete_with_warnings" if report["warnings"] else "complete"
             print_results(report)
+            if hasattr(args, "summary_table"):
+                try:
+                    from .R1_joint_enrichment import write_audited_report
+                except ImportError:
+                    from R1_joint_enrichment import write_audited_report
+                table = build_summary_table(sim, bank, ann, args.bootstrap, args.seed, args.score_block_size)
+                table.update(model_tag=args.tag, fresh_bank_filename="_fresh" in Path(args.bank).name.lower(),
+                             training_bank_provenance_note=report["training_bank_provenance_note"])
+                summary_args = argparse.Namespace(**vars(args))
+                safe_tag = "".join(c if c.isalnum() or c in "_.-" else "_" for c in args.tag)
+                summary_args.out = (str(output / f"S13_{safe_tag}_summary_table.json")
+                                    if args.summary_table == "auto" else args.summary_table)
+                paths = write_audited_report(summary_args, "S13_summary_table", table,
+                                            dict(sim=args.sim, bank=args.bank, anno=args.anno),
+                                            {"bootstrap": args.seed}, argv)
+                report["summary_table_file"] = str(paths[0])
+                print_table(("summary setting", "R1", "R5", "R10", "mAP", "delta_R1_pp", "identity_CI95_pp"),
+                            [[row["setting"], *[row["metrics"][key] for key in ("R1", "R5", "R10", "mAP")],
+                              row["delta_R1_pp"], row["identity_bootstrap"]["ci95_percentile_pp"]
+                              if row["identity_bootstrap"] else None] for row in table["rows"]])
         except Exception as exc:
             failure = exc
             report["status"], report["error"] = "stopped", f"{type(exc).__name__}: {exc}"

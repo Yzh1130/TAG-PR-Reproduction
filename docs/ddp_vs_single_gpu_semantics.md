@@ -212,3 +212,34 @@ Gumbel 不是通过 `self.training` 自动关闭的层，传 `training=False` �
 **尚未证明：** 单卡320与4卡×80的全部参数梯度/BN buffers/更新完全一致；4卡无 gather 与连续分块候选一致；梯度累积与单次完整前向一致；各机器不同精度 backend 的结果逐位一致。要比较必须固定并实际核查特征与 BN 状态、采样索引/顺序及补齐、局部归一分母、随机流/增强/worker、AMP scaling/overflow、候选侧 autograd、DDP 归约、优化步与调度、评测权重和 RNG 来源。
 
 前向损失值相同只验证该次数值输出；不能据此推断这些条件成立或全部梯度相同。本轮 D1 单进程固定特征的独立块参考测试若通过，仅证明它覆盖的损失与参数梯度关系，不构成未运行多进程路径的证据。
+
+## D8. Round B：原作者 TSE BatchNorm 的只读核查
+
+核查基线 `8622dc2540fb28e20c4c344204ef75603c8f3b3b`。原作者 TSE 实现位于
+`model/CrossEmbeddingLayer_tse.py:45-54`，定义的是普通 `nn.BatchNorm1d`，
+不是 `nn.SyncBatchNorm`；训练时先把本 rank 的 token 特征由 `[B,N,D]`
+reshape 为 `[B*N,D]`，再做第一层 BN。最后一层虽然声明 BN，但不调用。
+文本/图像调用分别在同文件 `:90` / `:122`。
+
+```python
+# model/CrossEmbeddingLayer_tse.py:45-54
+h = [hidden_dim] * (num_layers - 1)
+self.layers = nn.ModuleList(nn.Linear(n, k) for n, k in zip([input_dim] + h, h + [output_dim]))
+self.bns = nn.ModuleList(nn.BatchNorm1d(k) for k in h + [output_dim])
+
+def forward(self, x):
+    B, N, D = x.size()
+    x = x.reshape(B * N, D)
+    for i, (bn, layer) in enumerate(zip(self.bns, self.layers)):
+        x = F.relu(bn(layer(x))) if i < self.num_layers - 1 else layer(x)
+```
+
+`main.py:1822-1827` 直接包装 `DistributedDataParallel(...,
+find_unused_parameters=True)`。模型/训练入口没有 `SyncBatchNorm`、
+`convert_sync_batchnorm` 或跨进程合并 TSE BN batch 统计的操作。
+原有可微 all-gather 用于损失候选，不在上述 BN 内。
+
+因此：**4 卡×80 时每卡 BN 统计只覆盖本卡样本，单卡 320 时覆盖全批**。
+更准确地说，覆盖对应图像/文本选中 token 的 `B*N` 行。
+DDP 默认 buffer 广播不是当前 batch 统计的跨卡聚合。
+这是源码语义结论，没有进行多 GPU 试验，不作任何性能影响推断。

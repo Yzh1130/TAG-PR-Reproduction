@@ -1,17 +1,28 @@
-import os, sys, json, glob, hashlib, resource, subprocess, time, numpy as np
+import os, sys, json, glob, hashlib, subprocess, time, numpy as np
 ROOT = "/root/autodl-tmp/TAG-PR/experiments_ext"; OUT = "/root/autodl-tmp/_e_ext/s7a"
 ALPHA, K, NBOOT, SEED, CHUNK, BANK_CHUNK = 0.5, 10, 10000, 2026, 2048, 4096
-t0 = time.time()
+
+from pathlib import Path
+try:
+    from .S7_aggregate_seeds import (
+        common_parser, parse_common, select_runs, result_directory, output_name,
+        save_npy, save_npz, write_json, provenance, run_inputs, peak_rss_gb,
+        logged_rss, load_s7a_artifact,
+    )
+except ImportError:
+    from S7_aggregate_seeds import (
+        common_parser, parse_common, select_runs, result_directory, output_name,
+        save_npy, save_npz, write_json, provenance, run_inputs, peak_rss_gb,
+        logged_rss, load_s7a_artifact,
+    )
+
+
 def sha16(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()[:16]
+
 def log(*a): print(*a, flush=True)
 
 def run_dirs():
-    out = []
-    for d in sorted(glob.glob(ROOT + "/*")):
-        if not os.path.exists(d + "/meta.json"): continue
-        m = json.load(open(d + "/meta.json"))
-        if m.get("epoch") == 10 and m["split"] == "test": out.append((d, m))
-    return out
+    return SELECTED_RUNS
 
 def running_topk_mean(row_iter, ng):
     top = np.full((K, ng), -np.inf, np.float32)
@@ -65,46 +76,72 @@ def boot(c_base, c_new, clusters):
     lo, hi = np.percentile(dl, [2.5, 97.5])
     return {"ci95": [round(float(lo), 3), round(float(hi), 3)], "n_clusters": int(m), "excludes_zero": bool(lo > 0 or hi < 0)}
 
-summary = {"alpha": ALPHA, "k": K, "nboot": NBOOT, "seed": SEED, "argv": sys.argv,
-           "git_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd="/root/autodl-tmp/TAG-PR").decode().strip(),
-           "datasets": {}}
-for d, m in run_dirs():
-    ds = m["dataset"]; log("\n" + "=" * 78 + "\n### %s  (%s)" % (ds, os.path.basename(d)))
-    S = np.load(d + "/sim_qg.npy", mmap_mode="r"); nq, ng = S.shape
-    qpid = np.asarray(m["query_pid"]); gpid = np.asarray(m["gallery_pid"])
-    res = {"run": os.path.basename(d), "nq": nq, "ng": ng,
-           "inputs_sha16": {"sim_qg": sha16(d + "/sim_qg.npy"), "meta": sha16(d + "/meta.json")}}
-    f0, ap0, t10 = evaluate(S, None, qpid, gpid, "base"); mb = metrics(f0, ap0); res["baseline"] = mb
-    on = m.get("metrics", {}); diff = {k: round(mb[k] - float(on.get(k, np.nan)), 4) for k in mb if k in on}
-    res["baseline_vs_online_diff"] = diff; res["baseline_hub"] = hub(t10, ng)
-    log("  baseline offline: %s" % {k: round(v, 3) for k, v in mb.items()})
-    log("  baseline online : %s" % {k: round(float(v), 3) for k, v in on.items()})
-    log("  diff            : %s   %s" % (diff, "OK" if all(abs(v) < 0.02 for v in diff.values()) else "!! MISMATCH"))
-    per_query = {"first_rank_base": f0, "ap_base": ap0, "top1_base": t10}
-    for mode in ("transductive", "inductive"):
-        if mode == "transductive": r = r_transductive(S); bank_n = nq
-        else: r, bank_n = r_inductive(d, ng)
-        f1, ap1, t11 = evaluate(S, r, qpid, gpid, mode[:5]); mc = metrics(f1, ap1)
-        cb, cn = (f0 < 1).astype(np.float64), (f1 < 1).astype(np.float64)
-        entry = {"metrics": mc, "delta": {k: round(mc[k] - mb[k], 3) for k in mc}, "bank_size": bank_n,
-                 "boot_identity": boot(cb, cn, qpid), "boot_query": boot(cb, cn, np.arange(nq)), "hub_after": hub(t11, ng)}
-        res[mode] = entry
-        per_query["first_rank_" + mode] = f1; per_query["ap_" + mode] = ap1; per_query["top1_" + mode] = t11
-        np.save(f"{OUT}/{ds}_r_{mode}.npy", r)
-        log("  %-12s r1=%.2f (Δ%+.2f) r5=%.2f r10=%.2f mAP=%.2f | idCI %s%s | qCI %s | distinct %.3f→%.3f maxT1 %d→%d | bank=%d"
-            % (mode, mc["r1"], entry["delta"]["r1"], mc["r5"], mc["r10"], mc["mAP"],
-               entry["boot_identity"]["ci95"], "*" if entry["boot_identity"]["excludes_zero"] else "",
-               entry["boot_query"]["ci95"], res["baseline_hub"]["distinct_top1_ratio"], entry["hub_after"]["distinct_top1_ratio"],
-               res["baseline_hub"]["max_top1_count"], entry["hub_after"]["max_top1_count"], bank_n))
-    np.savez_compressed(f"{OUT}/{ds}_per_query.npz", qpid=qpid, gpid=gpid, **per_query)
-    summary["datasets"][ds] = res
-summary["peak_rss_gb"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
-summary["elapsed_sec"] = round(time.time() - t0, 1)
-json.dump(summary, open(f"{OUT}/S7a_summary.json", "w"), indent=2)
-log("\n=== S7a SUMMARY (transductive ΔR@1, ordered) ===")
-for ds, r in sorted(summary["datasets"].items(), key=lambda kv: -kv[1]["transductive"]["delta"]["r1"]):
-    log("  %-10s base=%6.2f  trans Δ=%+.2f %s  ind Δ=%+.2f %s"
-        % (ds, r["baseline"]["r1"], r["transductive"]["delta"]["r1"], r["transductive"]["boot_identity"]["ci95"],
-           r["inductive"]["delta"]["r1"], r["inductive"]["boot_identity"]["ci95"]))
-log("peak RSS %.2f GB  (%s)  elapsed %ss" % (summary["peak_rss_gb"], "OK" if summary["peak_rss_gb"] < 8 else "!! EXCEEDS 8GB LIMIT", summary["elapsed_sec"]))
-log("wrote", f"{OUT}/S7a_summary.json")
+def main(argv=None):
+    global ROOT, OUT, t0, SELECTED_RUNS
+    parser = common_parser("S7a_csls", "S7a_csls: original external offline calculations, explicit runs")
+    # Separate invocations/tags are required when a dataset has multiple seeds.
+    args = parse_common(parser, argv)
+    ROOT = args.root
+    SELECTED_RUNS = select_runs(args)
+    input_paths = [path for d, _ in SELECTED_RUNS for path in run_inputs(d, ("meta.json", "sim_qg.npy", "feats_bank_text_global.npy", "feats_bank_text_local.npy", "feats_img_global.npy", "feats_img_local.npy"))]
+    OUT = result_directory(args)
+    t0 = time.time()
+    summary = {"alpha": ALPHA, "k": K, "nboot": NBOOT, "seed": SEED, "argv": sys.argv,
+               "git_head": provenance(args, [], {})["git_HEAD"],
+               "datasets": {}}
+    for d, m in run_dirs():
+        ds = m["dataset"]; log("\n" + "=" * 78 + "\n### %s  (%s)" % (ds, os.path.basename(d)))
+        S = np.load(d + "/sim_qg.npy", mmap_mode="r"); nq, ng = S.shape
+        qpid = np.asarray(m["query_pid"]); gpid = np.asarray(m["gallery_pid"])
+        res = {"run": os.path.basename(d), "run_dir": str(Path(d).resolve()), "seed": int(m["seed"]), "nq": nq, "ng": ng, "artifacts": {},
+               "inputs_sha16": {"sim_qg": sha16(d + "/sim_qg.npy"), "meta": sha16(d + "/meta.json")}}
+        f0, ap0, t10 = evaluate(S, None, qpid, gpid, "base"); mb = metrics(f0, ap0); res["baseline"] = mb
+        on = m.get("metrics", {}); diff = {k: round(mb[k] - float(on.get(k, np.nan)), 4) for k in mb if k in on}
+        res["baseline_vs_online_diff"] = diff; res["baseline_hub"] = hub(t10, ng)
+        log("  baseline offline: %s" % {k: round(v, 3) for k, v in mb.items()})
+        log("  baseline online : %s" % {k: round(float(v), 3) for k, v in on.items()})
+        log("  diff            : %s   %s" % (diff, "OK" if all(abs(v) < 0.02 for v in diff.values()) else "!! MISMATCH"))
+        per_query = {"first_rank_base": f0, "ap_base": ap0, "top1_base": t10}
+        for mode in ("transductive", "inductive"):
+            if mode == "transductive": r = r_transductive(S); bank_n = nq
+            else: r, bank_n = r_inductive(d, ng)
+            f1, ap1, t11 = evaluate(S, r, qpid, gpid, mode[:5]); mc = metrics(f1, ap1)
+            cb, cn = (f0 < 1).astype(np.float64), (f1 < 1).astype(np.float64)
+            entry = {"metrics": mc, "delta": {k: round(mc[k] - mb[k], 3) for k in mc}, "bank_size": bank_n,
+                     "boot_identity": boot(cb, cn, qpid), "boot_query": boot(cb, cn, np.arange(nq)), "hub_after": hub(t11, ng)}
+            res[mode] = entry
+            per_query["first_rank_" + mode] = f1; per_query["ap_" + mode] = ap1; per_query["top1_" + mode] = t11
+            artifact = output_name(OUT, f"{ds}_r_{mode}", args.tag, ".npy")
+            save_npy(artifact, r)
+            res["artifacts"]["r_" + mode] = artifact
+            log("  %-12s r1=%.2f (Δ%+.2f) r5=%.2f r10=%.2f mAP=%.2f | idCI %s%s | qCI %s | distinct %.3f→%.3f maxT1 %d→%d | bank=%d"
+                % (mode, mc["r1"], entry["delta"]["r1"], mc["r5"], mc["r10"], mc["mAP"],
+                   entry["boot_identity"]["ci95"], "*" if entry["boot_identity"]["excludes_zero"] else "",
+                   entry["boot_query"]["ci95"], res["baseline_hub"]["distinct_top1_ratio"], entry["hub_after"]["distinct_top1_ratio"],
+                   res["baseline_hub"]["max_top1_count"], entry["hub_after"]["max_top1_count"], bank_n))
+        artifact = output_name(OUT, f"{ds}_per_query", args.tag, ".npz")
+        save_npz(artifact, qpid=qpid, gpid=gpid, **per_query)
+        res["artifacts"]["per_query"] = artifact
+        summary["datasets"][ds] = res
+    summary["peak_rss_gb"] = peak_rss_gb()
+    summary["elapsed_sec"] = round(time.time() - t0, 1)
+    summary["provenance"] = provenance(args, input_paths, {"bootstrap": SEED, "run_seeds": {m["dataset"]: int(m["seed"]) for _, m in SELECTED_RUNS}})
+    summary_path = output_name(OUT, "S7a_summary", args.tag, ".json")
+    write_json(summary_path, summary)
+    log("\n=== S7a SUMMARY (transductive ΔR@1, ordered) ===")
+    for ds, r in sorted(summary["datasets"].items(), key=lambda kv: -kv[1]["transductive"]["delta"]["r1"]):
+        log("  %-10s base=%6.2f  trans Δ=%+.2f %s  ind Δ=%+.2f %s"
+            % (ds, r["baseline"]["r1"], r["transductive"]["delta"]["r1"], r["transductive"]["boot_identity"]["ci95"],
+               r["inductive"]["delta"]["r1"], r["inductive"]["boot_identity"]["ci95"]))
+    rss_status = ("UNAVAILABLE on this platform" if summary["peak_rss_gb"] is None else
+                  "OK" if summary["peak_rss_gb"] < 8 else "!! EXCEEDS 8GB LIMIT")
+    log("peak RSS %.2f GB  (%s)  elapsed %ss" % (logged_rss(summary["peak_rss_gb"]), rss_status, summary["elapsed_sec"]))
+    log("wrote", summary_path)
+    return summary
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, KeyError, AssertionError) as error:
+        raise SystemExit(f"S7a_csls: {error}") from error

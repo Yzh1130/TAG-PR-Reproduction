@@ -20,6 +20,7 @@ import time
 import numpy as np
 
 try:
+    from ._analysis_audit import git_head, sha256_16
     from ._offline_common import evaluate, json_ready, load_annotations, load_similarity, safe_output_dir
     from ._s12_features import (
         _read_records, discover_train_annotations, extract_gallery_features,
@@ -28,6 +29,7 @@ try:
     )
     from .S12_inductive_bank import DEFAULT_DUMP, DEFAULT_ROOT, _metric_summary, _Tee, run_corrections
 except ImportError:
+    from _analysis_audit import git_head, sha256_16
     from _offline_common import evaluate, json_ready, load_annotations, load_similarity, safe_output_dir
     from _s12_features import (
         _read_records, discover_train_annotations, extract_gallery_features,
@@ -41,8 +43,8 @@ def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fresh-forward", action="store_true",
                         help="required opt-in: fresh scores, no archived-score parity gate")
-    parser.add_argument("--sim", "--sim-qg", dest="sim", default=str(DEFAULT_DUMP / "sim_qg.npy"),
-                        help="read-only archived qg, used only for metric comparison")
+    parser.add_argument("--sim", "--sim-qg", dest="sim", default=None,
+                        help="optional read-only archived qg; omitted: explicitly skip archive comparison")
     parser.add_argument("--anno", "--ann", dest="anno", required=True, help="test_reid.json in gallery order")
     parser.add_argument("--train-anno", default=None, help="explicit training annotation if discovery is ambiguous")
     parser.add_argument("--resume", required=True, help="trusted checkpoint or directory with checkpoint_best.pth")
@@ -156,9 +158,9 @@ def write_fresh_matrices(out, run_name, test_features, train_features, gallery_f
 
 
 def _run_real(args, out, run_name, report):
-    sim_path = Path(args.sim).expanduser().resolve()
+    sim_path = Path(args.sim).expanduser().resolve() if args.sim else None
     out = Path(out).expanduser().resolve()
-    if out == sim_path.parent or sim_path.parent in out.parents:
+    if sim_path is not None and (out == sim_path.parent or sim_path.parent in out.parents):
         raise ValueError("--out must not be inside the read-only similarity archive")
     ann = load_annotations(args.anno)
     checkpoint = resolve_checkpoint(args.resume)
@@ -173,10 +175,27 @@ def _run_real(args, out, run_name, report):
                    "test_query_use_in_training_bank": False, "alignment_W_used": False,
                    "archive_parity_checked": False,
                    "archive_role": "metrics-only reference; no reconstruction, alignment, acceptance gate or routing retries",
-                   "archived_similarity": str(sim_path), "warnings": []})
+                   "archived_similarity": str(sim_path) if sim_path else None,
+                   "archive_comparison_skipped": sim_path is None, "warnings": []})
     model, config, provenance = load_model(args.config, checkpoint, args.backbone, args.device,
                                           train_info["identities"], args.seed, args.repo)
     report["feature_provenance"] = provenance
+    paths = {"checkpoint": checkpoint, "config": Path(args.config),
+             "test_annotation": Path(args.anno), "train_annotation": train_path}
+    report["provenance"] = {
+        "argv": report.get("argv", list(sys.argv)),
+        "git_HEAD": git_head(args.repo), "seeds": {"initial_extraction": args.seed,
+                                                    "correction_subsets": [2026, 2027, 2028]},
+        "checkpoint_sha256_16": sha256_16(checkpoint),
+        "eval_router_mode": getattr(config.experiment, "eval_router_mode", "gumbel"),
+        # E3 uses its existing SINGLE initial seed before construction. It does
+        # not call main's post-load eval_seed reset; distinguish configured from applied.
+        "eval_seed": None, "initial_extraction_seed": args.seed,
+        "configured_eval_seed": getattr(config.experiment, "eval_seed", None),
+        "eval_seed_reset_applied": False,
+        "inputs": {key: {"path": str(Path(path).resolve()), "bytes": Path(path).stat().st_size,
+                         "sha256_16": sha256_16(path)} for key, path in paths.items()},
+    }
     report["view_prompt"] = bool(config.experiment.view_prompt)
     print("E3 FRESH SETTINGS " + json.dumps({"seed": args.seed, "image_batch_size": args.image_batch_size,
                                             "text_batch_size": args.text_batch_size, "provenance": provenance}, sort_keys=True))
@@ -196,6 +215,14 @@ def _run_real(args, out, run_name, report):
     if len(gallery["image_feat"]) != len(ann.gallery_ids):
         raise ValueError("Fresh gallery features do not cover all annotation images in order")
     report["gallery_extraction_passes"] = 1
+    image_root = Path(args.image_root or config.image_dir).expanduser()
+    report["provenance"]["gallery_image_inputs"] = []
+    for relative in ann.paths:
+        image_path = (image_root / relative).resolve()
+        evidence = {"path": str(image_path), "available": image_path.is_file()}
+        if image_path.is_file():
+            evidence.update(bytes=image_path.stat().st_size, sha256_16=sha256_16(image_path))
+        report["provenance"]["gallery_image_inputs"].append(evidence)
     print(f"E3 EXTRACT gallery_images rows={len(gallery['image_feat'])} elapsed_sec={elapsed['gallery_images']:.3f}")
 
     text_kwargs = dict(max_length=config.experiment.text_length, device=args.device,
@@ -256,17 +283,25 @@ def _run_real(args, out, run_name, report):
 
     # Archive access is intentionally after the fresh bank exists. It cannot
     # select a seed, change gallery routing, estimate W, or supply bank scores.
-    archived = load_similarity(sim_path, ann)
     raw = evaluate(matrices["sim_qg"], ann)
-    archived_eval = evaluate(archived, ann)
     report["fresh_metrics"] = _metric_summary(raw)
-    report["archived_metrics"] = _metric_summary(archived_eval)
-    delta = {key: float(raw[key] - archived_eval[key]) for key in ("R1", "R5", "R10", "mAP")}
-    report["fresh_minus_archived_metrics_pp"] = delta
-    report["fresh_minus_archived_correct_queries"] = int(np.asarray(raw["details"]["correct"]).sum()
-                                                          - np.asarray(archived_eval["details"]["correct"]).sum())
-    print("E3 ARCHIVE COMPARISON " + json.dumps({"fresh": report["fresh_metrics"], "archived": report["archived_metrics"],
-                                                "delta_pp": delta, "parity_gate": False}, sort_keys=True))
+    if sim_path is None:
+        report["archived_metrics"] = None
+        report["fresh_minus_archived_metrics_pp"] = None
+        report["fresh_minus_archived_correct_queries"] = None
+        print("E3 ARCHIVE COMPARISON SKIPPED: --sim not supplied; fresh metrics only, no archive read.")
+    else:
+        archived = load_similarity(sim_path, ann)
+        report["provenance"]["inputs"]["archived_similarity"] = {
+            "path": str(sim_path), "bytes": sim_path.stat().st_size, "sha256_16": sha256_16(sim_path)}
+        archived_eval = evaluate(archived, ann)
+        report["archived_metrics"] = _metric_summary(archived_eval)
+        delta = {key: float(raw[key] - archived_eval[key]) for key in ("R1", "R5", "R10", "mAP")}
+        report["fresh_minus_archived_metrics_pp"] = delta
+        report["fresh_minus_archived_correct_queries"] = int(np.asarray(raw["details"]["correct"]).sum()
+                                                              - np.asarray(archived_eval["details"]["correct"]).sum())
+        print("E3 ARCHIVE COMPARISON " + json.dumps({"fresh": report["fresh_metrics"], "archived": report["archived_metrics"],
+                                                    "delta_pp": delta, "parity_gate": False}, sort_keys=True))
     print("E3 INDUCTIVE SCOPE: train_* is query-independent; test_full is a transductive control. "
           "No archive parity threshold, rerouting, W or test-query calibration of train banks.")
     print("METHOD    BANK                    HYPERPARAMETERS                      R@1       R@5      R@10       mAP")
@@ -285,9 +320,10 @@ def main(argv=None):
     if min(args.image_batch_size, args.text_batch_size, args.score_block_size) < 1 or args.num_workers < 0:
         parser.error("batch/block sizes must be positive and --num-workers must be nonnegative")
     proposed_out = Path(args.out).expanduser().resolve()
-    archive_directory = Path(args.sim).expanduser().resolve().parent
-    if proposed_out == archive_directory or archive_directory in proposed_out.parents:
-        parser.error("--out must not be inside the read-only similarity archive")
+    if args.sim:
+        archive_directory = Path(args.sim).expanduser().resolve().parent
+        if proposed_out == archive_directory or archive_directory in proposed_out.parents:
+            parser.error("--out must not be inside the read-only similarity archive")
     try:
         out = safe_output_dir(proposed_out)
     except (OSError, ValueError) as exc:
@@ -295,6 +331,7 @@ def main(argv=None):
     tag = re.sub(r"[^A-Za-z0-9_.-]+", "_", args.tag).strip("._") or "run"
     run_name = f"E3_{tag}_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}"
     report = {"tool": "E3", "tag": args.tag, "arguments": vars(args),
+              "argv": list(sys.argv if argv is None else [str(Path(__file__)), *argv]),
               "started_utc": datetime.now(timezone.utc).isoformat()}
     buffer, started, failure = io.StringIO(), time.perf_counter(), None
     with redirect_stdout(_Tee(sys.stdout, buffer)):
