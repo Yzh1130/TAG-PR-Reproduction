@@ -5,7 +5,7 @@ or write into original experiment directories. Mock tests are not real results.
 
 ## Table renderer
 
-`scripts/revision/render_revision_tables.py` has eight independent subcommands.
+`scripts/revision/render_revision_tables.py` has eleven independent subcommands.
 Each requires explicit input paths and `--out NEW_OUTPUT_DIRECTORY`.
 `--decimals` defaults to 2. Signed differences use `+` / Unicode `−`, recorded
 intervals use `[lower, upper]`, and missing fields use `n/a` with reasons.
@@ -44,6 +44,42 @@ bootstrap JSON):
 ```text
 python scripts/revision/render_revision_tables.py s13 --summary "ViT-L/14=ABSOLUTE_L14_SUMMARY_JSON" --summary "ViT-B/16=ABSOLUTE_B16_SUMMARY_JSON" --out NEW_OUTPUT_DIRECTORY
 ```
+
+### Round E: additional archived-result views
+
+Use explicit `label=PATH` inputs; labels identify models, not guessed filenames.
+The S7d view permits repeating a model label for distinct recorded training
+seeds. All existing subcommands retain their original inputs and behavior.
+
+```text
+python scripts/revision/render_revision_tables.py table-e5 --json "ViT-L/14=ABSOLUTE_L14_R2_ROUTER_EVAL_JSON" --json "ViT-B/16=ABSOLUTE_B16_R2_ROUTER_EVAL_JSON" --out NEW_OUTPUT_DIRECTORY
+python scripts/revision/render_revision_tables.py table-e6 --root "ViT-L/14=ABSOLUTE_L14_E6_RUN_ROOT" --root "ViT-B/16=ABSOLUTE_B16_E6_RUN_ROOT" --out NEW_OUTPUT_DIRECTORY
+python scripts/revision/render_revision_tables.py table-s7d --s7d-json "ViT-B/16=ABSOLUTE_S7D_SEED0_JSON" --s7d-json "ViT-B/16=ABSOLUTE_S7D_SEED1_JSON" --s7d-json "ViT-B/16=ABSOLUTE_S7D_SEED2_JSON" --out NEW_OUTPUT_DIRECTORY
+python scripts/revision/render_revision_tables.py s13 --compare --summary "ViT-L/14=ABSOLUTE_L14_SUMMARY_JSON" --summary "ViT-B/16=ABSOLUTE_B16_SUMMARY_JSON" --out NEW_OUTPUT_DIRECTORY
+```
+
+- `table-e5` reads `R2_router_eval.py`'s saved `blocks`, `block_order`,
+  `main_report_block`, `n_images`, `n_gumbel` and `cam_source_table`. Each router
+  block is identified explicitly; classification proportions are displayed as
+  percentages. The producer does not serialize a pure-source assertion Boolean:
+  the table explicitly labels its check as a recheck of saved cam/source counts,
+  not as a recorded Boolean. Source-specific accuracy is a separate table.
+- `table-e6 --root` must name the **single run root** printed by
+  `e6_router_randomness.sh`, containing `router_randomness.json`. That summary
+  records each run's `evaluation_json` path, metrics, seed, differences from
+  argmax, and the maximum pairwise differences observed among these N Gumbel
+  repetitions. The renderer reads this summary, not checkpoints or guessed log
+  filenames; saved original run paths are audit references, not reopened inputs.
+  It does not call the observed difference a bound on other seeds.
+- `table-s7d` reads `protocols` and `paired_gallery_differences` from
+  `scripts/ext/S7d_aeri.py`. Controlled-gallery rows are five-draw means/stds,
+  **not five training seeds**. Only descriptive mean/std reductions of complete
+  stored draws are allowed. No interval endpoints are averaged. A pooled CI for
+  a controlled mean correction gain is not saved by this producer and remains
+  `n/a`; the separate paired-gallery CI conditional on five draws is preserved.
+- `s13 --compare` uses the same four validated summary settings as the existing
+  `s13` command, with just R@1 and ΔR@1 [identity CI] per model. Without the flag,
+  the original full four-metric summary view is retained.
 
 ### Stored-field conventions
 
@@ -97,6 +133,7 @@ Existing figure output directories are preserved with timestamped new runs.
 
 ```text
 python -m unittest tests.test_roundd_fig5 tests.test_roundd_tag_tables tests.test_roundd_ext_tables tests.test_roundd_collection_tables tests.test_roundd_renderer_cli -v
+python -m unittest tests.test_rounde_renderer -v
 python -m unittest discover -s tests -v
 ```
 

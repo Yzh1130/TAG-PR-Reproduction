@@ -1,4 +1,4 @@
-"""Render archived Round-D tables, without evaluating models or recomputing CIs.
+"""Render archived revision tables, without evaluating models or recomputing CIs.
 
 Only explicitly requested descriptive reductions of complete stored draws or
 paired CSV values are permitted. Missing values stay n/a, with an explanation.
@@ -24,6 +24,9 @@ from scripts.revision._revision_table_format import TableFormatter
 from scripts.revision._revision_tables_collection import render_pairs, render_runs
 from scripts.revision._revision_tables_ext import render_s13, render_table11, render_table12
 from scripts.revision._revision_tables_tag import render_r3, render_table3, render_table5
+from scripts.revision._revision_tables_rounde import (
+    collect_e6_inputs, render_e5, render_e6, render_s7d, render_s13_compare,
+)
 
 
 def build_parser():
@@ -38,6 +41,9 @@ def build_parser():
         ("table-r3", "Descriptive fine-grained cause tables"),
         ("runs", "Collector checkpoint inventory"),
         ("s13", "S13 --summary-table four-row comparison by model"),
+        ("table-e5", "Image-router classification and source-stratified accuracy"),
+        ("table-e6", "Recorded argmax/Gumbel retrieval repetitions"),
+        ("table-s7d", "AERI gallery compositions and paired gallery differences"),
     ):
         sub = commands.add_parser(name, help=description)
         sub.add_argument("--out", required=True, help="New analysis output directory, never an input archive directory")
@@ -57,6 +63,15 @@ def build_parser():
             sub.add_argument("--include", action="append", default=[], help="Collector prefix filter, repeatable")
         if name == "s13":
             sub.add_argument("--summary", required=True, action="append", help="Explicit label=PATH, repeatable")
+            sub.add_argument("--compare", action="store_true", default=False,
+                             help="Compact four-setting wide table: each model's R@1 and identity-CI gain")
+        if name == "table-e5":
+            sub.add_argument("--json", required=True, action="append", help="Explicit model label=router JSON, repeatable")
+        if name == "table-e6":
+            sub.add_argument("--root", required=True, action="append",
+                             help="Explicit model label=E6 run directory containing router_randomness.json, repeatable")
+        if name == "table-s7d":
+            sub.add_argument("--s7d-json", required=True, action="append", help="Explicit model label=S7d JSON, repeatable across seeds")
     return parser
 
 
@@ -108,6 +123,25 @@ def _head():
     return process.stdout.strip()
 
 
+def _labeled_inputs(values, flag, *, directory=False, repeated_labels=False):
+    labels, paths = [], []
+    for spec in values:
+        if "=" not in spec:
+            raise ValueError(f"{flag} must be explicit label=PATH")
+        label, value = spec.split("=", 1)
+        if not label.strip() or not value or (label in labels and not repeated_labels):
+            raise ValueError(f"{flag} labels must be nonempty and unique, with a nonempty path")
+        labels.append(label)
+        if directory:
+            path = Path(value).expanduser().resolve()
+            if not path.is_dir():
+                raise ValueError(f"input directory does not exist: {path}")
+            paths.append(path)
+        else:
+            paths.append(_path(value))
+    return labels, paths
+
+
 def _prepare(args, fmt):
     if args.command == "table11":
         paths = [_path(args.aggregate)]
@@ -115,6 +149,16 @@ def _prepare(args, fmt):
         paths = [_path(value) for value in args.s7b]
     elif args.command == "pairs":
         paths = [_path(value) for value in args.csv]
+    elif args.command == "table-e5":
+        labels, paths = _labeled_inputs(args.json, "--json")
+    elif args.command == "table-s7d":
+        labels, paths = _labeled_inputs(args.s7d_json, "--s7d-json", repeated_labels=True)
+    elif args.command == "table-e6":
+        labels, roots = _labeled_inputs(args.root, "--root", directory=True)
+        output = Path(args.out).expanduser().resolve()
+        if any(output == root or root in output.parents for root in roots):
+            raise ValueError("--out must not be inside a read-only E6 input directory")
+        paths = [collect_e6_inputs(root) for root in roots]
     elif args.command == "s13":
         labels, paths = [], []
         for value in args.summary:
@@ -146,8 +190,14 @@ def _prepare(args, fmt):
             body = render_table12([(str(path), value) for path, value in zip(paths, data)], fmt)
         elif args.command == "runs":
             body = render_runs(data[0], fmt, args.include)
+        elif args.command == "table-e5":
+            body = render_e5(list(zip(labels, data)), fmt)
+        elif args.command == "table-e6":
+            body = render_e6(list(zip(labels, data)), fmt)
+        elif args.command == "table-s7d":
+            body = render_s7d(list(zip(labels, data)), fmt)
         else:
-            body = render_s13(list(zip(labels, data)), fmt)
+            body = (render_s13_compare if args.compare else render_s13)(list(zip(labels, data)), fmt)
     for path, record in zip(paths, evidence):
         if path.stat().st_size != record["bytes"] or _sha(path) != record["sha256_16"]:
             raise ValueError(f"input changed during rendering: {path}")
@@ -191,6 +241,8 @@ def _write(args, body, paths, evidence, fmt, argv):
     body += f"\nProvenance: inputs: {inputs}; script git HEAD={head}.\n"
     suffix = getattr(args, "label", None) or (args.metric if args.command == "pairs" else "")
     stem = args.command.replace("-", "_")
+    if args.command == "s13" and args.compare:
+        stem += "_compare"
     if suffix:
         stem += "_" + re.sub(r"[^\w.-]+", "_", suffix, flags=re.UNICODE).strip("._")
     root.mkdir(parents=True, exist_ok=True)
