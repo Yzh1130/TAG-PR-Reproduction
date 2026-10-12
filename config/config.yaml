@@ -9,6 +9,12 @@ num_of_selected_experts: 5
 expert_blocks: [6, 7, 8]
 
 experiment:
+  itc_block_size: 0
+  allow_unverified_multiproc: false
+  eval_router_mode: 'gumbel'
+  eval_seed: null
+  save_last: false
+  debug_max_iters: 0
   grad_checkpoint: false
   use_bridge: false
   bridge_cv_ratio: 0.0

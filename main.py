@@ -1,10 +1,13 @@
 import argparse
 import csv
+import hashlib
+import json
 import os
 import random
 import time
 from collections import OrderedDict
 from contextlib import contextmanager, nullcontext
+from datetime import datetime
 from pathlib import Path
 
 import torch
@@ -17,7 +20,7 @@ from experiment import (
     prepare_experiment_directory,
     resolve_experiment_directory,
 )
-from misc.utils import get_rank
+from misc.utils import get_rank, get_world_size
 from misc.build import load_checkpoint, cosine_scheduler, build_optimizer
 from misc.data import build_pedes_data
 from misc.eval import metric_eval, similarity_dump_context, test_tse, test
@@ -32,6 +35,15 @@ CSLS_CONFIG_DEFAULTS = {
     "csls": False,
     "csls_k": 10,
     "csls_mode": "query",
+}
+
+REVISION_CONFIG_DEFAULTS = {
+    "itc_block_size": 0,
+    "allow_unverified_multiproc": False,
+    "eval_router_mode": "gumbel",
+    "eval_seed": None,
+    "save_last": False,
+    "debug_max_iters": 0,
 }
 
 
@@ -360,6 +372,18 @@ def build_parser():
             "retaining metric files (default: False)"
         ),
     )
+    parser.add_argument("--itc_block_size", type=int, default=None,
+                        help="contiguous contrastive candidate block size (default: 0, disabled)")
+    parser.add_argument("--allow_unverified_multiproc", action="store_true",
+                        help="explicitly permit unverified multiprocess ITC blocks (default: False)")
+    parser.add_argument("--eval_router_mode", choices=("gumbel", "argmax"), default=None,
+                        help="evaluation image router mode (default: gumbel)")
+    parser.add_argument("--eval_seed", type=int, default=None,
+                        help="reset RNG after loading only in eval_only (default: None)")
+    parser.add_argument("--save_last", action="store_true",
+                        help="also save completed last-epoch weights (default: False)")
+    parser.add_argument("--debug_max_iters", type=int, default=None,
+                        help="stop cleanly after N successful optimizer updates (default: 0)")
     # Retain the previously accepted option even though the baseline does not use it.
     parser.add_argument("--simplified", action="store_true", help=argparse.SUPPRESS)
     return parser
@@ -369,8 +393,15 @@ def apply_cli_overrides(config, args):
     for key, default_value in CSLS_CONFIG_DEFAULTS.items():
         if key not in config.experiment:
             config.experiment[key] = default_value
+    for key, default_value in REVISION_CONFIG_DEFAULTS.items():
+        if key not in config.experiment:
+            config.experiment[key] = default_value
     overrides = []
     override_specs = [
+        (args.itc_block_size, config.experiment, "itc_block_size", "experiment.itc_block_size"),
+        (args.eval_router_mode, config.experiment, "eval_router_mode", "experiment.eval_router_mode"),
+        (args.eval_seed, config.experiment, "eval_seed", "experiment.eval_seed"),
+        (args.debug_max_iters, config.experiment, "debug_max_iters", "experiment.debug_max_iters"),
         (args.backbone, config.model, "backbone", "model.backbone"),
         (args.batch_size, config.data, "batch_size", "data.batch_size"),
         (
@@ -564,6 +595,11 @@ def apply_cli_overrides(config, args):
         new_value = not args.no_csls
         config.experiment.csls = new_value
         overrides.append(("experiment.csls", old_value, new_value))
+    for key in ("save_last", "allow_unverified_multiproc"):
+        if getattr(args, key):
+            old_value = config.experiment[key]
+            config.experiment[key] = True
+            overrides.append(("experiment." + key, old_value, True))
     return overrides
 
 
@@ -574,13 +610,20 @@ def resolve_runtime_config(args):
 
 
 def configure_experiment(config, args):
+    revision_eval_archive = args.eval_only and (
+        config.experiment.eval_seed is not None
+        or config.experiment.eval_router_mode != "gumbel"
+    )
+    effective_exp_name = args.exp_name
+    if revision_eval_archive and args.output_dir is None and args.exp_name is None:
+        effective_exp_name = "eval_revision_" + datetime.now().strftime("%H%M%S_%f")
     directory = resolve_experiment_directory(
         config.model.saved_path,
         output_dir=args.output_dir,
-        exp_name=args.exp_name,
+        exp_name=effective_exp_name,
     )
 
-    if args.output_dir is not None or args.exp_name is not None:
+    if args.output_dir is not None or effective_exp_name is not None:
         old_saved_path = config.model.saved_path
         config.model.saved_path = str(directory)
         path_override = ("model.saved_path", old_saved_path, str(directory))
@@ -623,6 +666,10 @@ def configure_experiment(config, args):
             args.rerank_lambda,
             args.csls_k,
             args.csls_mode,
+            args.itc_block_size,
+            args.eval_router_mode,
+            args.eval_seed,
+            args.debug_max_iters,
         )
     ) or any(
         (
@@ -642,6 +689,8 @@ def configure_experiment(config, args):
             args.no_csls,
             args.dump_sim,
             args.dry_run,
+            args.save_last,
+            args.allow_unverified_multiproc,
         )
     ) or args.config != "config/config.yaml"
     if (
@@ -719,6 +768,9 @@ def log_cli_overrides(logger, overrides, config=None):
     logger.info("experiment.csls effective: %r", config.experiment.csls)
     logger.info("experiment.csls_k effective: %r", config.experiment.csls_k)
     logger.info("experiment.csls_mode effective: %r", config.experiment.csls_mode)
+    for key, default_value in REVISION_CONFIG_DEFAULTS.items():
+        logger.info("experiment.%s effective: %r", key,
+                    getattr(config.experiment, key, default_value))
     logger.info("model.backbone effective: %r", config.model.backbone)
     logger.info(
         "model.expert_blocks_auto effective: %r",
@@ -1521,6 +1573,80 @@ def environment_rank():
         return 0
 
 
+def set_evaluation_seed(eval_only, seed, logger=None):
+    """An explicit eval-only reset; the default and training paths are no-ops."""
+    if not eval_only or seed is None:
+        return False
+    import numpy as np
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    if logger is not None:
+        logger.info("EVAL RNG: Python random, NumPy, torch CPU/CUDA, DataLoader "
+                    "worker/base_seed, image-router Gumbel; eval_seed=%s", seed)
+    return True
+
+
+def validate_itc_multiprocess(config):
+    if (config.experiment.itc_block_size > 0 and get_world_size() > 1
+            and not config.experiment.allow_unverified_multiproc):
+        raise ValueError("ITC blocks: 多进程路径未验证; explicitly pass "
+                         "--allow_unverified_multiproc only for verification")
+
+
+def _resume_num_classes(resume_path, config):
+    checkpoint = torch.load(resume_path, map_location="cpu", weights_only=False)
+    state = checkpoint.get("model", checkpoint)
+    if not config.experiment.id:
+        return 1
+    if "classifier.weight" not in state:
+        raise ValueError("eval_seed requires classifier.weight to infer the "
+                         "training identity head before creating data loaders")
+    return int(state["classifier.weight"].shape[0])
+
+
+def _debug_iteration_trace(config, optimizer, ret, loss, update, it, epoch, alpha):
+    gradients = [p.grad.detach().float() for group in optimizer.param_groups
+                 for p in group["params"] if p.grad is not None]
+    grad_norm = (torch.stack([g.norm() for g in gradients]).norm().item()
+                 if gradients else 0.0)
+    finite = bool(torch.isfinite(loss.detach()).all()) and all(
+        bool(torch.isfinite(g).all()) for g in gradients)
+    return {
+        "update": update, "it": it, "epoch": epoch,
+        "lr": [float(group["lr"]) for group in optimizer.param_groups],
+        "alpha": float(alpha), "niter_per_ep": config.schedule.niter_per_ep,
+        "itc_block_size": config.experiment.itc_block_size,
+        "loss_weights": {key: config.experiment[key] for key in
+                         ("nitc_ratio", "ritc_ratio", "id_ratio", "view_ratio",
+                          "ortho_ratio", "sdm_ratio", "tal_ratio",
+                          "bridge_cv_ratio", "bridge_tg_ratio")},
+        "losses": {k: float(v.detach().item() if torch.is_tensor(v) else v)
+                   for k, v in ret.items() if "loss" in k},
+        "total_loss": float(loss.detach().item()), "grad_norm": grad_norm,
+        "finite": finite,
+    }
+
+
+def _append_revision_completion(experiment, debug_max_iters, updates, last_path):
+    if experiment is None or not experiment.enabled:
+        return
+    if not debug_max_iters and last_path is None:
+        return
+    with (experiment.directory / "final_results.txt").open("a", encoding="utf-8") as handle:
+        if debug_max_iters:
+            handle.write(f"debug_max_iters: {debug_max_iters}\noptimizer_updates: {updates}\n")
+        if last_path is not None:
+            digest = hashlib.sha256()
+            with last_path.open("rb") as checkpoint_file:
+                for block in iter(lambda: checkpoint_file.read(1024 * 1024), b""):
+                    digest.update(block)
+            handle.write(f"last_checkpoint_path: {last_path.resolve()}\n")
+            handle.write(f"last_checkpoint_sha256: {digest.hexdigest()}\n")
+
+
 def run(
     config,
     experiment=None,
@@ -1570,11 +1696,27 @@ def run(
     best_epoch = 0
     best_metrics = None
     best_metrics_epoch = None
+    debug_max_iters = getattr(config.experiment, "debug_max_iters", 0)
+    debug_updates = 0
+    debug_stopped = False
+    last_checkpoint_path = None
 
     try:
         # Keep training-only dependencies out of import/help/dry-run code paths.
         from model.tbps_model_MoE import clip_vitb
 
+        preloaded_eval_model = None
+        if eval_only and config.experiment.eval_seed is not None:
+            if not is_master():
+                return None
+            preloaded_eval_model = clip_vitb(
+                config, _resume_num_classes(resume_path, config))
+            load_resume_weights(preloaded_eval_model, resume_path,
+                                config.experiment.use_ema, logger)
+            preloaded_eval_model.to(config.device)
+            # Explicit opt-in only: load -> reset -> create loaders. The
+            # baseline construction order below is retained when seed is None.
+            set_evaluation_seed(True, config.experiment.eval_seed, logger)
         dataloader = build_pedes_data(config)
         apply_test_loader_override(config, dataloader, cli_overrides)
         train_loader = dataloader['train_loader']
@@ -1623,17 +1765,24 @@ def run(
         # model_name = "EVA02-CLIP-B-16"
         # pretrained = "/data/zxy/UAV/checkpoints/EVA02_CLIP_B_psz16_s8B.pt"  # or "/path/to/EVA02_CLIP_B_psz16_s8B.pt"
         # model, _, preprocess = create_model_and_transforms(config, model_name, pretrained, force_custom_clip=True)
-        model = clip_vitb(config, num_classes)
+        model = (clip_vitb(config, num_classes) if preloaded_eval_model is None
+                 else preloaded_eval_model)
         if eval_only:
             if not is_master():
                 return None
-            load_resume_weights(
-                model,
-                resume_path,
-                config.experiment.use_ema,
-                logger,
-            )
-            model.to(config.device)
+            if preloaded_eval_model is None:
+                load_resume_weights(
+                    model,
+                    resume_path,
+                    config.experiment.use_ema,
+                    logger,
+                )
+                model.to(config.device)
+            if config.experiment.eval_seed is None:
+                logger.info("EVAL RNG: Python random, NumPy, torch CPU/CUDA, "
+                            "DataLoader worker/base_seed; image router=%s; "
+                            "startup misc.seed=%s (no eval-only reset)",
+                            config.experiment.eval_router_mode, config.misc.seed)
             eval_result, reranked_result, csls_result = evaluate_model(
                 model,
                 dataloader['test_loader'],
@@ -1652,6 +1801,14 @@ def run(
                 csls_result,
             )
             torch.cuda.empty_cache()
+            if (experiment is not None and experiment.enabled
+                    and (config.experiment.eval_seed is not None
+                         or config.experiment.eval_router_mode != "gumbel")):
+                with (experiment.directory / "evaluation_revision.json").open("w", encoding="utf-8") as handle:
+                    json.dump({"eval_seed": config.experiment.eval_seed,
+                               "eval_router_mode": config.experiment.eval_router_mode,
+                               "original": eval_result, "reranked": reranked_result,
+                               "csls": csls_result}, handle, indent=2)
             return {
                 'original': eval_result,
                 'reranked': reranked_result,
@@ -1696,6 +1853,12 @@ def run(
                 del saved_checkpoint
 
         config.schedule.niter_per_ep = len(train_loader)
+        validate_itc_multiprocess(config)
+        if config.experiment.itc_block_size > 0:
+            global_batch_size = train_loader.batch_size * get_world_size()
+            block_size = config.experiment.itc_block_size
+            logger.info("ITC block size=%s, blocks per global batch=%s", block_size,
+                        (global_batch_size + block_size - 1) // block_size)
         lr_schedule = cosine_scheduler(config)
         optimizer = build_optimizer(config, model)
 
@@ -1762,6 +1925,13 @@ def run(
                     meters['nrw_mu_ground'].update(ret['nrw_mu_ground'], batch_size)
 
                 scaler.scale(loss).backward()
+                if debug_max_iters:
+                    # Debug-only observation of unscaled gradients; the formal
+                    # scheduler and alpha ramp above are never rebuilt from N.
+                    scaler.unscale_(optimizer)
+                    debug_scale_before = scaler.get_scale()
+                    debug_trace = _debug_iteration_trace(
+                        config, optimizer, ret, loss, debug_updates + 1, it, epoch, alpha)
                 if model_ema is None:
                     scaler.step(optimizer)
                     scaler.update()
@@ -1779,6 +1949,15 @@ def run(
                 model.zero_grad()
                 optimizer.zero_grad()
                 it += 1
+                if debug_max_iters:
+                    if scaler.get_scale() >= debug_scale_before:
+                        debug_updates += 1
+                        logger.info("DEBUG ITER %s", json.dumps(debug_trace, sort_keys=True))
+                    else:
+                        logger.info("DEBUG SKIPPED overflow at iteration=%s", it)
+                    if debug_updates >= debug_max_iters:
+                        debug_stopped = True
+                        break
 
                 if (i + 1) % config.log.print_period == 0:
                     info_str = f"Epoch[{epoch + 1}] Iteration[{i + 1}/{len(train_loader)}]"
@@ -1787,6 +1966,14 @@ def run(
                             info_str += f", {key}: {meter.val:.4f}"
                     info_str += f", Base Lr: {param_group['lr']:.2e}"
                     logger.info(info_str)
+
+            if debug_stopped:
+                epoch_peak_alloc_gb, epoch_peak_reserved_gb = _cuda_peak_memory_gb()
+                full_peak_alloc_gb = max(full_peak_alloc_gb, epoch_peak_alloc_gb)
+                full_peak_reserved_gb = max(full_peak_reserved_gb, epoch_peak_reserved_gb)
+                logger.info("DEBUG STOPPED after %s optimizer updates; skipping "
+                            "partial-epoch evaluation and normal checkpoint saves", debug_updates)
+                break
 
             if is_master():
                 end_time = time.time()
@@ -1877,9 +2064,21 @@ def run(
                         save_obj['model_ema'] = model_ema.state_dict()
                     torch.save(
                         save_obj,
-                        os.path.join(config.model.saved_path, 'checkpoint_best.pth'),
+                        os.path.join(config.model.saved_path, 'checkpoint_debug_best.pth'
+                                     if debug_max_iters else 'checkpoint_best.pth'),
                     )
                     del save_obj
+
+        if (config.experiment.save_last and not debug_max_iters and is_master()
+                and completed_epochs == config.schedule.epoch):
+            save_obj = {"model": model_without_ddp.state_dict(),
+                        "optimizer": optimizer.state_dict(), "config": config,
+                        "epoch": completed_epochs}
+            if model_ema is not None:
+                save_obj["model_ema"] = model_ema.state_dict()
+            last_checkpoint_path = Path(config.model.saved_path) / "checkpoint_last.pth"
+            torch.save(save_obj, last_checkpoint_path)
+            logger.info("Saved last-epoch checkpoint: %s", last_checkpoint_path)
 
     except torch.cuda.OutOfMemoryError:
         current_alloc_gb, current_reserved_gb = _cuda_peak_memory_gb()
@@ -1919,7 +2118,12 @@ def run(
             full_peak_alloc_gb,
             full_peak_reserved_gb,
             completed_epochs,
+            run_status="debug_stopped" if debug_stopped else "completed",
         )
+        _append_revision_completion(experiment, debug_max_iters, debug_updates,
+                                    last_checkpoint_path)
+    if debug_stopped:
+        return {"run_status": "debug_stopped", "optimizer_updates": debug_updates}
     print(f"best Acc@1: {best_rank_1} at epoch {best_epoch + 1}")
 
 
@@ -1943,6 +2147,9 @@ def main(argv=None):
         "tag-pedes",
         "tagpedes",
     ):
+        if any(config.experiment[key] != default_value for key, default_value in
+               REVISION_CONFIG_DEFAULTS.items()):
+            parser.error("Round A switches require a TAG-PEDES config; external runtime is unchanged")
         if args.dry_run:
             parser.error("--dry_run is not supported for external datasets; use --smoke")
         if args.smoke is not None and args.smoke < 1:
@@ -1977,6 +2184,12 @@ def main(argv=None):
         )
     if config.experiment.dhn_margin < 0:
         parser.error("dhn_margin must be non-negative")
+    if config.experiment.itc_block_size < 0:
+        parser.error("itc_block_size must be non-negative")
+    if config.experiment.debug_max_iters < 0:
+        parser.error("debug_max_iters must be non-negative")
+    if config.experiment.eval_router_mode not in ("gumbel", "argmax"):
+        parser.error("eval_router_mode must be gumbel or argmax")
     if config.experiment.rerank:
         if config.experiment.rerank_k1 < 1:
             parser.error("rerank_k1 must be positive")
@@ -2019,6 +2232,7 @@ def main(argv=None):
     import model.tbps_model_MoE as tbps_model_module
 
     init_distributed_mode(config)
+    validate_itc_multiprocess(config)
     configure_backbone = getattr(
         tbps_model_module,
         'configure_backbone_from_checkpoint',
@@ -2032,6 +2246,8 @@ def main(argv=None):
     set_seed(config)
     archive_eval_only = (
         args.output_dir is not None or args.exp_name is not None
+        or config.experiment.eval_seed is not None
+        or config.experiment.eval_router_mode != "gumbel"
     )
     experiment = ExperimentArchive(
         experiment_directory,

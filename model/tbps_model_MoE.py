@@ -440,6 +440,8 @@ class CLIP(nn.Module):
         pos_idx = torch.eq(idx, idx_all).float()
         sim_targets = pos_idx / pos_idx.sum(1, keepdim=True)
 
+        itc_block_size = getattr(self.config.experiment, 'itc_block_size', 0)
+
         dhn_margin = self.config.experiment.dhn_margin
         dhn_hard_mask = None
         if dhn_margin > 0:
@@ -462,7 +464,17 @@ class CLIP(nn.Module):
 
         nrw_mode = self.config.experiment.nrw_mode
         if nrw_mode == 'off':
-            nitc_loss = self.calc_contrastive(image_features_norm, text_features_norm, image_features_s_norm,
+            if itc_block_size > 0:
+                nitc_loss = self.compute_itc_in_blocks(
+                    'nitc', image_features_norm, text_features_norm,
+                    image_features_norm_gathered, text_features_norm_gathered,
+                    ids, gathered_ids, sim_targets, logit_scale, alpha=alpha,
+                    domain_ids=domain_ids if dhn_margin > 0 else None,
+                    gathered_domain_ids=gathered_domain_ids if dhn_margin > 0 else None,
+                    dhn_margin=dhn_margin,
+                )
+            else:
+                nitc_loss = self.calc_contrastive(image_features_norm, text_features_norm, image_features_s_norm,
                                               text_features_s_norm, image_features_norm_gathered,
                                               text_features_norm_gathered, image_features_s_norm_gathered,
                                               text_features_s_norm_gathered, sim_targets, alpha, logit_scale,
@@ -475,7 +487,18 @@ class CLIP(nn.Module):
                 epoch,
             )
             ret.update(nrw_metrics)
-            nitc_loss = self.calc_contrastive_weighted(
+            if itc_block_size > 0:
+                nitc_loss = self.compute_itc_in_blocks(
+                    'nitc', image_features_norm, text_features_norm,
+                    image_features_norm_gathered, text_features_norm_gathered,
+                    ids, gathered_ids, sim_targets, logit_scale, alpha=alpha,
+                    sample_weights=nrw_weights,
+                    domain_ids=domain_ids if dhn_margin > 0 else None,
+                    gathered_domain_ids=gathered_domain_ids if dhn_margin > 0 else None,
+                    dhn_margin=dhn_margin,
+                )
+            else:
+                nitc_loss = self.calc_contrastive_weighted(
                 image_features_norm,
                 text_features_norm,
                 image_features_s_norm,
@@ -499,12 +522,32 @@ class CLIP(nn.Module):
         i_tse_f_s_gathered = i_tse_f_norm_gathered.detach()
         t_tse_f_s_gathered = t_tse_f_norm_gathered.detach()
         if nrw_mode == 'off':
-            nitc_tse_loss = self.calc_contrastive(i_tse_f, t_tse_f, i_tse_f.detach(), t_tse_f.detach(),
+            if itc_block_size > 0:
+                nitc_tse_loss = self.compute_itc_in_blocks(
+                    'nitc', i_tse_f, t_tse_f, i_tse_f_norm_gathered,
+                    t_tse_f_norm_gathered, ids, gathered_ids, sim_targets,
+                    logit_scale, alpha=alpha,
+                    domain_ids=domain_ids if dhn_margin > 0 else None,
+                    gathered_domain_ids=gathered_domain_ids if dhn_margin > 0 else None,
+                    dhn_margin=dhn_margin,
+                )
+            else:
+                nitc_tse_loss = self.calc_contrastive(i_tse_f, t_tse_f, i_tse_f.detach(), t_tse_f.detach(),
                                                   i_tse_f_norm_gathered, t_tse_f_norm_gathered,
                                                   i_tse_f_s_gathered, t_tse_f_s_gathered, sim_targets, alpha, logit_scale,
                                                   dhn_hard_mask, dhn_margin)
         else:
-            nitc_tse_loss = self.calc_contrastive_weighted(
+            if itc_block_size > 0:
+                nitc_tse_loss = self.compute_itc_in_blocks(
+                    'nitc', i_tse_f, t_tse_f, i_tse_f_norm_gathered,
+                    t_tse_f_norm_gathered, ids, gathered_ids, sim_targets,
+                    logit_scale, alpha=alpha, sample_weights=nrw_weights,
+                    domain_ids=domain_ids if dhn_margin > 0 else None,
+                    gathered_domain_ids=gathered_domain_ids if dhn_margin > 0 else None,
+                    dhn_margin=dhn_margin,
+                )
+            else:
+                nitc_tse_loss = self.calc_contrastive_weighted(
                 i_tse_f,
                 t_tse_f,
                 i_tse_f.detach(),
@@ -525,7 +568,19 @@ class CLIP(nn.Module):
 
         sdm_ratio = self.config.experiment.sdm_ratio
         if sdm_ratio > 0:
-            sdm_global_loss = self.compute_sdm(
+            if itc_block_size > 0:
+                sdm_global_loss = self.compute_itc_in_blocks(
+                    'sdm', image_features_norm, text_features_norm,
+                    image_features_norm_gathered, text_features_norm_gathered,
+                    ids, gathered_ids, sim_targets, logit_scale,
+                )
+                sdm_tse_loss = self.compute_itc_in_blocks(
+                    'sdm', i_tse_f, t_tse_f, i_tse_f_norm_gathered,
+                    t_tse_f_norm_gathered, ids, gathered_ids, sim_targets,
+                    logit_scale,
+                )
+            else:
+                sdm_global_loss = self.compute_sdm(
                 image_features_norm,
                 text_features_norm,
                 image_features_norm_gathered,
@@ -533,7 +588,7 @@ class CLIP(nn.Module):
                 sim_targets,
                 logit_scale,
             )
-            sdm_tse_loss = self.compute_sdm(
+                sdm_tse_loss = self.compute_sdm(
                 i_tse_f,
                 t_tse_f,
                 i_tse_f_norm_gathered,
@@ -547,7 +602,19 @@ class CLIP(nn.Module):
 
         tal_ratio = self.config.experiment.tal_ratio
         if tal_ratio > 0:
-            tal_global_loss = self.compute_tal(
+            if itc_block_size > 0:
+                tal_global_loss = self.compute_itc_in_blocks(
+                    'tal', image_features_norm, text_features_norm,
+                    image_features_norm_gathered, text_features_norm_gathered,
+                    ids, gathered_ids, sim_targets, logit_scale,
+                )
+                tal_tse_loss = self.compute_itc_in_blocks(
+                    'tal', i_tse_f, t_tse_f, i_tse_f_norm_gathered,
+                    t_tse_f_norm_gathered, ids, gathered_ids, sim_targets,
+                    logit_scale,
+                )
+            else:
+                tal_global_loss = self.compute_tal(
                 image_features_norm,
                 text_features_norm,
                 image_features_norm_gathered,
@@ -557,7 +624,7 @@ class CLIP(nn.Module):
                 self.config.experiment.tal_margin,
                 self.config.experiment.tal_tau,
             )
-            tal_tse_loss = self.compute_tal(
+                tal_tse_loss = self.compute_tal(
                 i_tse_f,
                 t_tse_f,
                 i_tse_f_norm_gathered,
@@ -572,9 +639,21 @@ class CLIP(nn.Module):
             ) * tal_ratio
 
         if self.config.experiment.ritc:
-            ritc_loss = self.compute_ritc(image_features_norm, text_features_norm, image_features_norm_gathered,
+            if itc_block_size > 0:
+                ritc_loss = self.compute_itc_in_blocks(
+                    'ritc', image_features_norm, text_features_norm,
+                    image_features_norm_gathered, text_features_norm_gathered,
+                    ids, gathered_ids, sim_targets, logit_scale,
+                )
+                ritc_tse_loss = self.compute_itc_in_blocks(
+                    'ritc', i_tse_f, t_tse_f, i_tse_f_norm_gathered,
+                    t_tse_f_norm_gathered, ids, gathered_ids, sim_targets,
+                    logit_scale,
+                )
+            else:
+                ritc_loss = self.compute_ritc(image_features_norm, text_features_norm, image_features_norm_gathered,
                                           text_features_norm_gathered, logit_scale, sim_targets)
-            ritc_tse_loss = self.compute_ritc(i_tse_f, t_tse_f, i_tse_f_norm_gathered, t_tse_f_norm_gathered,
+                ritc_tse_loss = self.compute_ritc(i_tse_f, t_tse_f, i_tse_f_norm_gathered, t_tse_f_norm_gathered,
                                               logit_scale, sim_targets)
             ret['ritc_loss'] = (ritc_loss + ritc_tse_loss) * self.config.experiment.ritc_ratio
 
@@ -603,6 +682,131 @@ class CLIP(nn.Module):
             )
 
         return ret
+
+    def _original_candidate_loss(
+        self, kind, image_features, text_features, image_candidates,
+        text_candidates, ids, candidate_ids, targets, logit_scale,
+        alpha=0.0, sample_weights=None, dhn_hard_mask=None, dhn_margin=0.0,
+    ):
+        """Invoke the existing loss without changing its formula or reduction."""
+        if kind == 'nitc':
+            arguments = (
+                image_features, text_features,
+                image_features.detach(), text_features.detach(),
+                image_candidates, text_candidates,
+                image_candidates.detach(), text_candidates.detach(),
+                targets, alpha, logit_scale,
+            )
+            if sample_weights is None:
+                return self.calc_contrastive(
+                    *arguments, dhn_hard_mask, dhn_margin,
+                )
+            return self.calc_contrastive_weighted(
+                *arguments, sample_weights, dhn_hard_mask, dhn_margin,
+            )
+        if kind == 'ritc':
+            return self.compute_ritc(
+                image_features, text_features, image_candidates,
+                text_candidates, logit_scale, targets,
+            )
+        if kind == 'sdm':
+            return self.compute_sdm(
+                image_features, text_features, image_candidates,
+                text_candidates, targets, logit_scale,
+            )
+        if kind == 'tal':
+            return self.compute_tal(
+                image_features, text_features, image_candidates,
+                text_candidates, ids, candidate_ids,
+                self.config.experiment.tal_margin,
+                self.config.experiment.tal_tau,
+            )
+        raise ValueError(f'Unsupported block contrastive loss: {kind}')
+
+    def compute_itc_in_blocks(
+        self, kind, image_features, text_features, image_candidates,
+        text_candidates, ids, candidate_ids, targets, logit_scale,
+        alpha=0.0, sample_weights=None, domain_ids=None,
+        gathered_domain_ids=None, dhn_margin=0.0,
+    ):
+        """Invoke original losses on continuous blocks after the existing gather.
+
+        Features and any full-batch NRW weights are computed once upstream.
+        ID targets, detached teacher softmax and DHN masks are rebuilt per block.
+        Multi-rank operation is deliberately unverified and needs explicit opt-in.
+        """
+        block_size = getattr(self.config.experiment, 'itc_block_size', 0)
+        distributed = (
+            torch.distributed.is_available()
+            and torch.distributed.is_initialized()
+        )
+        world_size = torch.distributed.get_world_size() if distributed else 1
+        if block_size > 0 and world_size > 1 and not getattr(
+            self.config.experiment, 'allow_unverified_multiproc', False,
+        ):
+            raise RuntimeError(
+                'ITC block 多进程路径未验证; use --allow_unverified_multiproc '
+                'only for explicit future validation'
+            )
+        anchor_count = image_features.shape[0]
+        candidate_count = image_candidates.shape[0]
+
+        def hard_mask(block_ids, block_candidate_ids, block_domains,
+                      block_candidate_domains):
+            if dhn_margin <= 0:
+                return None
+            if block_domains is None or block_candidate_domains is None:
+                raise ValueError('DHN blocks require local and gathered domain IDs')
+            return self.build_dhn_hard_mask(
+                block_ids, block_candidate_ids,
+                block_domains, block_candidate_domains,
+            )
+
+        if block_size <= 0 or block_size >= candidate_count:
+            mask = hard_mask(ids, candidate_ids, domain_ids, gathered_domain_ids)
+            return self._original_candidate_loss(
+                kind, image_features, text_features, image_candidates,
+                text_candidates, ids, candidate_ids, targets, logit_scale,
+                alpha, sample_weights, mask, dhn_margin,
+            )
+        if anchor_count == 0:
+            raise ValueError('ITC blocks require at least one anchor')
+        if candidate_count != text_candidates.shape[0]:
+            raise ValueError('image/text candidate counts must match')
+        offset = 0
+        if self.use_gather and distributed:
+            offset = torch.distributed.get_rank() * anchor_count
+        anchor_positions = torch.arange(anchor_count, device=ids.device) + offset
+        losses = []
+        for start in range(0, candidate_count, block_size):
+            stop = min(start + block_size, candidate_count)
+            anchor_mask = (anchor_positions >= start) & (anchor_positions < stop)
+            count = int(anchor_mask.sum().item())
+            if count == 0:
+                continue
+            block_ids = ids[anchor_mask]
+            block_candidate_ids = candidate_ids[start:stop]
+            positives = block_ids.view(-1, 1).eq(
+                block_candidate_ids.view(1, -1),
+            ).float()
+            block_targets = positives / positives.sum(1, keepdim=True)
+            mask = hard_mask(
+                block_ids, block_candidate_ids,
+                domain_ids[anchor_mask] if domain_ids is not None else None,
+                gathered_domain_ids[start:stop]
+                if gathered_domain_ids is not None else None,
+            )
+            loss = self._original_candidate_loss(
+                kind, image_features[anchor_mask], text_features[anchor_mask],
+                image_candidates[start:stop], text_candidates[start:stop],
+                block_ids, block_candidate_ids, block_targets, logit_scale,
+                alpha, sample_weights[anchor_mask]
+                if sample_weights is not None else None, mask, dhn_margin,
+            )
+            losses.append(loss * (count / anchor_count))
+        if not losses:
+            raise ValueError('ITC blocks found no local anchors in the candidate layout')
+        return sum(losses)
 
     @torch.no_grad()
     def compute_nrw_weights(
@@ -789,7 +993,13 @@ class CLIP(nn.Module):
         targets = pos / pos.sum(1, keepdim=True)
 
         if bridge_cv_ratio > 0:
-            bridge_cv_loss = self.bidirectional_soft_target_loss(
+            if getattr(self.config.experiment, 'itc_block_size', 0) > 0:
+                bridge_cv_loss = self.compute_bridge_in_blocks(
+                    aerial_features_sub, bridge_features_norm, ids_sub,
+                    has_bridge, targets, logit_scale,
+                )
+            else:
+                bridge_cv_loss = self.bidirectional_soft_target_loss(
                 aerial_features_sub,
                 bridge_features_norm,
                 targets,
@@ -797,7 +1007,13 @@ class CLIP(nn.Module):
             )
             ret['bridge_cv_loss'] = bridge_cv_loss * bridge_cv_ratio
         if bridge_tg_ratio > 0:
-            bridge_tg_loss = self.bidirectional_soft_target_loss(
+            if getattr(self.config.experiment, 'itc_block_size', 0) > 0:
+                bridge_tg_loss = self.compute_bridge_in_blocks(
+                    text_features_sub, bridge_features_norm, ids_sub,
+                    has_bridge, targets, logit_scale,
+                )
+            else:
+                bridge_tg_loss = self.bidirectional_soft_target_loss(
                 text_features_sub,
                 bridge_features_norm,
                 targets,
@@ -805,6 +1021,35 @@ class CLIP(nn.Module):
             )
             ret['bridge_tg_loss'] = bridge_tg_loss * bridge_tg_ratio
         return ret
+
+    def compute_bridge_in_blocks(
+        self, features, bridge_features, ids, has_bridge, targets, logit_scale,
+    ):
+        """Use the primary batch's block positions, not compact-subset blocks."""
+        block_size = getattr(self.config.experiment, 'itc_block_size', 0)
+        batch_count = has_bridge.numel()
+        if block_size <= 0 or block_size >= batch_count:
+            return self.bidirectional_soft_target_loss(
+                features, bridge_features, targets, logit_scale,
+            )
+        positions = has_bridge.nonzero(as_tuple=False).view(-1).to(ids.device)
+        bridge_count = ids.numel()
+        if bridge_count == 0:
+            return features.sum() * 0.0
+        losses = []
+        for start in range(0, batch_count, block_size):
+            mask = (positions >= start) & (positions < start + block_size)
+            count = int(mask.sum().item())
+            if count == 0:
+                continue
+            block_ids = ids[mask]
+            positives = block_ids.view(-1, 1).eq(block_ids.view(1, -1)).float()
+            block_targets = positives / positives.sum(1, keepdim=True)
+            block_loss = self.bidirectional_soft_target_loss(
+                features[mask], bridge_features[mask], block_targets, logit_scale,
+            )
+            losses.append(block_loss * (count / bridge_count))
+        return sum(losses)
 
     def encode_bridge_image(self, image, cam_id, training):
         bridge_features, _ = self.visual(

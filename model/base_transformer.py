@@ -76,7 +76,8 @@ class ResidualAttentionBlock(nn.Module):
 class ResidualAttentionBlockMoE(nn.Module):
     def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None, dropout: float = 0.,
                  num_of_experts: int = None, num_of_selected_experts: int = None,
-                 compute_view_loss: bool = True, compute_ortho_loss: bool = True):
+                 compute_view_loss: bool = True, compute_ortho_loss: bool = True,
+                 eval_router_mode: str = 'gumbel'):
         super().__init__()
 
         self.attn = nn.MultiheadAttention(d_model, n_head, dropout=dropout)
@@ -87,6 +88,9 @@ class ResidualAttentionBlockMoE(nn.Module):
         self.num_of_selected_experts = num_of_selected_experts
         self.compute_view_loss = compute_view_loss
         self.compute_ortho_loss = compute_ortho_loss
+        if eval_router_mode not in ('gumbel', 'argmax'):
+            raise ValueError("eval_router_mode must be 'gumbel' or 'argmax'")
+        self.eval_router_mode = eval_router_mode
         self.img_router = nn.Linear(d_model, 2)
         nn.init.normal_(self.img_router.weight.data, std=0.001)
         nn.init.constant_(self.img_router.bias.data, val=0.0)
@@ -127,7 +131,10 @@ class ResidualAttentionBlockMoE(nn.Module):
                 cos_sim = torch.cosine_similarity(F.normalize(x[:, 0, :], dim=-1), F.normalize(x[:, -1, :]), dim=-1).abs()
                 ortho_loss = (cos_sim - 0.001).clamp(min=0.0).mean() * 100
     
-        group_probs = F.gumbel_softmax(view_logits, hard=not training)
+        if not self.training and self.eval_router_mode == 'argmax':
+            group_probs = F.one_hot(view_logits.argmax(-1), num_classes=view_logits.shape[-1]).to(view_logits.dtype)
+        else:
+            group_probs = F.gumbel_softmax(view_logits, hard=not training)
         group_id = torch.argmax(group_probs, dim=1)  # [B]
     
         # logits
@@ -228,12 +235,14 @@ class Transformer_MoE(nn.Module):
         self.num_of_selected_experts = getattr(config, 'num_of_selected_experts', 0)
         self.compute_view_loss = config.experiment.view_ratio > 0
         self.compute_ortho_loss = config.experiment.ortho_ratio > 0
+        self.eval_router_mode = getattr(config.experiment, 'eval_router_mode', 'gumbel')
 
         self.resblocks = nn.ModuleList([
             ResidualAttentionBlockMoE(width, heads, attn_mask, dropout=dropout, num_of_experts=self.num_of_experts,
                                       num_of_selected_experts=self.num_of_selected_experts,
                                       compute_view_loss=self.compute_view_loss,
-                                      compute_ortho_loss=self.compute_ortho_loss)
+                                      compute_ortho_loss=self.compute_ortho_loss,
+                                      eval_router_mode=self.eval_router_mode)
             if i in self.expert_blocks else
             ResidualAttentionBlock(width, heads, attn_mask, dropout=dropout)
             for i in range(layers)
