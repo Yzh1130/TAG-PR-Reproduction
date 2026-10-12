@@ -196,18 +196,32 @@ def _text_font(figure, font):
     from matplotlib.text import Text
     for item in figure.findobj(Text):
         size = item.get_fontsize()
-        item.set_fontproperties(font)
-        item.set_fontsize(size)
+        weight = item.get_fontweight()
+        properties = font.copy()
+        properties.set_size(size)
+        properties.set_weight(weight)
+        item.set_fontproperties(properties)
+
+
+def _layout_figure(figure, font):
+    import matplotlib
+    # Apply the requested font before layout measures the labels. SimHei does
+    # not contain Unicode minus; scope the ASCII tick fallback to this figure.
+    with matplotlib.rc_context({"axes.unicode_minus": False}):
+        _text_font(figure, font)
+        figure.tight_layout()
 
 
 def _save_figure(figure, directory, stem, font):
+    import matplotlib
     _text_font(figure, font)
     result = {}
-    for suffix in ("png", "pdf"):
-        path = directory / f"{stem}.{suffix}"
-        with path.open("xb") as handle:
-            figure.savefig(handle, format=suffix, dpi=300, bbox_inches="tight")
-        result[suffix] = str(path)
+    with matplotlib.rc_context({"axes.unicode_minus": False}):
+        for suffix in ("png", "pdf"):
+            path = directory / f"{stem}.{suffix}"
+            with path.open("xb") as handle:
+                figure.savefig(handle, format=suffix, dpi=300, bbox_inches="tight")
+            result[suffix] = str(path)
     return result
 
 
@@ -259,7 +273,7 @@ def plot_data(data, directory, tag, font_path=None):
     right.set_ylabel("ΔR@1 (百分点)" if chinese else "Delta R@1 (percentage points)")
     right.set_title("Hub 偏度与校正增益：描述性散点" if chinese else "Hub skewness and correction gain: descriptive scatter")
     right.grid(alpha=.15)
-    fig.tight_layout()
+    _layout_figure(fig, font)
     artifacts = {"main": _save_figure(fig, directory, f"fig5_aeri_{tag}", font)}
     plt.close(fig)
     if data["paired_points"]:
@@ -287,7 +301,7 @@ def plot_data(data, directory, tag, font_path=None):
         fig.legend(handles=[plt.Line2D([], [], color=seed_colors[index], marker=markers[index],
                                       linestyle="none", label=f"seed {seed}") for index, seed in enumerate(seeds)],
                    loc="upper center", bbox_to_anchor=(.5, -.025), ncol=3, fontsize=9)
-        fig.tight_layout()
+        _layout_figure(fig, font)
         artifacts["paired"] = _save_figure(fig, directory, f"fig5_aeri_paired_{tag}", font)
         plt.close(fig)
     return artifacts, chinese
