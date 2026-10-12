@@ -59,6 +59,8 @@ def build_parser():
         if name == "pairs":
             sub.add_argument("--csv", required=True, action="append", help="Explicit collector pair CSV, repeatable")
             sub.add_argument("--metric", choices=("R1", "R5", "R10", "mAP"), default="R1")
+            sub.add_argument("--alias", action="append", default=[],
+                             help="Explicit OLD_PAIR=TARGET_PAIR name mapping, repeatable; overlapping paired seeds are errors")
         if name == "runs":
             sub.add_argument("--include", action="append", default=[], help="Collector prefix filter, repeatable")
         if name == "s13":
@@ -175,7 +177,7 @@ def _prepare(args, fmt):
         raise ValueError("the same input path was provided more than once")
     evidence = [{"path": str(path), "bytes": path.stat().st_size, "sha256_16": _sha(path)} for path in paths]
     if args.command == "pairs":
-        body = render_pairs([(str(path), _csv(path)) for path in paths], fmt, args.metric)
+        body = render_pairs([(str(path), _csv(path)) for path in paths], fmt, args.metric, aliases=args.alias)
     else:
         data = [_json(path) for path in paths]
         if args.command == "table5":

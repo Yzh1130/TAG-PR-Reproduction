@@ -6,6 +6,7 @@ is performed. Missing metrics are not reconstructed from other columns.
 from __future__ import annotations
 
 import math
+import json
 import re
 from collections import defaultdict
 from typing import Any
@@ -47,15 +48,66 @@ def _summary_cells(values, fmt, context, *, signed=False):
     ]
 
 
-def render_pairs(documents, fmt, metric="R1"):
+def _pair_aliases(aliases):
+    """Resolve only explicit aliases; reject ambiguity instead of guessing."""
+    if aliases is None:
+        return {}
+    if isinstance(aliases, str) or not isinstance(aliases, (list, tuple)):
+        raise ValueError("--alias must be repeated OLD_PAIR=TARGET_PAIR strings")
+    mapping = {}
+    for definition in aliases:
+        if not isinstance(definition, str) or definition.count("=") != 1:
+            raise ValueError("--alias must be OLD_PAIR=TARGET_PAIR")
+        source, target = definition.split("=", 1)
+        if not source or not target or source.strip() != source or target.strip() != target:
+            raise ValueError("--alias pair names must be nonempty and have no surrounding whitespace")
+        if any(len(name.split("|")) != 2 or not all(name.split("|")) for name in (source, target)):
+            raise ValueError("--alias pair names must each contain two nonempty prefixes separated by |")
+        if source in mapping:
+            raise ValueError(f"duplicate or ambiguous --alias source {source!r}")
+        mapping[source] = target
+    resolved = {}
+    for source in mapping:
+        visited = set()
+        target = source
+        while target in mapping:
+            if target in visited:
+                raise ValueError(f"cycle in --alias definitions starting at {source!r}")
+            visited.add(target)
+            target = mapping[target]
+        resolved[source] = target
+    return resolved
+
+
+def _pair_directories(value, context, fmt):
+    """Collector writes directory lists as JSON, never Python repr."""
+    if value is None or value == "":
+        return fmt.text(None, context)
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{context}: expected collector JSON directory array") from exc
+    if not isinstance(value, list) or not all(isinstance(path, str) for path in value):
+        raise ValueError(f"{context}: expected collector JSON directory array of strings")
+    if not value:
+        return "(recorded empty list)"
+    return "; ".join(path + " (name=" + re.split(r"[/\\]", path.rstrip("/\\"))[-1] + ")"
+                     for path in value)
+
+
+def render_pairs(documents, fmt, metric="R1", aliases=None):
     """Merge exact duplicate rows; stop on conflicting pair/scope/seed records.
 
     ``documents`` is a list of (source path/label, DictReader rows). Collector's
     ``metric`` column is the checkpoint scope (last/best), not the retrieval
     metric selected for this table. Distinct scopes are always separate tables.
+    Aliases never combine metric cells: overlapping paired seeds are errors;
+    unpaired placeholders remain visible in provenance but supply no values.
     """
     if metric not in ("R1", "R5", "R10", "mAP"):
         raise ValueError("--metric must be R1, R5, R10, or mAP")
+    alias_map = _pair_aliases(aliases)
     merged = {}
     source_membership = defaultdict(list)
     for source, rows in documents:
@@ -80,8 +132,23 @@ def render_pairs(documents, fmt, metric="R1"):
         fmt.reason("pairs: input CSVs contain no collector pair rows")
         return "## Seed-paired configurations\n\nNo recorded pair rows.\n"
     groups = defaultdict(list)
-    for (pair, scope, seed), row in merged.items():
-        groups[(pair, scope)].append((seed, row))
+    canonical_seeds = defaultdict(list)
+    for key, row in merged.items():
+        pair, scope, seed = key
+        canonical_seeds[(alias_map.get(pair, pair), scope, seed)].append((key, row))
+    for (pair, scope, seed), records in canonical_seeds.items():
+        for key, record in records:
+            if (record.get("status") or None) not in ("paired", "unpaired", None):
+                raise ValueError(f"pairs.{key}: unknown collector pairing status {record.get('status')!r}")
+        paired = [(key, row) for key, row in records if row.get("status") == "paired"]
+        if len(paired) > 1:
+            origins = "; ".join(f"{key[0]!r} from {', '.join(source_membership[key])}" for key, _ in paired)
+            raise ValueError(f"alias collision: more than one paired record for pair/scope/seed "
+                             f"{(pair, scope, seed)!r}: {origins}; not overwriting even equal values")
+        # No cell-wise filling or run-directory matching: one recorded paired
+        # row is used verbatim, and unpaired records contribute no statistics.
+        selected = paired[0][1] if paired else records[0][1]
+        groups[(pair, scope)].append((seed, selected, records))
     parts = ["## Seed-paired configurations\n\n"
              f"Retrieval metric: {metric}; checkpoint scopes remain separate. "
              "Statistics use only recorded paired values; population std uses ddof=0.\n"]
@@ -90,14 +157,15 @@ def render_pairs(documents, fmt, metric="R1"):
         parts.append(f"\n### {fmt.text(pair, context + '.pair')} ({fmt.text(scope, context + '.scope')})\n")
         display_rows = []
         values = {side: [] for side in ("A", "B", "delta")}
-        for seed, row in sorted(items, key=lambda item: _seed_sort(item[0])):
+        for seed, row, records in sorted(items, key=lambda item: _seed_sort(item[0])):
             row_context = context + f".seed={seed}"
             status = row.get("status") or None
             if status not in ("paired", "unpaired", None):
                 raise ValueError(f"{row_context}: unknown collector pairing status {status!r}")
             cells = [fmt.text(seed, row_context + ".seed")]
             if status != "paired":
-                reason = row.get("reason") or "pairing status missing; no paired values used"
+                reason = "; ".join(record.get("reason") or "pairing status missing; no paired values used"
+                                   for _, record in records)
                 fmt.reason(f"{row_context}: {reason}")
                 cells.extend(["n/a"] * 3)
             else:
@@ -107,9 +175,31 @@ def render_pairs(documents, fmt, metric="R1"):
                     cells.append(fmt.number(value, row_context + "." + column, signed=side == "delta"))
                     if value is not None:
                         values[side].append(value)
-            cells.extend([fmt.text(status, row_context + ".status"), row.get("reason") or ""])
+            sources = []
+            original_pairs = []
+            directories = {side: [] for side in ("A", "B")}
+            placeholders = []
+            for key, record in records:
+                original_pair = key[0]
+                original_pairs.append(original_pair)
+                origins = ", ".join(source_membership[key])
+                sources.append(original_pair + ": " + origins)
+                for side in ("A", "B"):
+                    directories[side].append(original_pair + ": " + _pair_directories(
+                        record.get(f"{side}_directories"), row_context + f".{original_pair}.{side}_directories", fmt))
+                if record.get("status") != "paired":
+                    placeholders.append(original_pair + " @ " + origins + ": "
+                                        + (record.get("reason") or "pairing status missing"))
+            reason_cell = row.get("reason") or ""
+            if status != "paired" and len(records) > 1:
+                reason_cell = reason
+            cells.extend([fmt.text(status, row_context + ".status"), reason_cell,
+                          "\n".join(sources), "\n".join(original_pairs),
+                          "\n".join(directories["A"]), "\n".join(directories["B"]),
+                          "\n".join(placeholders) or "none"])
             display_rows.append(cells)
-        parts.append(fmt.table(["seed", "A", "B", "Δ(B−A)", "status", "reason"], display_rows))
+        parts.append(fmt.table(["seed", "A", "B", "Δ(B−A)", "status", "reason", "source CSV:line",
+                                "original pair", "A directories", "B directories", "unpaired provenance"], display_rows))
         summaries = [_summary_cells(values[side], fmt, context + f".{side}", signed=side == "delta")
                      for side in ("A", "B", "delta")]
         statistic_names = ["mean", "population std (ddof=0)", "range [min, max]", "sign counts (−/0/+)"]

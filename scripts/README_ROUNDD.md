@@ -56,6 +56,7 @@ python scripts/revision/render_revision_tables.py table-e5 --json "ViT-L/14=ABSO
 python scripts/revision/render_revision_tables.py table-e6 --root "ViT-L/14=ABSOLUTE_L14_E6_RUN_ROOT" --root "ViT-B/16=ABSOLUTE_B16_E6_RUN_ROOT" --out NEW_OUTPUT_DIRECTORY
 python scripts/revision/render_revision_tables.py table-s7d --s7d-json "ViT-B/16=ABSOLUTE_S7D_SEED0_JSON" --s7d-json "ViT-B/16=ABSOLUTE_S7D_SEED1_JSON" --s7d-json "ViT-B/16=ABSOLUTE_S7D_SEED2_JSON" --out NEW_OUTPUT_DIRECTORY
 python scripts/revision/render_revision_tables.py s13 --compare --summary "ViT-L/14=ABSOLUTE_L14_SUMMARY_JSON" --summary "ViT-B/16=ABSOLUTE_B16_SUMMARY_JSON" --out NEW_OUTPUT_DIRECTORY
+python scripts/revision/render_revision_tables.py pairs --csv ABSOLUTE_CURRENT_PAIRS_CSV --csv ABSOLUTE_HISTORICAL_PAIRS_CSV --alias "bs320_ep10|nrw_view_norm_ep10=bs320_ep10|e2_nrw_view_norm" --out NEW_OUTPUT_DIRECTORY
 ```
 
 - `table-e5` reads `R2_router_eval.py`'s saved `blocks`, `block_order`,
@@ -98,10 +99,17 @@ python scripts/revision/render_revision_tables.py s13 --compare --summary "ViT-L
   seeds. Dataset-level `spearman_excess_skew_vs_D` and fit-level
   `spearman_vs_excess_skew` are distinct, clearly named columns.
 - Pairs accepts repeated `--csv`, `--metric {R1,R5,R10,mAP}` (default R1).
-  Merge keys include pair name, last/best checkpoint scope, and seed. Exact
-  duplicate rows are deduplicated; conflicting rows stop. Last/best are never
-  pooled. Descriptive summaries reduce stored paired values only; absent Δ is
-  not computed from B−A. `unpaired` remains `n/a`.
+  Optional repeatable `--alias OLD_PAIR=TARGET_PAIR` defaults to no mappings;
+  names are never matched by guesswork. Merge keys include the explicit target
+  pair name, last/best checkpoint scope, and seed. Without aliases, exact
+  duplicate rows are deduplicated; conflicting rows stop. Aliasing two valid
+  paired rows onto the same seed/scope is always an error, even if their values
+  are equal. Each seed row records the original pair name, CSV path/line and
+  A/B directory paths and names. An unpaired placeholder does not contribute
+  values or replace an intact paired row; its provenance/reason is retained.
+  Two unpaired rows are never combined into a pair. Last/best are never pooled.
+  Descriptive summaries reduce stored paired values only; absent Δ is not
+  computed from B−A. `unpaired` remains `n/a`.
 - R3 R@1 is stored in percent; its identity CI and SSSV shares are proportions
   and are converted to percent. Attribute Jaccard values remain unscaled.
   Empty Market quartiles and null endpoints remain `n/a`.
@@ -134,6 +142,7 @@ Existing figure output directories are preserved with timestamped new runs.
 ```text
 python -m unittest tests.test_roundd_fig5 tests.test_roundd_tag_tables tests.test_roundd_ext_tables tests.test_roundd_collection_tables tests.test_roundd_renderer_cli -v
 python -m unittest tests.test_rounde_renderer -v
+python -m unittest tests.test_rounde_pairs -v
 python -m unittest discover -s tests -v
 ```
 
