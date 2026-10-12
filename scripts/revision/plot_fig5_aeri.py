@@ -307,6 +307,133 @@ def plot_data(data, directory, tag, font_path=None):
     return artifacts, chinese
 
 
+def _save_paper_figure(figure, directory, stem, font):
+    """Keep the 17 cm canvas: a tight bounding box would change its width."""
+    import matplotlib
+    _text_font(figure, font)
+    result = {}
+    with matplotlib.rc_context({"axes.unicode_minus": False, "savefig.bbox": None}):
+        for suffix in ("png", "pdf"):
+            path = directory / f"{stem}.{suffix}"
+            with path.open("xb") as handle:
+                figure.savefig(handle, format=suffix, dpi=300, bbox_inches=None)
+            result[suffix] = str(path)
+    return result
+
+
+def plot_paper_data(data, directory, tag, font_path=None):
+    """Plot the recorded points in three panels, without recomputing metrics."""
+    import matplotlib
+    matplotlib.use("Agg")
+    from matplotlib import pyplot as plt
+    font, chinese = _font(font_path)
+    seeds = data["training_seeds"]
+    markers = ("o", "s", "^")
+    modes = ("trans_delta_r1", "ind_delta_r1")
+    labels = (["官方\n纯空中", "规模受控\n纯空中", "纯地面", "空地混合"] if chinese else
+              ["Official\naerial", "Controlled\naerial", "Ground\nonly", "Aerial +\nground"])
+    mode_labels = (["转导式", "归纳式"] if chinese else ["Transductive", "Inductive"])
+    controlled_label = "受控（5 次抽样均值）" if chinese else "Controlled (5-draw mean)"
+    # Do not claim a five-draw mean when a different input protocol was supplied.
+    controlled = [row for row in data["points"] if row["composition"] == "controlled_aerial"]
+    if any(row["gallery_draws"] != 5 for row in controlled):
+        raise ValueError("paper layout requires the recorded five controlled-gallery draws")
+    paired = [row for row in data["paired_points"]
+              if row["metric"] == "transductive_gain_difference_vs_official"]
+    expected = {(composition, seed) for composition in PAIRED for seed in seeds}
+    if {(row["composition"], row["seed"]) for row in paired} != expected or len(paired) != len(expected):
+        raise ValueError("paper panel (b) requires recorded transductive paired differences for every composition/seed")
+    if any(row["ci_low"] is None or row["ci_high"] is None for row in paired):
+        raise ValueError("paper panel (b) requires the recorded identity CI for every paired difference")
+    composition_index = {name: index for index, (name, _) in enumerate(COMPOSITIONS)}
+    jitter = {seed: (index - 1) * .055 for index, seed in enumerate(seeds)}
+    width_cm, height_cm = 17.0, 8.1
+    style = {"font.size": 7.5, "axes.labelsize": 7.5, "xtick.labelsize": 7,
+             "ytick.labelsize": 7, "legend.fontsize": 7, "axes.linewidth": .6,
+             "axes.unicode_minus": False}
+    with matplotlib.rc_context(style):
+        fig, (gain_axis, paired_axis, hub_axis) = plt.subplots(
+            1, 3, figsize=(width_cm / 2.54, height_cm / 2.54))
+        # Reserve space inside the fixed-size canvas for labels and one legend row.
+        fig.subplots_adjust(left=.078, right=.988, top=.91, bottom=.27, wspace=.52)
+        for axis, letter in zip(fig.axes, "abc"):
+            axis.text(0, 1.04, f"({letter})", transform=axis.transAxes,
+                      fontsize=8.5, fontweight="bold", ha="left", va="bottom")
+            axis.tick_params(width=.6, length=2.5, pad=2)
+            axis.grid(axis="y", alpha=.15, linewidth=.5)
+        offsets = {"trans_delta_r1": -.18, "ind_delta_r1": .18}
+        for metric in modes:
+            for point in (row for row in data["points"] if row["metric"] == metric):
+                x = composition_index[point["composition"]] + offsets[metric]
+                gain_axis.scatter(x + jitter[point["seed"]], point["value"], color=COLORS[metric],
+                                  marker=markers[seeds.index(point["seed"])], s=18, zorder=3)
+            for name, _ in COMPOSITIONS:
+                values = [row["value"] for row in data["points"]
+                          if row["composition"] == name and row["metric"] == metric]
+                x = composition_index[name] + offsets[metric]
+                gain_axis.hlines(float(np.mean(values)), x - .10, x + .10,
+                                 color=COLORS[metric], linewidth=1.5, zorder=4)
+        gain_axis.set_xticks(range(len(labels)), labels)
+        gain_axis.set_xlim(-.5, 3.5)
+        gain_axis.set_ylabel("ΔR@1 (百分点)" if chinese else "Delta R@1 (pp)")
+        gain_axis.axhline(0, color="#888888", linestyle="--", linewidth=.65)
+        categories = list(PAIRED)
+        for row in paired:
+            x = categories.index(row["composition"]) + jitter[row["seed"]] * 1.5
+            # Use the recorded endpoints; a percentile CI need not contain its estimate.
+            paired_axis.vlines(x, row["ci_low"], row["ci_high"], color=COLORS[modes[0]], linewidth=.85)
+            paired_axis.hlines([row["ci_low"], row["ci_high"]], x - .025, x + .025,
+                               color=COLORS[modes[0]], linewidth=.85)
+            paired_axis.scatter(x, row["value"], color=COLORS[modes[0]],
+                                marker=markers[seeds.index(row["seed"])], s=18, zorder=3)
+        paired_axis.set_xticks(range(len(categories)), [labels[composition_index[name]] for name in categories])
+        paired_axis.set_xlim(-.45, 2.45)
+        paired_axis.set_ylabel("增益配对差 (百分点)" if chinese else "Paired gain difference (pp)")
+        paired_axis.axhline(0, color="#888888", linestyle="--", linewidth=.65)
+        for metric in modes:
+            for point in (row for row in data["points"] if row["metric"] == metric):
+                hollow = point["composition"] == "controlled_aerial"
+                hub_axis.scatter(point["hub_skew"], point["value"],
+                                 facecolors="none" if hollow else COLORS[metric], edgecolors=COLORS[metric],
+                                 marker=markers[seeds.index(point["seed"])], s=21, linewidths=.8, zorder=3)
+        hub_axis.set_xlabel("Hub 超额偏度 (N10)" if chinese else "Hub excess skewness (N10)")
+        hub_axis.set_ylabel("ΔR@1 (百分点)" if chinese else "Delta R@1 (pp)")
+        handles = [plt.Line2D([], [], color=COLORS[metric], linewidth=1.5, label=label)
+                   for metric, label in zip(modes, mode_labels)]
+        handles += [plt.Line2D([], [], color="#666666", marker=markers[index], markersize=3.8,
+                              linestyle="none", label=f"seed {seed}") for index, seed in enumerate(seeds)]
+        handles.append(plt.Line2D([], [], color="#666666", marker="o", markerfacecolor="none",
+                                  markersize=3.8, linestyle="none", label=controlled_label))
+        fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(.5, .035), ncol=len(handles),
+                   frameon=False, handlelength=1.25, handletextpad=.4, columnspacing=.95)
+        artifacts = {"paper": _save_paper_figure(fig, directory, f"fig5_aeri_paper_{tag}", font)}
+        plt.close(fig)
+    seed_key = "/".join(str(seed) for seed in seeds)
+    caption = (
+        "图5. AERI-PEDES 不同图库构成下的 hubness 校正结果。"
+        "(a) 转导式与归纳式 ΔR@1：点为三个训练种子，短横线为种子均值。"
+        "(b) 转导式增益相对官方纯空中图库的配对差：误差棒为归档的身份级 95% CI，"
+        "受控图库的 CI 条件于五次图库抽样。"
+        "(c) Hub 超额偏度 (N10) 与 ΔR@1 的描述性散点：空心点为受控纯空中图库五次抽样的均值。"
+        f"蓝色/橙色表示转导式/归纳式，圆/方/三角表示 seed {seed_key}。增益及配对差的单位为百分点。"
+        if chinese else
+        "Figure 5. Hubness correction under four AERI-PEDES gallery compositions. "
+        "(a) Transductive and inductive delta R@1: points denote three training seeds and short lines their means. "
+        "(b) Paired transductive-gain differences versus the official aerial gallery, with recorded 95% identity CIs; "
+        "controlled-gallery CIs are conditional on five draws. "
+        "(c) Descriptive hub excess skewness (N10) versus delta R@1; hollow points denote controlled-gallery five-draw means. "
+        f"Blue/orange denote transductive/inductive correction; circles/squares/triangles denote seeds {seed_key}. "
+        "Gains and paired differences are in percentage points.")
+    layout = {"name": "paper", "panel_count": 3, "width_cm": width_cm, "height_cm": height_cm,
+              "dpi": 300, "minimum_font_pt": 7, "legend_rows": 1,
+              "panel_point_counts": {"a": sum(row["metric"] in modes for row in data["points"]),
+                                     "b": len(paired),
+                                     "c": sum(row["metric"] in modes for row in data["points"])},
+              "seed_markers": dict(zip((str(seed) for seed in seeds), markers)),
+              "suggested_caption": caption}
+    return artifacts, chinese, layout
+
+
 def _directory(root, tag, inputs):
     root = Path(root).expanduser().resolve()
     if any(root == path.parent for path in inputs):
@@ -329,6 +456,8 @@ def build_parser():
     parser.add_argument("--out", required=True, help="Parent for a fresh output directory")
     parser.add_argument("--tag", required=True)
     parser.add_argument("--font", default=None, help="Chinese font file; missing/unreadable font falls back to English")
+    parser.add_argument("--layout", choices=("legacy", "paper"), default="legacy",
+                        help="legacy (default) or a 17 cm, three-panel paper layout")
     return parser
 
 
@@ -346,7 +475,12 @@ def main(argv=None):
         directory = _directory(args.out, args.tag, input_paths)
         for warning in data["warnings"]:
             print("WARNING:", warning, flush=True)
-        artifacts, chinese = plot_data(data, directory, args.tag, args.font)
+        if args.layout == "paper":
+            artifacts, chinese, layout = plot_paper_data(data, directory, args.tag, args.font)
+            data["paper_layout"] = layout
+            print("建议图注：" if chinese else "Suggested caption:", layout["suggested_caption"], flush=True)
+        else:
+            artifacts, chinese = plot_data(data, directory, args.tag, args.font)
         csv_path = directory / f"fig5_aeri_data_{args.tag}.csv"
         fields = ("plot", "composition", "seed", "metric", "value", "ci_low", "ci_high", "hub_skew", "source_json", "source_field", "hub_source_field", "ci_source_field", "gallery_draws")
         with csv_path.open("x", newline="", encoding="utf-8") as handle:
@@ -374,6 +508,8 @@ def main(argv=None):
         with (directory / f"fig5_aeri_{args.tag}.log").open("x", encoding="utf-8") as handle:
             handle.write(data["font_status"] + "\n")
             handle.write("\n".join(data["warnings"]) + "\n")
+            if args.layout == "paper":
+                handle.write(data["paper_layout"]["suggested_caption"] + "\n")
             handle.write(json.dumps(artifacts, ensure_ascii=False, indent=2) + "\n")
         print("wrote", path, flush=True)
         return data
