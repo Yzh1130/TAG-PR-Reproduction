@@ -104,24 +104,30 @@ positive-preserving；shared evaluator 剔除 zero-positive 查询。
 `{out}/{script}_{tag}[_{UTC}]/`，其中每个产物文件名含 tag。
 S7a summary 为 `S7a_summary_{tag}.json`。
 S7b/e 用 `--s7a-json` 验证原 run 路径与 meta/sim 哈希，再定位 penalty。
+五个入口共用 `S7_aggregate_seeds.select_runs/_run_meta`：
+**`--run-dir` 的 PATH 若为相对路径，则相对当前工作目录解析，而不是
+相对 `--root`**。`--root` 仅用于未给 `--run-dir` 时的目录扫描。
+本轮只修正文档，不修改入口解析；下列所有 run 变量都显式拼成绝对路径。
 
 以下为 seed0/1/2 完整循环。每个变量应是具有 epoch=10 转储的**实际**
-目录（目录包含真实时间戳），不得填推测的时间戳或通配符：
+目录（目录包含真实时间戳），不得填推测的时间戳或通配符。
+`*_DIR` 环境变量只填已有目录的 basename（不带路径）；固定的绝对根
+加上该 basename 形成实际输入路径：
 
 ```bash
 EXT_ROOT=/root/autodl-tmp/TAG-PR/experiments_ext
-: "${CUHK0:?设为 cuhkpedes_ViT-B-16_test_seed0_<真实时间戳> 完整目录}"
-: "${CUHK1:?设为 cuhkpedes seed1 完整目录}"
-: "${CUHK2:?设为 cuhkpedes seed2 完整目录}"
-: "${ICFG0:?设为 icfgpedes seed0 完整目录}"
-: "${ICFG1:?设为 icfgpedes seed1 完整目录}"
-: "${ICFG2:?设为 icfgpedes seed2 完整目录}"
-: "${AERI0:?设为 aeri seed0 完整目录}"
-: "${AERI1:?设为 aeri seed1 完整目录}"
-: "${AERI2:?设为 aeri seed2 完整目录}"
-: "${TBAPR0:?设为 tbapr seed0 完整目录}"
-: "${TBAPR1:?设为 tbapr seed1 完整目录}"
-: "${TBAPR2:?设为 tbapr seed2 完整目录}"
+CUHK0="$EXT_ROOT/${CUHK0_DIR:?填已有 cuhkpedes test seed0 目录名}"
+CUHK1="$EXT_ROOT/${CUHK1_DIR:?填已有 cuhkpedes test seed1 目录名}"
+CUHK2="$EXT_ROOT/${CUHK2_DIR:?填已有 cuhkpedes test seed2 目录名}"
+ICFG0="$EXT_ROOT/${ICFG0_DIR:?填已有 icfgpedes test seed0 目录名}"
+ICFG1="$EXT_ROOT/${ICFG1_DIR:?填已有 icfgpedes test seed1 目录名}"
+ICFG2="$EXT_ROOT/${ICFG2_DIR:?填已有 icfgpedes test seed2 目录名}"
+AERI0="$EXT_ROOT/${AERI0_DIR:?填已有 aeri test seed0 目录名}"
+AERI1="$EXT_ROOT/${AERI1_DIR:?填已有 aeri test seed1 目录名}"
+AERI2="$EXT_ROOT/${AERI2_DIR:?填已有 aeri test seed2 目录名}"
+TBAPR0="$EXT_ROOT/${TBAPR0_DIR:?填已有 tbapr test seed0 目录名}"
+TBAPR1="$EXT_ROOT/${TBAPR1_DIR:?填已有 tbapr test seed1 目录名}"
+TBAPR2="$EXT_ROOT/${TBAPR2_DIR:?填已有 tbapr test seed2 目录名}"
 CUHK_RUNS=("$CUHK0" "$CUHK1" "$CUHK2")
 ICFG_RUNS=("$ICFG0" "$ICFG1" "$ICFG2")
 AERI_RUNS=("$AERI0" "$AERI1" "$AERI2")
@@ -156,7 +162,7 @@ python scripts/ext/S7_aggregate_seeds.py \
 只有 CUHK seed0 val 转储在任务中明确提供；不猜测 seed1/2 的 val：
 
 ```bash
-: "${CUHK_VAL0:?设为 cuhkpedes_ViT-B-16_val_seed0_<真实时间戳> 完整目录}"
+CUHK_VAL0="$EXT_ROOT/${CUHK_VAL0_DIR:?填已有 cuhkpedes val seed0 目录名}"
 python scripts/ext/S7c_valselect.py --root "$EXT_ROOT" \
   --run-dir "cuhkpedes:val=$CUHK_VAL0" --run-dir "cuhkpedes:test=$CUHK0" \
   --run-dir "icfgpedes:test=$ICFG0" --run-dir "aeri:test=$AERI0" --run-dir "tbapr:test=$TBAPR0" \
@@ -379,3 +385,158 @@ shared evaluator。不同原版脚本的top-k归约精度也原样保留。
 真实联合先验与富集；外部seed0/1/2所有S7及汇总；B16末轮E3提取/352行
 与各模型组summary；真实R3/案例人工挑选；e6 GPU路由重复评测。
 本地mock不替代这些门槛，不报告任何未知实测数值。
+
+## 9. Round C：结果收集、显式面板与图5（只读离线）
+
+本节脚本不运行训练、不修改任何 run 或原有评测路径。真实实验结果均
+**待训练机执行**；只指定已有输入目录/JSON，输出放入新的分析目录。
+
+### 9.1 archived runs 与逐 seed 配对
+
+```bash
+: "${RUN_ROOT:?设为已有 TAG-PEDES 实验根目录的绝对路径}"
+: "${ROUND_C_OUT:?设为新的分析输出目录的绝对路径}"
+python scripts/revision/collect_revision_runs.py --root "$RUN_ROOT" \
+  --include e3_ --pair 'e3_c0_b0|e3_c1_b80' --by seed --metric last \
+  --tag e3_last --out "$ROUND_C_OUT/collector"
+
+# 历史基线前缀由用户指定，不用目录日期或模型名字推断基线。
+: "${HIST_B16_BS320_PREFIX:?填历史 B/16 bs320 基线的真实前缀}"
+: "${E2_GROUP2_PREFIX:?填第2组 E2 的真实前缀}"
+: "${E2_GROUP3_PREFIX:?填第3组 E2 的真实前缀}"
+: "${E2_GROUP4_PREFIX:?填第4组 E2 的真实前缀}"
+python scripts/revision/collect_revision_runs.py --root "$RUN_ROOT" \
+  --include "$HIST_B16_BS320_PREFIX" --include e2_ \
+  --pair "$HIST_B16_BS320_PREFIX|e2_nrw_view_norm" \
+  --pair "$HIST_B16_BS320_PREFIX|$E2_GROUP2_PREFIX" \
+  --pair "$HIST_B16_BS320_PREFIX|$E2_GROUP3_PREFIX" \
+  --pair "$HIST_B16_BS320_PREFIX|$E2_GROUP4_PREFIX" \
+  --by seed --metric last --tag e2_last --out "$ROUND_C_OUT/collector"
+
+# best 是独立口径，独立 tag/表，不与 last 混列。
+python scripts/revision/collect_revision_runs.py --root "$RUN_ROOT" \
+  --include e3_ --pair 'e3_c0_b0|e3_c1_b80' --metric best \
+  --tag e3_best --out "$ROUND_C_OUT/collector"
+```
+
+`--root`、`--include`、`--pair` 可重复；include 默认不过滤，pair 默认
+不启用；`--by=seed`、`--metric=last`。前缀匹配目录名、去掉 `YYYYMMDD_`
+的目录名及归档 exp_name，不从目录名提取 seed。输出 `runs_TAG.csv/json`
+与有配对时的 `pairs_last_TAG.csv`（或 `pairs_best_TAG.csv`）。碰撞增加
+UTC 后缀，不覆盖。每个 seed 两侧都必须恰好一个目录，缺失、重复、
+两前缀命中同一目录或指标缺失均标 unpaired，不选择“最新”目录。
+统计仅为 A/B 及 B−A 的均值、population std(ddof=0)、范围和差值符号
+计数，不做检验或可加分解。
+
+解析证据为本轮基线源码中的实际写入格式：
+
+- `main.py:1962-1968` 的 `Epoch[k] Iteration[i/N]` 是按 print_period
+  抽样的进度行；`1981-1987` 的 `Epoch k done.` 是完成证据。N 记为
+  measured_loader_iterations；不能用最后一条打印的 i 冒充完整轮长度。
+- `main.py:1370-1377` 原始 `Acc@1 ... Acc@5 ... Acc@10 ... mAP ...`
+  只有5位小数；CSLS/RERANK 前缀行不是原始指标。优先读
+  `metrics_by_epoch.csv` 的 epoch/R1/R5/R10/mAP 原始列（`1432-1490`）。
+- `experiment.py:213-231` 归档 config_used.yaml/git_commit.txt/
+  run_command.txt/environment_summary.txt；命令文件 `116-141` 保存
+  command/sys.argv/config_source，git 文件 `104-115` 保存运行时 HEAD。
+- `experiment.py:263-303` 的 final_results.txt 有 best_epoch、四指标、
+  completed_epochs/run_status；`main.py:2058-2081` 保存 best/last checkpoint。
+  collector 仅流式哈希 checkpoint，不反序列化。日志文件为 train.log
+  （`experiment.py:65-79`），兼容历史 train_log.txt 及其他 `.log`。
+
+缺失字段一律 null 并列入 missing_fields；不使用当前 config 默认值、
+当前 git HEAD 或配置里的理论 epoch 数补训练证据。config_used 的 SHA16
+来自归档文件；原始 config_source 的 SHA16 若当时未记录则 null，不能
+用现在同路径的 YAML 冒充训练时文件。老日志可能没有 argv/exp_name/
+seed/git/config hash/开关值；只留5位指标或没有完整迭代证据时也如实标注。
+
+### 9.2 R2 归纳条件与显式 Figure 3 面板
+
+```bash
+: "${SIM_QG:?设为已有 sim_qg.npy 的绝对路径}"
+: "${BANK_G:?设为已有 sim_bank_g_fresh.npy 的绝对路径}"
+: "${ANN:?设为真实 test_reid.json 的绝对路径}"
+: "${IMAGE_ROOT:?设为真实图像根目录的绝对路径}"
+: "${S13_JSON:?设为同一矩阵对应 S13 JSON 的绝对路径}"
+python scripts/R2_hard_case_pool.py --sim "$SIM_QG" --bank "$BANK_G" \
+  --anno "$ANN" --image-root "$IMAGE_ROOT" --s13-json "$S13_JSON" \
+  --inductive-alpha 0.5 --inductive-k 10 \
+  --bank-label 'E3_fresh_forward e3_c0_b0_seed0' --out "$ROUND_C_OUT/r2_pool"
+
+: "${R2_TRANS_JSON:?填保存所选查询行的 R2 JSON 绝对路径}"
+: "${R2_IND_JSON:?填归纳条件 R2 JSON 绝对路径}"
+python scripts/R2_make_figure.py --pool-json "trans=$R2_TRANS_JSON" \
+  --pool-json "ind=$R2_IND_JSON" --panel 'a:446@trans,1663@trans' \
+  --panel 'b:1421@trans' --panel 'c:1048@trans' --panel 'd:511@trans' \
+  --panel 'e:227@ind' --tag fig3 --out "$ROUND_C_OUT/fig3"
+```
+
+hard_case 的新增默认值仍为 alpha=.5/k=10/bank-label=None，原 parity gate
+不变。bank 路径、bytes、SHA16、alpha/k/label 都进 JSON；未给 label
+时沿用旧 provenance note。用户自由文本 label 不是查询独立性的认证。
+
+`--panel` 与 `--pool-json LABEL=PATH` 可重复；`--tag` 默认 selected。
+也支持 `--select POOL_JSON --panel 'a:446,1663'`，或旧 selection JSON。
+无 --panel 时旧 --select 的渲染与输出保持原样。若同 q 在一个 JSON
+内有不同条件，显式用 `227@ind/inductive_success`；@label 仅指定 JSON，
+不能隐式决定该 JSON 内的校正条件。缺少保存行（即使属于 candidate
+但不在已保存抽样 cases 中）立即报错，不重算或静默跳过。
+
+新面板按查询源图、before top-3、after top-3、best positive 共8格；
+绿框命中、红框未命中，行首 `(a) q=...`。图内仅英文标签，无查询文本。
+新目录输出 PNG300dpi/PDF/layout JSON/selected_cases_TAG.json；查询文本
+只在 JSON。逐行保存所属池、池seed、保存的抽样规模、是否位于该池
+selected_query_indices、条件、源 JSON 路径/bytes/SHA16；旧 JSON 缺 seed
+或抽样列表时为 null，不补猜。全条件相同的多个池成员关系全部保留。
+
+### 9.3 Figure 5：只画 S7d 已记录的结果
+
+```bash
+: "${S7D_SEED0_JSON:?填 seed0 S7d JSON 的绝对路径}"
+: "${S7D_SEED1_JSON:?填 seed1 S7d JSON 的绝对路径}"
+: "${S7D_SEED2_JSON:?填 seed2 S7d JSON 的绝对路径}"
+: "${S7_AGG_JSON:?填同三训练种子 aggregate JSON 的绝对路径}"
+python scripts/revision/plot_fig5_aeri.py \
+  --s7d-json "$S7D_SEED0_JSON" --s7d-json "$S7D_SEED1_JSON" \
+  --s7d-json "$S7D_SEED2_JSON" --aggregate-json "$S7_AGG_JSON" \
+  --tag fig5 --out "$ROUND_C_OUT/fig5" --font /absolute/path/to/chinese.ttf
+```
+
+恰好三个 --s7d-json，按 `_meta.provenance.seeds.run_seed` 验证训练seed，
+不从文件名猜。--out/--tag 必填，--font 默认 None；缺失或无效字体
+打印 WARNING 后回退英文。输出新目录里的主图 PNG300dpi/PDF、存在
+paired_gallery_differences 时的另一版配对差/身份CI图、逐点 CSV、
+绘图 JSON 与日志。所有数值来自 protocols/paired_gallery_differences；
+aggregate 只核对种子与记录 official 值对照，舍入差只警告，不替换值。
+
+左图各训练seed的点与三seed均值横线；右图为 hub excess skewness_N10
+与校正 ΔR1 的描述性散点，不拟合。规模受控项使用 S7d 保存的 mean
+字段，hub 为其5次图库抽样偏度均值；5次抽样不当作5个训练seed。
+配对CI不混合、不平均端点；缺失的CI保持空值；controlled CI 保留
+conditional_on_five_draws 语义。CSV记录来源字段，便于逐点追溯。
+
+### 9.4 Round C 自检
+
+```bash
+MKL_THREADING_LAYER=SEQUENTIAL python -m unittest \
+  tests.test_roundc_collector tests.test_roundc_r2 tests.test_roundc_fig5 -v
+MKL_THREADING_LAYER=SEQUENTIAL python -m unittest discover -s tests -v
+```
+
+collector 合成目录树包括历史与新结构、缺失字段、重复seed与手算
+配对统计；R2/fig5 用200×100 mock（含不同校正条件、缺行停止、
+旧JSON兼容、无字体回退、PNG/PDF与输入只读检查）。此处不是正式
+训练或真实论文结果。
+
+2026-10-12 本机实测：collector 14、R2 6、fig5 5 项全部通过；完整
+tests suite `Ran 134 tests in 38.717s; OK (skipped=6)`，即128项通过、
+6项跳过。既有 scripts suite 75项通过（15.079s），tools suite 12项
+通过（7.772s）；4个本轮 Python 入口真实 `--help` 与语法检查通过。
+PNG/PDF mock 已做视觉检查。跳过项为4个外部真实标注测试、可选
+einops 测试与 Linux-only shell 测试，不涉及新增25项。
+
+既有 scripts 测试使用包名调用（此目录为 namespace package），例如
+`python -m unittest scripts.test_S11_S12 scripts.test_E3_fresh_forward`；
+不能直接 `discover -s scripts`，否则相对 import 没有 package 上下文。
+全量 tests 中原有 CPU toy loop/smoke mock 不等于正式训练；本轮未
+执行任何正式训练、服务器操作或真实数据评测。
