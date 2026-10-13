@@ -194,3 +194,19 @@ python scripts/revision/compare_eval_outputs.py train \
 ```
 
 `NEW_TIMESTAMP` 替换为本次时间戳；输出文件必须不存在，禁止覆盖旧证据。
+
+## 表5零正例与图库抽样规则核查（CPU）
+
+`scripts/revision/verify_table5_sampler.py` 按每次抽样保存的图库保留索引，
+逐查询重算合法正样本数、核对零正例及 `has_legal_positive`，并打印
+S11 的 `sample_gallery` 等抽样规则源码。输入为脚本扫描的
+`/root/autodl-tmp/experiments/roundB_*/R1_table5_*/R1_table5_clusters.json`
+（同名目录取最新 roundB）及其中 provenance 指向的测试标注；输出到
+对应归档目录的 `verify_zero_positive_recount.json`。在仓库根目录运行：
+
+```bash
+python scripts/revision/verify_table5_sampler.py
+```
+
+只需 CPU；沿用现有服务器路径与输出格式。本次本地仅执行 `py_compile`
+语法检查，未运行核查、未读写任何实验结果。
