@@ -152,6 +152,56 @@ class Fig5PaperTests(unittest.TestCase):
             self.assertNotIn("Suggested caption:", stdout.getvalue())
             self.assertEqual(self.before, {path: Path(path).read_bytes() for path in self.before})
 
+    def test_paper_seed_mean_lines_span_markers_and_are_drawn_under_them(self):
+        from matplotlib.collections import LineCollection, PathCollection
+        from matplotlib.transforms import Affine2D
+
+        data = FIG.prepare_data(self.paths, self.aggregate)
+        figures = []
+        original_save = FIG._save_paper_figure
+
+        def save(figure, *args):
+            result = original_save(figure, *args)
+            figures.append(figure)
+            return result
+
+        with mock.patch.object(FIG, "_save_paper_figure", side_effect=save), \
+                contextlib.redirect_stdout(io.StringIO()):
+            FIG.plot_paper_data(data, self.directory, "mock_mean_lines")
+        figure = figures[0]
+        # draw() materializes the point-to-pixel marker transforms used below.
+        figure.canvas.draw()
+        axis = figure.axes[0]
+        markers = [item for item in axis.collections if isinstance(item, PathCollection)]
+        means = [item for item in axis.collections if isinstance(item, LineCollection)]
+        modes = ("trans_delta_r1", "ind_delta_r1")
+        rows = [row for mode in modes for row in data["points"] if row["metric"] == mode]
+        marker_rows = list(zip(markers, rows))
+        self.assertEqual(len(means), len(modes) * len(FIG.COMPOSITIONS))
+        for mean, (mode, composition) in zip(means, [(mode, name) for mode in modes
+                                                    for name, _ in FIG.COMPOSITIONS]):
+            segment = mean.get_segments()[0]
+            self.assertAlmostEqual(segment[1, 0] - segment[0, 0], .36)
+            np.testing.assert_array_equal(mean.get_linewidths(), [1.5])
+            self.assertEqual(mean.get_zorder(), 2)
+            group = [point for point, row in marker_rows
+                     if row["metric"] == mode and row["composition"] == composition]
+            self.assertEqual(len(group), 3)
+            # Include full marker shapes and edge strokes, not just their centers.
+            marker_extents = []
+            for point in group:
+                self.assertEqual(point.get_zorder(), 3)
+                self.assertLess(mean.get_zorder(), point.get_zorder())
+                vertices = Affine2D(point.get_transforms()[0]).transform(point.get_paths()[0].vertices)
+                center = point.get_offset_transform().transform(point.get_offsets()[0])
+                half_edge = point.get_linewidths()[0] * figure.dpi / 72 / 2
+                marker_extents.append((center[0] + vertices[:, 0].min() - half_edge,
+                                       center[0] + vertices[:, 0].max() + half_edge))
+            line_pixels = axis.transData.transform(segment)[:, 0]
+            self.assertLess(line_pixels.min(), min(left for left, _ in marker_extents))
+            self.assertGreater(line_pixels.max(), max(right for _, right in marker_extents))
+        self.assertEqual(self.before, {path: Path(path).read_bytes() for path in self.before})
+
     def test_paper_does_not_infer_missing_pairs_or_five_draw_evidence(self):
         data = FIG.prepare_data(self.paths, self.aggregate)
         bad = copy.deepcopy(data)

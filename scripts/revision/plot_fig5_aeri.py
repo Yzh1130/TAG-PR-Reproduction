@@ -371,8 +371,9 @@ def plot_paper_data(data, directory, tag, font_path=None):
                 values = [row["value"] for row in data["points"]
                           if row["composition"] == name and row["metric"] == metric]
                 x = composition_index[name] + offsets[metric]
-                gain_axis.hlines(float(np.mean(values)), x - .10, x + .10,
-                                 color=COLORS[metric], linewidth=1.5, zorder=4)
+                # Extend beyond the three seed markers, drawing behind them.
+                gain_axis.hlines(float(np.mean(values)), x - .18, x + .18,
+                                 color=COLORS[metric], linewidth=1.5, zorder=2)
         gain_axis.set_xticks(range(len(labels)), labels)
         gain_axis.set_xlim(-.5, 3.5)
         gain_axis.set_ylabel("ΔR@1 (百分点)" if chinese else "Delta R@1 (pp)")
