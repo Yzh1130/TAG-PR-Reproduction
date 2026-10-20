@@ -1,0 +1,373 @@
+Router evidence directory: /root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7
+2026-10-13 05:50:33,135 TAG INFO: OVERRIDE SUMMARY
+2026-10-13 05:50:33,136 TAG INFO: experiment.eval_router_mode: 'gumbel' -> 'argmax'
+2026-10-13 05:50:33,136 TAG INFO: experiment.eval_seed: None -> 0
+2026-10-13 05:50:33,137 TAG INFO: model.backbone: 'ViT-B/16' -> 'ViT-B/16'
+2026-10-13 05:50:33,137 TAG INFO: experiment.rerank: False -> False
+2026-10-13 05:50:33,137 TAG INFO: experiment.csls: False -> False
+2026-10-13 05:50:33,137 TAG INFO: model.saved_path: 'ckpts/' -> '/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/argmax/20261013_e6_argmax'
+2026-10-13 05:50:33,137 TAG INFO: experiment.grad_checkpoint effective: False
+2026-10-13 05:50:33,137 TAG INFO: experiment.use_bridge effective: False
+2026-10-13 05:50:33,137 TAG INFO: experiment.bridge_cv_ratio effective: 0.0
+2026-10-13 05:50:33,137 TAG INFO: experiment.bridge_tg_ratio effective: 0.0
+2026-10-13 05:50:33,137 TAG INFO: experiment.dhn_margin effective: 0.0
+2026-10-13 05:50:33,137 TAG INFO: experiment.sdm_ratio effective: 0.0
+2026-10-13 05:50:33,137 TAG INFO: experiment.tal_ratio effective: 0.0
+2026-10-13 05:50:33,137 TAG INFO: experiment.tal_margin effective: 0.1
+2026-10-13 05:50:33,137 TAG INFO: experiment.tal_tau effective: 0.02
+2026-10-13 05:50:33,137 TAG INFO: experiment.nrw_mode effective: 'off'
+2026-10-13 05:50:33,137 TAG INFO: experiment.nrw_alpha effective: 2.0
+2026-10-13 05:50:33,138 TAG INFO: experiment.nrw_min_weight effective: 0.2
+2026-10-13 05:50:33,138 TAG INFO: experiment.nrw_warmup_epochs effective: 3
+2026-10-13 05:50:33,138 TAG INFO: experiment.nrw_ema effective: 0.99
+2026-10-13 05:50:33,138 TAG INFO: experiment.nrw_fixed_aerial effective: 0.8
+2026-10-13 05:50:33,138 TAG INFO: experiment.view_ratio effective: 1.0
+2026-10-13 05:50:33,138 TAG INFO: experiment.ortho_ratio effective: 1.0
+2026-10-13 05:50:33,138 TAG INFO: experiment.disable_moe effective: False
+2026-10-13 05:50:33,138 TAG INFO: experiment.max_words effective: 77
+2026-10-13 05:50:33,138 TAG INFO: experiment.use_ema effective: False
+2026-10-13 05:50:33,138 TAG INFO: experiment.ema_decay effective: 0.999
+2026-10-13 05:50:33,138 TAG INFO: experiment.view_prompt effective: False
+2026-10-13 05:50:33,138 TAG INFO: experiment.rerank effective: False
+2026-10-13 05:50:33,138 TAG INFO: experiment.rerank_k1 effective: 20
+2026-10-13 05:50:33,138 TAG INFO: experiment.rerank_k2 effective: 6
+2026-10-13 05:50:33,138 TAG INFO: experiment.rerank_lambda effective: 0.3
+2026-10-13 05:50:33,138 TAG INFO: experiment.csls effective: False
+2026-10-13 05:50:33,138 TAG INFO: experiment.csls_k effective: 10
+2026-10-13 05:50:33,138 TAG INFO: experiment.csls_mode effective: 'query'
+2026-10-13 05:50:33,138 TAG INFO: experiment.itc_block_size effective: 0
+2026-10-13 05:50:33,138 TAG INFO: experiment.allow_unverified_multiproc effective: False
+2026-10-13 05:50:33,138 TAG INFO: experiment.eval_router_mode effective: 'argmax'
+2026-10-13 05:50:33,138 TAG INFO: experiment.eval_seed effective: 0
+2026-10-13 05:50:33,138 TAG INFO: experiment.save_last effective: False
+2026-10-13 05:50:33,138 TAG INFO: experiment.debug_max_iters effective: 0
+2026-10-13 05:50:33,138 TAG INFO: model.backbone effective: 'ViT-B/16'
+2026-10-13 05:50:33,138 TAG INFO: model.expert_blocks_auto effective: True
+2026-10-13 05:50:33,138 TAG INFO: END OVERRIDE SUMMARY
+2026-10-13 05:50:33,138 TAG INFO: BACKBONE STRUCTURE SUMMARY
+2026-10-13 05:50:33,138 TAG INFO:   source: /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth
+2026-10-13 05:50:33,138 TAG INFO:   patch_size: 16
+2026-10-13 05:50:33,138 TAG INFO:   vision_width: 768
+2026-10-13 05:50:33,138 TAG INFO:   vision_layers: 12
+2026-10-13 05:50:33,138 TAG INFO:   vision_heads: 12
+2026-10-13 05:50:33,138 TAG INFO:   embed_dim: 512
+2026-10-13 05:50:33,138 TAG INFO:   text_width: 512
+2026-10-13 05:50:33,138 TAG INFO:   text_layers: 12
+2026-10-13 05:50:33,138 TAG INFO:   text_heads: 8
+2026-10-13 05:50:33,138 TAG INFO:   pretrained_grid_size: [14, 14]
+2026-10-13 05:50:33,138 TAG INFO:   actual_patch_count: 196
+2026-10-13 05:50:33,138 TAG INFO:   expert_blocks: [6, 7, 8] -> [6, 7, 8] (auto=True)
+2026-10-13 05:50:33,138 TAG INFO: END BACKBONE STRUCTURE SUMMARY
+2026-10-13 05:50:33,139 TAG INFO: 
+{'device': 'cuda:0', 'misc': {'seed': 0}, 'num_of_experts_groups': 2, 'num_of_experts': 6, 'num_of_selected_experts': 5, 'expert_blocks': [6, 7, 8], 'experiment': {'grad_checkpoint': False, 'use_bridge': False, 'bridge_cv_ratio': 0.0, 'bridge_tg_ratio': 0.0, 'nrw_mode': 'off', 'nrw_alpha': 2.0, 'nrw_min_weight': 0.2, 'nrw_warmup_epochs': 3, 'nrw_ema': 0.99, 'nrw_fixed_aerial': 0.8, 'view_ratio': 1.0, 'ortho_ratio': 1.0, 'disable_moe': False, 'max_words': 77, 'use_ema': False, 'ema_decay': 0.999, 'view_prompt': False, 'rerank': False, 'rerank_k1': 20, 'rerank_k2': 6, 'rerank_lambda': 0.3, 'input_resolution': [224, 224], 'dropout': 0.05, 'text_length': 77, 'nitc_ratio': 1.0, 'dhn_margin': 0.0, 'sdm_ratio': 0.0, 'tal_ratio': 0.0, 'tal_margin': 0.1, 'tal_tau': 0.02, 'ritc': True, 'ritc_eps': 0.01, 'ritc_ratio': 1.0, 'id': True, 'id_ratio': 0.5, 'itc_block_size': 0, 'allow_unverified_multiproc': False, 'eval_router_mode': 'argmax', 'eval_seed': 0, 'save_last': False, 'debug_max_iters': 0, 'csls': False, 'csls_k': 10, 'csls_mode': 'query'}, 'schedule': {'lr': 0.0001, 'epoch': 10, 'epoch_warmup': 1, 'lr_start': 1e-06, 'lr_end': 5e-06, 'weight_decay': 0.02, 'betas': [0.9, 0.98], 'eps': 1e-08, 'ratio_factor': 1.0}, 'model': {'backbone': 'ViT-B/16', 'expert_blocks_auto': True, 'ckpt_type': 'original_clip', 'saved_path': '/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/argmax/20261013_e6_argmax', 'checkpoint': '/root/autodl-tmp/checkpoints/ViT-B-16.pt', 'use_gather': True, 'softlabel_ratio': 0.5, 'embed_dim': 512, 'vocab_size': 49408, 'expert_blocks_source': [6, 7, 8], 'patch_size': 16, 'vision_width': 768, 'vision_layers': 12, 'vision_heads': 12, 'text_width': 512, 'text_heads': 8, 'text_layers': 12, 'source_context_length': 77, 'pretrained_grid_size': [14, 14], 'architecture_source': '/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth'}, 'log': {'print_period': 50}, 'data': {'batch_size': 80, 'test_batch_size': 256, 'num_workers': 2}, 'distributed': {'backend': 'nccl', 'url': 'env://', 'rank': 0, 'world_size': 1, 'local_rank': 0}, 'anno_dir': '/root/autodl-tmp/datasets/TAG-PEDES', 'image_dir': '/root/autodl-tmp/datasets/TAG-PEDES'}
+2026-10-13 05:50:37,328 TAG INFO: Loaded model weights from /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth (missing=0 unexpected=0)
+2026-10-13 05:50:37,577 TAG INFO: EVAL RNG: Python random, NumPy, torch CPU/CUDA, DataLoader worker/base_seed, image-router Gumbel; eval_seed=0
+DOMAIN SUMMARY
+  AG-ReID.v2: id=0, pairs=10658, percentage=26.71%
+  G2APS: id=1, pairs=16354, percentage=40.98%
+  Market: id=2, pairs=4758, percentage=11.92%
+  PRAI-1581: id=3, pairs=4720, percentage=11.83%
+  uavhuman: id=4, pairs=3418, percentage=8.56%
+END DOMAIN SUMMARY
+TEXT LENGTH SUMMARY
+  max_words: 77
+  mean words after truncation: 38.13
+  truncated samples: 2669 (6.69%)
+  samples exceeding text_length=77 after tokenization: 3959
+  WARNING: CLIP tokenize will truncate these samples to text_length
+END TEXT LENGTH SUMMARY
+2026-10-13 05:50:42,873 TAG INFO: DataLoader batch_size verified: expected=80, actual=80
+2026-10-13 05:50:42,873 TAG INFO: Evaluation DataLoader batch_size: config=256, actual=32
+2026-10-13 05:51:35,245 TAG INFO: Acc@1 62.24551 Acc@5 79.21716 Acc@10 84.46437 mAP 48.99202
+[rank0]:[W1013 05:51:35.363740180 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+2026-10-13 05:51:41,817 TAG INFO: OVERRIDE SUMMARY
+2026-10-13 05:51:41,818 TAG INFO: experiment.eval_router_mode: 'gumbel' -> 'gumbel'
+2026-10-13 05:51:41,818 TAG INFO: experiment.eval_seed: None -> 0
+2026-10-13 05:51:41,818 TAG INFO: model.backbone: 'ViT-B/16' -> 'ViT-B/16'
+2026-10-13 05:51:41,818 TAG INFO: experiment.rerank: False -> False
+2026-10-13 05:51:41,818 TAG INFO: experiment.csls: False -> False
+2026-10-13 05:51:41,818 TAG INFO: model.saved_path: 'ckpts/' -> '/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed0/20261013_e6_gumbel_seed0'
+2026-10-13 05:51:41,818 TAG INFO: experiment.grad_checkpoint effective: False
+2026-10-13 05:51:41,818 TAG INFO: experiment.use_bridge effective: False
+2026-10-13 05:51:41,818 TAG INFO: experiment.bridge_cv_ratio effective: 0.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.bridge_tg_ratio effective: 0.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.dhn_margin effective: 0.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.sdm_ratio effective: 0.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.tal_ratio effective: 0.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.tal_margin effective: 0.1
+2026-10-13 05:51:41,818 TAG INFO: experiment.tal_tau effective: 0.02
+2026-10-13 05:51:41,818 TAG INFO: experiment.nrw_mode effective: 'off'
+2026-10-13 05:51:41,818 TAG INFO: experiment.nrw_alpha effective: 2.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.nrw_min_weight effective: 0.2
+2026-10-13 05:51:41,818 TAG INFO: experiment.nrw_warmup_epochs effective: 3
+2026-10-13 05:51:41,818 TAG INFO: experiment.nrw_ema effective: 0.99
+2026-10-13 05:51:41,818 TAG INFO: experiment.nrw_fixed_aerial effective: 0.8
+2026-10-13 05:51:41,818 TAG INFO: experiment.view_ratio effective: 1.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.ortho_ratio effective: 1.0
+2026-10-13 05:51:41,818 TAG INFO: experiment.disable_moe effective: False
+2026-10-13 05:51:41,818 TAG INFO: experiment.max_words effective: 77
+2026-10-13 05:51:41,818 TAG INFO: experiment.use_ema effective: False
+2026-10-13 05:51:41,818 TAG INFO: experiment.ema_decay effective: 0.999
+2026-10-13 05:51:41,818 TAG INFO: experiment.view_prompt effective: False
+2026-10-13 05:51:41,818 TAG INFO: experiment.rerank effective: False
+2026-10-13 05:51:41,819 TAG INFO: experiment.rerank_k1 effective: 20
+2026-10-13 05:51:41,819 TAG INFO: experiment.rerank_k2 effective: 6
+2026-10-13 05:51:41,819 TAG INFO: experiment.rerank_lambda effective: 0.3
+2026-10-13 05:51:41,819 TAG INFO: experiment.csls effective: False
+2026-10-13 05:51:41,819 TAG INFO: experiment.csls_k effective: 10
+2026-10-13 05:51:41,819 TAG INFO: experiment.csls_mode effective: 'query'
+2026-10-13 05:51:41,819 TAG INFO: experiment.itc_block_size effective: 0
+2026-10-13 05:51:41,819 TAG INFO: experiment.allow_unverified_multiproc effective: False
+2026-10-13 05:51:41,819 TAG INFO: experiment.eval_router_mode effective: 'gumbel'
+2026-10-13 05:51:41,819 TAG INFO: experiment.eval_seed effective: 0
+2026-10-13 05:51:41,819 TAG INFO: experiment.save_last effective: False
+2026-10-13 05:51:41,819 TAG INFO: experiment.debug_max_iters effective: 0
+2026-10-13 05:51:41,819 TAG INFO: model.backbone effective: 'ViT-B/16'
+2026-10-13 05:51:41,819 TAG INFO: model.expert_blocks_auto effective: True
+2026-10-13 05:51:41,819 TAG INFO: END OVERRIDE SUMMARY
+2026-10-13 05:51:41,819 TAG INFO: BACKBONE STRUCTURE SUMMARY
+2026-10-13 05:51:41,819 TAG INFO:   source: /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth
+2026-10-13 05:51:41,819 TAG INFO:   patch_size: 16
+2026-10-13 05:51:41,819 TAG INFO:   vision_width: 768
+2026-10-13 05:51:41,819 TAG INFO:   vision_layers: 12
+2026-10-13 05:51:41,819 TAG INFO:   vision_heads: 12
+2026-10-13 05:51:41,819 TAG INFO:   embed_dim: 512
+2026-10-13 05:51:41,819 TAG INFO:   text_width: 512
+2026-10-13 05:51:41,819 TAG INFO:   text_layers: 12
+2026-10-13 05:51:41,819 TAG INFO:   text_heads: 8
+2026-10-13 05:51:41,819 TAG INFO:   pretrained_grid_size: [14, 14]
+2026-10-13 05:51:41,819 TAG INFO:   actual_patch_count: 196
+2026-10-13 05:51:41,819 TAG INFO:   expert_blocks: [6, 7, 8] -> [6, 7, 8] (auto=True)
+2026-10-13 05:51:41,819 TAG INFO: END BACKBONE STRUCTURE SUMMARY
+2026-10-13 05:51:41,819 TAG INFO: 
+{'device': 'cuda:0', 'misc': {'seed': 0}, 'num_of_experts_groups': 2, 'num_of_experts': 6, 'num_of_selected_experts': 5, 'expert_blocks': [6, 7, 8], 'experiment': {'grad_checkpoint': False, 'use_bridge': False, 'bridge_cv_ratio': 0.0, 'bridge_tg_ratio': 0.0, 'nrw_mode': 'off', 'nrw_alpha': 2.0, 'nrw_min_weight': 0.2, 'nrw_warmup_epochs': 3, 'nrw_ema': 0.99, 'nrw_fixed_aerial': 0.8, 'view_ratio': 1.0, 'ortho_ratio': 1.0, 'disable_moe': False, 'max_words': 77, 'use_ema': False, 'ema_decay': 0.999, 'view_prompt': False, 'rerank': False, 'rerank_k1': 20, 'rerank_k2': 6, 'rerank_lambda': 0.3, 'input_resolution': [224, 224], 'dropout': 0.05, 'text_length': 77, 'nitc_ratio': 1.0, 'dhn_margin': 0.0, 'sdm_ratio': 0.0, 'tal_ratio': 0.0, 'tal_margin': 0.1, 'tal_tau': 0.02, 'ritc': True, 'ritc_eps': 0.01, 'ritc_ratio': 1.0, 'id': True, 'id_ratio': 0.5, 'itc_block_size': 0, 'allow_unverified_multiproc': False, 'eval_router_mode': 'gumbel', 'eval_seed': 0, 'save_last': False, 'debug_max_iters': 0, 'csls': False, 'csls_k': 10, 'csls_mode': 'query'}, 'schedule': {'lr': 0.0001, 'epoch': 10, 'epoch_warmup': 1, 'lr_start': 1e-06, 'lr_end': 5e-06, 'weight_decay': 0.02, 'betas': [0.9, 0.98], 'eps': 1e-08, 'ratio_factor': 1.0}, 'model': {'backbone': 'ViT-B/16', 'expert_blocks_auto': True, 'ckpt_type': 'original_clip', 'saved_path': '/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed0/20261013_e6_gumbel_seed0', 'checkpoint': '/root/autodl-tmp/checkpoints/ViT-B-16.pt', 'use_gather': True, 'softlabel_ratio': 0.5, 'embed_dim': 512, 'vocab_size': 49408, 'expert_blocks_source': [6, 7, 8], 'patch_size': 16, 'vision_width': 768, 'vision_layers': 12, 'vision_heads': 12, 'text_width': 512, 'text_heads': 8, 'text_layers': 12, 'source_context_length': 77, 'pretrained_grid_size': [14, 14], 'architecture_source': '/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth'}, 'log': {'print_period': 50}, 'data': {'batch_size': 80, 'test_batch_size': 256, 'num_workers': 2}, 'distributed': {'backend': 'nccl', 'url': 'env://', 'rank': 0, 'world_size': 1, 'local_rank': 0}, 'anno_dir': '/root/autodl-tmp/datasets/TAG-PEDES', 'image_dir': '/root/autodl-tmp/datasets/TAG-PEDES'}
+2026-10-13 05:51:45,797 TAG INFO: Loaded model weights from /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth (missing=0 unexpected=0)
+2026-10-13 05:51:46,071 TAG INFO: EVAL RNG: Python random, NumPy, torch CPU/CUDA, DataLoader worker/base_seed, image-router Gumbel; eval_seed=0
+DOMAIN SUMMARY
+  AG-ReID.v2: id=0, pairs=10658, percentage=26.71%
+  G2APS: id=1, pairs=16354, percentage=40.98%
+  Market: id=2, pairs=4758, percentage=11.92%
+  PRAI-1581: id=3, pairs=4720, percentage=11.83%
+  uavhuman: id=4, pairs=3418, percentage=8.56%
+END DOMAIN SUMMARY
+TEXT LENGTH SUMMARY
+  max_words: 77
+  mean words after truncation: 38.13
+  truncated samples: 2669 (6.69%)
+  samples exceeding text_length=77 after tokenization: 3959
+  WARNING: CLIP tokenize will truncate these samples to text_length
+END TEXT LENGTH SUMMARY
+2026-10-13 05:51:51,292 TAG INFO: DataLoader batch_size verified: expected=80, actual=80
+2026-10-13 05:51:51,292 TAG INFO: Evaluation DataLoader batch_size: config=256, actual=32
+2026-10-13 05:52:43,879 TAG INFO: Acc@1 62.25158 Acc@5 79.22321 Acc@10 84.46437 mAP 48.99119
+[rank0]:[W1013 05:52:44.999934211 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+2026-10-13 05:52:50,206 TAG INFO: OVERRIDE SUMMARY
+2026-10-13 05:52:50,206 TAG INFO: experiment.eval_router_mode: 'gumbel' -> 'gumbel'
+2026-10-13 05:52:50,206 TAG INFO: experiment.eval_seed: None -> 1
+2026-10-13 05:52:50,206 TAG INFO: model.backbone: 'ViT-B/16' -> 'ViT-B/16'
+2026-10-13 05:52:50,206 TAG INFO: experiment.rerank: False -> False
+2026-10-13 05:52:50,206 TAG INFO: experiment.csls: False -> False
+2026-10-13 05:52:50,206 TAG INFO: model.saved_path: 'ckpts/' -> '/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed1/20261013_e6_gumbel_seed1'
+2026-10-13 05:52:50,206 TAG INFO: experiment.grad_checkpoint effective: False
+2026-10-13 05:52:50,206 TAG INFO: experiment.use_bridge effective: False
+2026-10-13 05:52:50,206 TAG INFO: experiment.bridge_cv_ratio effective: 0.0
+2026-10-13 05:52:50,206 TAG INFO: experiment.bridge_tg_ratio effective: 0.0
+2026-10-13 05:52:50,206 TAG INFO: experiment.dhn_margin effective: 0.0
+2026-10-13 05:52:50,206 TAG INFO: experiment.sdm_ratio effective: 0.0
+2026-10-13 05:52:50,206 TAG INFO: experiment.tal_ratio effective: 0.0
+2026-10-13 05:52:50,206 TAG INFO: experiment.tal_margin effective: 0.1
+2026-10-13 05:52:50,206 TAG INFO: experiment.tal_tau effective: 0.02
+2026-10-13 05:52:50,206 TAG INFO: experiment.nrw_mode effective: 'off'
+2026-10-13 05:52:50,206 TAG INFO: experiment.nrw_alpha effective: 2.0
+2026-10-13 05:52:50,206 TAG INFO: experiment.nrw_min_weight effective: 0.2
+2026-10-13 05:52:50,207 TAG INFO: experiment.nrw_warmup_epochs effective: 3
+2026-10-13 05:52:50,207 TAG INFO: experiment.nrw_ema effective: 0.99
+2026-10-13 05:52:50,207 TAG INFO: experiment.nrw_fixed_aerial effective: 0.8
+2026-10-13 05:52:50,207 TAG INFO: experiment.view_ratio effective: 1.0
+2026-10-13 05:52:50,207 TAG INFO: experiment.ortho_ratio effective: 1.0
+2026-10-13 05:52:50,207 TAG INFO: experiment.disable_moe effective: False
+2026-10-13 05:52:50,207 TAG INFO: experiment.max_words effective: 77
+2026-10-13 05:52:50,207 TAG INFO: experiment.use_ema effective: False
+2026-10-13 05:52:50,207 TAG INFO: experiment.ema_decay effective: 0.999
+2026-10-13 05:52:50,207 TAG INFO: experiment.view_prompt effective: False
+2026-10-13 05:52:50,207 TAG INFO: experiment.rerank effective: False
+2026-10-13 05:52:50,207 TAG INFO: experiment.rerank_k1 effective: 20
+2026-10-13 05:52:50,207 TAG INFO: experiment.rerank_k2 effective: 6
+2026-10-13 05:52:50,207 TAG INFO: experiment.rerank_lambda effective: 0.3
+2026-10-13 05:52:50,207 TAG INFO: experiment.csls effective: False
+2026-10-13 05:52:50,207 TAG INFO: experiment.csls_k effective: 10
+2026-10-13 05:52:50,207 TAG INFO: experiment.csls_mode effective: 'query'
+2026-10-13 05:52:50,207 TAG INFO: experiment.itc_block_size effective: 0
+2026-10-13 05:52:50,207 TAG INFO: experiment.allow_unverified_multiproc effective: False
+2026-10-13 05:52:50,207 TAG INFO: experiment.eval_router_mode effective: 'gumbel'
+2026-10-13 05:52:50,207 TAG INFO: experiment.eval_seed effective: 1
+2026-10-13 05:52:50,207 TAG INFO: experiment.save_last effective: False
+2026-10-13 05:52:50,207 TAG INFO: experiment.debug_max_iters effective: 0
+2026-10-13 05:52:50,207 TAG INFO: model.backbone effective: 'ViT-B/16'
+2026-10-13 05:52:50,207 TAG INFO: model.expert_blocks_auto effective: True
+2026-10-13 05:52:50,207 TAG INFO: END OVERRIDE SUMMARY
+2026-10-13 05:52:50,207 TAG INFO: BACKBONE STRUCTURE SUMMARY
+2026-10-13 05:52:50,207 TAG INFO:   source: /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth
+2026-10-13 05:52:50,207 TAG INFO:   patch_size: 16
+2026-10-13 05:52:50,207 TAG INFO:   vision_width: 768
+2026-10-13 05:52:50,207 TAG INFO:   vision_layers: 12
+2026-10-13 05:52:50,207 TAG INFO:   vision_heads: 12
+2026-10-13 05:52:50,207 TAG INFO:   embed_dim: 512
+2026-10-13 05:52:50,207 TAG INFO:   text_width: 512
+2026-10-13 05:52:50,207 TAG INFO:   text_layers: 12
+2026-10-13 05:52:50,207 TAG INFO:   text_heads: 8
+2026-10-13 05:52:50,207 TAG INFO:   pretrained_grid_size: [14, 14]
+2026-10-13 05:52:50,207 TAG INFO:   actual_patch_count: 196
+2026-10-13 05:52:50,207 TAG INFO:   expert_blocks: [6, 7, 8] -> [6, 7, 8] (auto=True)
+2026-10-13 05:52:50,207 TAG INFO: END BACKBONE STRUCTURE SUMMARY
+2026-10-13 05:52:50,207 TAG INFO: 
+{'device': 'cuda:0', 'misc': {'seed': 0}, 'num_of_experts_groups': 2, 'num_of_experts': 6, 'num_of_selected_experts': 5, 'expert_blocks': [6, 7, 8], 'experiment': {'grad_checkpoint': False, 'use_bridge': False, 'bridge_cv_ratio': 0.0, 'bridge_tg_ratio': 0.0, 'nrw_mode': 'off', 'nrw_alpha': 2.0, 'nrw_min_weight': 0.2, 'nrw_warmup_epochs': 3, 'nrw_ema': 0.99, 'nrw_fixed_aerial': 0.8, 'view_ratio': 1.0, 'ortho_ratio': 1.0, 'disable_moe': False, 'max_words': 77, 'use_ema': False, 'ema_decay': 0.999, 'view_prompt': False, 'rerank': False, 'rerank_k1': 20, 'rerank_k2': 6, 'rerank_lambda': 0.3, 'input_resolution': [224, 224], 'dropout': 0.05, 'text_length': 77, 'nitc_ratio': 1.0, 'dhn_margin': 0.0, 'sdm_ratio': 0.0, 'tal_ratio': 0.0, 'tal_margin': 0.1, 'tal_tau': 0.02, 'ritc': True, 'ritc_eps': 0.01, 'ritc_ratio': 1.0, 'id': True, 'id_ratio': 0.5, 'itc_block_size': 0, 'allow_unverified_multiproc': False, 'eval_router_mode': 'gumbel', 'eval_seed': 1, 'save_last': False, 'debug_max_iters': 0, 'csls': False, 'csls_k': 10, 'csls_mode': 'query'}, 'schedule': {'lr': 0.0001, 'epoch': 10, 'epoch_warmup': 1, 'lr_start': 1e-06, 'lr_end': 5e-06, 'weight_decay': 0.02, 'betas': [0.9, 0.98], 'eps': 1e-08, 'ratio_factor': 1.0}, 'model': {'backbone': 'ViT-B/16', 'expert_blocks_auto': True, 'ckpt_type': 'original_clip', 'saved_path': '/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed1/20261013_e6_gumbel_seed1', 'checkpoint': '/root/autodl-tmp/checkpoints/ViT-B-16.pt', 'use_gather': True, 'softlabel_ratio': 0.5, 'embed_dim': 512, 'vocab_size': 49408, 'expert_blocks_source': [6, 7, 8], 'patch_size': 16, 'vision_width': 768, 'vision_layers': 12, 'vision_heads': 12, 'text_width': 512, 'text_heads': 8, 'text_layers': 12, 'source_context_length': 77, 'pretrained_grid_size': [14, 14], 'architecture_source': '/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth'}, 'log': {'print_period': 50}, 'data': {'batch_size': 80, 'test_batch_size': 256, 'num_workers': 2}, 'distributed': {'backend': 'nccl', 'url': 'env://', 'rank': 0, 'world_size': 1, 'local_rank': 0}, 'anno_dir': '/root/autodl-tmp/datasets/TAG-PEDES', 'image_dir': '/root/autodl-tmp/datasets/TAG-PEDES'}
+2026-10-13 05:52:54,849 TAG INFO: Loaded model weights from /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth (missing=0 unexpected=0)
+2026-10-13 05:52:55,122 TAG INFO: EVAL RNG: Python random, NumPy, torch CPU/CUDA, DataLoader worker/base_seed, image-router Gumbel; eval_seed=1
+DOMAIN SUMMARY
+  AG-ReID.v2: id=0, pairs=10658, percentage=26.71%
+  G2APS: id=1, pairs=16354, percentage=40.98%
+  Market: id=2, pairs=4758, percentage=11.92%
+  PRAI-1581: id=3, pairs=4720, percentage=11.83%
+  uavhuman: id=4, pairs=3418, percentage=8.56%
+END DOMAIN SUMMARY
+TEXT LENGTH SUMMARY
+  max_words: 77
+  mean words after truncation: 38.13
+  truncated samples: 2669 (6.69%)
+  samples exceeding text_length=77 after tokenization: 3959
+  WARNING: CLIP tokenize will truncate these samples to text_length
+END TEXT LENGTH SUMMARY
+2026-10-13 05:53:00,447 TAG INFO: DataLoader batch_size verified: expected=80, actual=80
+2026-10-13 05:53:00,447 TAG INFO: Evaluation DataLoader batch_size: config=256, actual=32
+2026-10-13 05:53:52,720 TAG INFO: Acc@1 62.25158 Acc@5 79.22928 Acc@10 84.47043 mAP 48.99286
+[rank0]:[W1013 05:53:52.834546078 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+{
+  "status": "complete",
+  "task": "e6_router_randomness",
+  "argmax": {
+    "label": "argmax",
+    "eval_router_mode": "argmax",
+    "eval_seed": 0,
+    "startup_misc_seed": 0,
+    "metrics": {
+      "r1": 62.245513916015625,
+      "r5": 79.21715545654297,
+      "r10": 84.46437072753906,
+      "mAP": 48.99201583862305
+    },
+    "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/argmax/20261013_e6_argmax/evaluation_revision.json",
+    "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/argmax/20261013_e6_argmax/config_used.yaml"
+  },
+  "gumbel": [
+    {
+      "label": "gumbel_seed0",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 0,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 62.2515754699707,
+        "r5": 79.22321319580078,
+        "r10": 84.46437072753906,
+        "mAP": 48.991188049316406
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed0/20261013_e6_gumbel_seed0/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed0/20261013_e6_gumbel_seed0/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.006061553955078125,
+        "r5": 0.0060577392578125,
+        "r10": 0.0,
+        "mAP": -0.000827789306640625
+      }
+    },
+    {
+      "label": "gumbel_seed1",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 1,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 62.2515754699707,
+        "r5": 79.22927856445312,
+        "r10": 84.47042846679688,
+        "mAP": 48.992862701416016
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed1/20261013_e6_gumbel_seed1/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed1/20261013_e6_gumbel_seed1/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.006061553955078125,
+        "r5": 0.01212310791015625,
+        "r10": 0.0060577392578125,
+        "mAP": 0.00084686279296875
+      }
+    }
+  ],
+  "n_repetitions": 2,
+  "observed_maximum_pairwise_difference_pp": {
+    "r1": 0.0,
+    "r5": 0.00606536865234375,
+    "r10": 0.0060577392578125,
+    "mAP": 0.001674652099609375
+  },
+  "maximum_scope": "n=2 次重复中观测到的最大差异; not a bound over other seeds",
+  "provenance": {
+    "argv": [
+      "bash",
+      "scripts/revision/e6_router_randomness.sh",
+      "/root/autodl-tmp/TAG-PR/config/config.local.yaml",
+      "ViT-B/16",
+      "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth",
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0",
+      "2"
+    ],
+    "seeds": {
+      "argmax_eval": 0,
+      "gumbel_eval": [
+        0,
+        1
+      ],
+      "startup_misc_seed_by_run": {
+        "argmax": 0,
+        "gumbel_seed0": 0,
+        "gumbel_seed1": 0
+      }
+    },
+    "inputs": {
+      "/root/autodl-tmp/TAG-PR/config/config.local.yaml": {
+        "bytes": 1568,
+        "sha256_16": "606cdf063f9019da"
+      },
+      "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth": {
+        "bytes": 2705081686,
+        "sha256_16": "4f90ebc8156e8962"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/argmax/20261013_e6_argmax/evaluation_revision.json": {
+        "bytes": 260,
+        "sha256_16": "eda6758a3673752c"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/argmax/20261013_e6_argmax/config_used.yaml": {
+        "bytes": 2110,
+        "sha256_16": "3f543f0ca1bfc04b"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed0/20261013_e6_gumbel_seed0/evaluation_revision.json": {
+        "bytes": 259,
+        "sha256_16": "9d95aeee330eb90e"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed0/20261013_e6_gumbel_seed0/config_used.yaml": {
+        "bytes": 2122,
+        "sha256_16": "79b5d927bfaf26a9"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed1/20261013_e6_gumbel_seed1/evaluation_revision.json": {
+        "bytes": 259,
+        "sha256_16": "cdc3c7f1708ae944"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7/gumbel_seed1/20261013_e6_gumbel_seed1/config_used.yaml": {
+        "bytes": 2122,
+        "sha256_16": "a92821e97e6eb83d"
+      }
+    },
+    "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075"
+  },
+  "training_executed": false,
+  "postprocessing_enabled": false
+}
+E6 complete; retained evidence: /root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed0/e6_router_20261012T215027Z_ORlCk7

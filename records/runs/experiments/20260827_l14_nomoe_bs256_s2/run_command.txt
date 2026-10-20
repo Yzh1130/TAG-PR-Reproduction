@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --exp_name l14_nomoe_bs256_s2 --output_dir /root/autodl-tmp/experiments --config /tmp/cfg_l14.yaml --backbone ViT-L/14 --batch_size 256 --epoch 10 --grad_checkpoint --disable_moe --seed 2
+cwd: /root/autodl-tmp/TAG-PR
+config_source: /tmp/cfg_l14.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--exp_name", "l14_nomoe_bs256_s2", "--output_dir", "/root/autodl-tmp/experiments", "--config", "/tmp/cfg_l14.yaml", "--backbone", "ViT-L/14", "--batch_size", "256", "--epoch", "10", "--grad_checkpoint", "--disable_moe", "--seed", "2"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=38339
+OMP_NUM_THREADS=25
+PYTHONHASHSEED=2

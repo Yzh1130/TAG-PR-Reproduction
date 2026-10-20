@@ -1,0 +1,368 @@
+{
+  "status": "complete",
+  "task": "e6_router_randomness",
+  "argmax": {
+    "label": "argmax",
+    "eval_router_mode": "argmax",
+    "eval_seed": 0,
+    "startup_misc_seed": 0,
+    "metrics": {
+      "r1": 63.63911437988281,
+      "r5": 79.25957489013672,
+      "r10": 84.60978698730469,
+      "mAP": 50.46981430053711
+    },
+    "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/argmax/20261013_e6_argmax/evaluation_revision.json",
+    "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/argmax/20261013_e6_argmax/config_used.yaml"
+  },
+  "gumbel": [
+    {
+      "label": "gumbel_seed0",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 0,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.633056640625,
+        "r5": 79.25957489013672,
+        "r10": 84.60978698730469,
+        "mAP": 50.4649772644043
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed0/20261013_e6_gumbel_seed0/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed0/20261013_e6_gumbel_seed0/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": -0.0060577392578125,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -0.0048370361328125
+      }
+    },
+    {
+      "label": "gumbel_seed1",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 1,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.633056640625,
+        "r5": 79.26563262939453,
+        "r10": 84.6158447265625,
+        "mAP": 50.466285705566406
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed1/20261013_e6_gumbel_seed1/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed1/20261013_e6_gumbel_seed1/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": -0.0060577392578125,
+        "r5": 0.0060577392578125,
+        "r10": 0.0060577392578125,
+        "mAP": -0.003528594970703125
+      }
+    },
+    {
+      "label": "gumbel_seed2",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 2,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.633056640625,
+        "r5": 79.25957489013672,
+        "r10": 84.60978698730469,
+        "mAP": 50.469200134277344
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed2/20261013_e6_gumbel_seed2/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed2/20261013_e6_gumbel_seed2/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": -0.0060577392578125,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -0.000614166259765625
+      }
+    },
+    {
+      "label": "gumbel_seed3",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 3,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.62699890136719,
+        "r5": 79.25957489013672,
+        "r10": 84.60978698730469,
+        "mAP": 50.465370178222656
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed3/20261013_e6_gumbel_seed3/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed3/20261013_e6_gumbel_seed3/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": -0.012115478515625,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -0.004444122314453125
+      }
+    },
+    {
+      "label": "gumbel_seed4",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 4,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.63911437988281,
+        "r5": 79.26563262939453,
+        "r10": 84.60978698730469,
+        "mAP": 50.47111511230469
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed4/20261013_e6_gumbel_seed4/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed4/20261013_e6_gumbel_seed4/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.0,
+        "r5": 0.0060577392578125,
+        "r10": 0.0,
+        "mAP": 0.001300811767578125
+      }
+    },
+    {
+      "label": "gumbel_seed5",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 5,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.63911437988281,
+        "r5": 79.26563262939453,
+        "r10": 84.60978698730469,
+        "mAP": 50.469482421875
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed5/20261013_e6_gumbel_seed5/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed5/20261013_e6_gumbel_seed5/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.0,
+        "r5": 0.0060577392578125,
+        "r10": 0.0,
+        "mAP": -0.000331878662109375
+      }
+    },
+    {
+      "label": "gumbel_seed6",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 6,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.633056640625,
+        "r5": 79.25957489013672,
+        "r10": 84.60978698730469,
+        "mAP": 50.46567916870117
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed6/20261013_e6_gumbel_seed6/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed6/20261013_e6_gumbel_seed6/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": -0.0060577392578125,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -0.0041351318359375
+      }
+    },
+    {
+      "label": "gumbel_seed7",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 7,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.63911437988281,
+        "r5": 79.25957489013672,
+        "r10": 84.60978698730469,
+        "mAP": 50.46962356567383
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed7/20261013_e6_gumbel_seed7/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed7/20261013_e6_gumbel_seed7/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.0,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -0.00019073486328125
+      }
+    },
+    {
+      "label": "gumbel_seed8",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 8,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.633056640625,
+        "r5": 79.25957489013672,
+        "r10": 84.60978698730469,
+        "mAP": 50.469356536865234
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed8/20261013_e6_gumbel_seed8/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed8/20261013_e6_gumbel_seed8/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": -0.0060577392578125,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -0.000457763671875
+      }
+    },
+    {
+      "label": "gumbel_seed9",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 9,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 63.63911437988281,
+        "r5": 79.27169036865234,
+        "r10": 84.60978698730469,
+        "mAP": 50.470821380615234
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed9/20261013_e6_gumbel_seed9/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed9/20261013_e6_gumbel_seed9/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.0,
+        "r5": 0.012115478515625,
+        "r10": 0.0,
+        "mAP": 0.001007080078125
+      }
+    }
+  ],
+  "n_repetitions": 10,
+  "observed_maximum_pairwise_difference_pp": {
+    "r1": 0.012115478515625,
+    "r5": 0.012115478515625,
+    "r10": 0.0060577392578125,
+    "mAP": 0.006137847900390625
+  },
+  "maximum_scope": "n=10 次重复中观测到的最大差异; not a bound over other seeds",
+  "provenance": {
+    "argv": [
+      "bash",
+      "scripts/revision/e6_router_randomness.sh",
+      "/root/autodl-tmp/cfg_l14.yaml",
+      "ViT-L/14",
+      "/root/autodl-tmp/experiments/20260827_l14_final_keep/checkpoint_best.pth",
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1",
+      "10"
+    ],
+    "seeds": {
+      "argmax_eval": 0,
+      "gumbel_eval": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "startup_misc_seed_by_run": {
+        "argmax": 0,
+        "gumbel_seed0": 0,
+        "gumbel_seed1": 0,
+        "gumbel_seed2": 0,
+        "gumbel_seed3": 0,
+        "gumbel_seed4": 0,
+        "gumbel_seed5": 0,
+        "gumbel_seed6": 0,
+        "gumbel_seed7": 0,
+        "gumbel_seed8": 0,
+        "gumbel_seed9": 0
+      }
+    },
+    "inputs": {
+      "/root/autodl-tmp/cfg_l14.yaml": {
+        "bytes": 1568,
+        "sha256_16": "b93c6198657e6a95"
+      },
+      "/root/autodl-tmp/experiments/20260827_l14_final_keep/checkpoint_best.pth": {
+        "bytes": 6727423982,
+        "sha256_16": "ce676f3313d4bcb8"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/argmax/20261013_e6_argmax/evaluation_revision.json": {
+        "bytes": 258,
+        "sha256_16": "2acc129c3b05057c"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/argmax/20261013_e6_argmax/config_used.yaml": {
+        "bytes": 2113,
+        "sha256_16": "7b74d911f047c351"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed0/20261013_e6_gumbel_seed0/evaluation_revision.json": {
+        "bytes": 256,
+        "sha256_16": "1c52d6ed9b94bca9"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed0/20261013_e6_gumbel_seed0/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "8ceb3577943f19c5"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed1/20261013_e6_gumbel_seed1/evaluation_revision.json": {
+        "bytes": 257,
+        "sha256_16": "2aa00fea47860671"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed1/20261013_e6_gumbel_seed1/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "f162126ff11f7ae9"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed2/20261013_e6_gumbel_seed2/evaluation_revision.json": {
+        "bytes": 258,
+        "sha256_16": "479611aa37ce8d83"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed2/20261013_e6_gumbel_seed2/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "1ba3fc904c2bce9e"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed3/20261013_e6_gumbel_seed3/evaluation_revision.json": {
+        "bytes": 260,
+        "sha256_16": "961987dc1c111494"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed3/20261013_e6_gumbel_seed3/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "6e9a70c8f7ac5a61"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed4/20261013_e6_gumbel_seed4/evaluation_revision.json": {
+        "bytes": 259,
+        "sha256_16": "cd977e072a0388ea"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed4/20261013_e6_gumbel_seed4/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "b53a132cd8a52c53"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed5/20261013_e6_gumbel_seed5/evaluation_revision.json": {
+        "bytes": 257,
+        "sha256_16": "3d7b6e9774199922"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed5/20261013_e6_gumbel_seed5/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "b69884a65e0b92ab"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed6/20261013_e6_gumbel_seed6/evaluation_revision.json": {
+        "bytes": 257,
+        "sha256_16": "cb68f0493d6e869d"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed6/20261013_e6_gumbel_seed6/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "b4e2d01e68b1e799"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed7/20261013_e6_gumbel_seed7/evaluation_revision.json": {
+        "bytes": 258,
+        "sha256_16": "a568f6c3e69175b8"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed7/20261013_e6_gumbel_seed7/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "de5ce73cf96bace1"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed8/20261013_e6_gumbel_seed8/evaluation_revision.json": {
+        "bytes": 258,
+        "sha256_16": "f29aa97dc4205e58"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed8/20261013_e6_gumbel_seed8/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "de0d6f9f9082118b"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed9/20261013_e6_gumbel_seed9/evaluation_revision.json": {
+        "bytes": 260,
+        "sha256_16": "3d2880c383bfc0ae"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_model1/e6_router_20261012T205227Z_NEdooQ/gumbel_seed9/20261013_e6_gumbel_seed9/config_used.yaml": {
+        "bytes": 2125,
+        "sha256_16": "e81c28106dddb7c4"
+      }
+    },
+    "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075"
+  },
+  "training_executed": false,
+  "postprocessing_enabled": false
+}

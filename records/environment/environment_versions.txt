@@ -1,0 +1,6 @@
+python 3.10.12
+platform Linux-5.15.0-94-generic-x86_64-with-glibc2.35
+torch 2.7.1+cu128
+torchvision 0.22.1+cu128
+cuda_runtime 12.8
+cudnn 90701

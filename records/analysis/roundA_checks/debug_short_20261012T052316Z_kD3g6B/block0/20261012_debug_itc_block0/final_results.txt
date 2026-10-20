@@ -1,0 +1,12 @@
+best_epoch: not available
+R@1: not available
+R@5: not available
+R@10: not available
+mAP: not available
+total_training_time_sec: 52.000000953674316
+completed_epochs: 0
+peak_mem_alloc_gb: 15.21618366241455
+peak_mem_reserved_gb: 16.517578125
+run_status: debug_stopped
+debug_max_iters: 30
+optimizer_updates: 30

@@ -1,0 +1,179 @@
+{
+  "status": "complete",
+  "rows": [
+    {
+      "setting": "uncorrected",
+      "bank": null,
+      "alpha": null,
+      "k": null,
+      "metrics": {
+        "R1": 62.166748046875,
+        "R5": 79.1868667602539,
+        "R10": 84.54920196533203,
+        "mAP": 48.951151758925086
+      },
+      "delta_R1_pp": 0.0,
+      "identity_bootstrap": null
+    },
+    {
+      "setting": "inductive_default",
+      "bank": "train_full",
+      "alpha": 0.5,
+      "k": 10,
+      "metrics": {
+        "R1": 62.566650390625,
+        "R5": 79.1505126953125,
+        "R10": 84.51284790039062,
+        "mAP": 49.00744048424754
+      },
+      "delta_R1_pp": 0.3999030538051382,
+      "identity_bootstrap": {
+        "delta_definition": "R1(second) - R1(first), percentage points",
+        "observed_delta_pp": 0.3999030538051382,
+        "bootstrap_mean_delta_pp": 0.3988220206058355,
+        "bootstrap_std_pp": 0.18661022622804357,
+        "ci95_percentile_pp": [
+          0.029971080268192517,
+          0.754697254723765
+        ],
+        "p_two_sided": 0.034996500349965,
+        "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+        "repeats": 10000,
+        "seed": 2026,
+        "unit": "cluster",
+        "n_units": 2000,
+        "n_queries": 16504,
+        "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries"
+      }
+    },
+    {
+      "setting": "inductive_075_30",
+      "bank": "train_full",
+      "alpha": 0.75,
+      "k": 30,
+      "metrics": {
+        "R1": 62.42123031616211,
+        "R5": 78.85967254638672,
+        "R10": 84.27047729492188,
+        "mAP": 48.9068492562652
+      },
+      "delta_R1_pp": 0.25448376151236063,
+      "identity_bootstrap": {
+        "delta_definition": "R1(second) - R1(first), percentage points",
+        "observed_delta_pp": 0.25448376151236063,
+        "bootstrap_mean_delta_pp": 0.25394619394225076,
+        "bootstrap_std_pp": 0.20758970995761172,
+        "ci95_percentile_pp": [
+          -0.15197984583420887,
+          0.6630652731126462
+        ],
+        "p_two_sided": 0.23017698230176983,
+        "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+        "repeats": 10000,
+        "seed": 2026,
+        "unit": "cluster",
+        "n_units": 2000,
+        "n_queries": 16504,
+        "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries"
+      }
+    },
+    {
+      "setting": "transductive_k10",
+      "bank": "test_full",
+      "alpha": 0.5,
+      "k": 10,
+      "metrics": {
+        "R1": 63.09379577636719,
+        "R5": 79.7806625366211,
+        "R10": 85.03392791748047,
+        "mAP": 49.60088978281348
+      },
+      "delta_R1_pp": 0.9270479883664566,
+      "identity_bootstrap": {
+        "delta_definition": "R1(second) - R1(first), percentage points",
+        "observed_delta_pp": 0.9270479883664566,
+        "bootstrap_mean_delta_pp": 0.9270193971836163,
+        "bootstrap_std_pp": 0.19813337035194326,
+        "ci95_percentile_pp": [
+          0.5363204766392644,
+          1.320891904992729
+        ],
+        "p_two_sided": 0.00019998000199980003,
+        "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+        "repeats": 10000,
+        "seed": 2026,
+        "unit": "cluster",
+        "n_units": 2000,
+        "n_queries": 16504,
+        "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries"
+      }
+    }
+  ],
+  "n_query": 16504,
+  "n_gallery": 8252,
+  "formula": "S - alpha*mean(top-k(bank[:,g]))",
+  "calibration_frozen_before_bootstrap": true,
+  "source_image_exclusion": false,
+  "selection_from_test_metrics": false,
+  "interval_scope": "paired whole-identity percentile CI; conditional on each supplied matrix and fixed bank",
+  "a_b_c_legacy_configurations_changed": false,
+  "model_tag": "b16_c0_seed2",
+  "fresh_bank_filename": true,
+  "training_bank_provenance_note": "The bank filename contains '_fresh': classified by the E3 filename convention as a fresh-forward training bank, without a test-fitted W. This filename classification does not verify the extraction provenance; retain the corresponding E3 JSON as evidence.",
+  "provenance": {
+    "argv": [
+      "scripts/S13_inductive_bootstrap.py",
+      "--sim",
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e4_b16_c0_seed2/E3_e3_c0_b0_seed2_20261012T173030129418Z_sim_qg_fresh.npy",
+      "--bank",
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e4_b16_c0_seed2/E3_e3_c0_b0_seed2_20261012T173030129418Z_sim_bank_g_fresh.npy",
+      "--anno",
+      "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+      "--out",
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/s13_b16_c0_seed2",
+      "--tag",
+      "b16_c0_seed2",
+      "--seed",
+      "2026",
+      "--bootstrap",
+      "10000",
+      "--summary-table"
+    ],
+    "arguments": {
+      "sim": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e4_b16_c0_seed2/E3_e3_c0_b0_seed2_20261012T173030129418Z_sim_qg_fresh.npy",
+      "bank": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e4_b16_c0_seed2/E3_e3_c0_b0_seed2_20261012T173030129418Z_sim_bank_g_fresh.npy",
+      "anno": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+      "out": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/s13_b16_c0_seed2/S13_b16_c0_seed2_summary_table.json",
+      "tag": "b16_c0_seed2",
+      "seed": 2026,
+      "bootstrap": 10000,
+      "score_block_size": 256,
+      "summary_table": "auto"
+    },
+    "seeds": {
+      "bootstrap": 2026
+    },
+    "inputs": {
+      "sim": {
+        "path": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e4_b16_c0_seed2/E3_e3_c0_b0_seed2_20261012T173030129418Z_sim_qg_fresh.npy",
+        "available": true,
+        "bytes": 544764160,
+        "sha256_16": "6608d7cc20a1edbb"
+      },
+      "bank": {
+        "path": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e4_b16_c0_seed2/E3_e3_c0_b0_seed2_20261012T173030129418Z_sim_bank_g_fresh.npy",
+        "available": true,
+        "bytes": 1317283392,
+        "sha256_16": "6252b53d7e0c253f"
+      },
+      "anno": {
+        "path": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+        "available": true,
+        "bytes": 5373276,
+        "sha256_16": "40d549b5669bcc46"
+      }
+    },
+    "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+    "created_utc": "2026-10-12T18:09:12.029869+00:00"
+  }
+}

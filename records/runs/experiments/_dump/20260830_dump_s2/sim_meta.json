@@ -1,0 +1,31 @@
+{
+  "n_query": 16504,
+  "n_gallery": 8252,
+  "dtype": "float16",
+  "sim_qg_scoring": "sim_qg = 0.5 * cosine(text_global, image_global) + 0.5 * cosine(text_TSE, image_TSE); all features are L2-normalized.",
+  "sim_gg_scoring": "sim_gg = 0.5 * cosine(image_global, image_global) + 0.5 * cosine(image_TSE, image_TSE); the two image branches are L2-normalized and use the same weights as sim_qg.",
+  "sim_gg_composition_matches_sim_qg": true,
+  "checkpoint_path": "/root/autodl-tmp/experiments/20260827_l14_keep_s2/checkpoint_best.pth",
+  "checkpoint_note": "loaded from --resume",
+  "exp_name": "dump_s2",
+  "git_commit": "c9823ee7ded838724d561ed07279e7a78afbadb6",
+  "raw_metrics": {
+    "R@1": 62.802955627441406,
+    "R@5": 79.07779693603516,
+    "R@10": 84.37348175048828,
+    "mAP": 50.374107360839844
+  },
+  "sim_qg_stats": {
+    "mean": 0.4250692338852297,
+    "std": 0.009036129994612747,
+    "min": 0.35888671875,
+    "max": 0.50537109375
+  },
+  "sim_gg_stats": {
+    "mean": 0.4731959632105935,
+    "std": 0.12883328772033148,
+    "min": 0.027435302734375,
+    "max": 1.0
+  },
+  "dump_elapsed_sec": 2.65572477504611
+}

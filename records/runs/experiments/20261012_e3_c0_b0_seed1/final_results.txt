@@ -1,0 +1,12 @@
+best_epoch: 10
+R@1: 61.88802719116211
+R@5: 79.08385467529297
+R@10: 84.72491455078125
+mAP: 48.877994537353516
+total_training_time_sec: 1961.9950754642487
+completed_epochs: 10
+peak_mem_alloc_gb: 15.21618366241455
+peak_mem_reserved_gb: 16.57421875
+run_status: completed
+last_checkpoint_path: /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/checkpoint_last.pth
+last_checkpoint_sha256: a10ac04b93edd5974d0a49287ffcbe6d5ca47b79bb55a93ca69b05133e8bd184

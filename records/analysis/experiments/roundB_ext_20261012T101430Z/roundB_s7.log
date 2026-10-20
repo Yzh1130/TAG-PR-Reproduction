@@ -1,0 +1,33 @@
+[2026-10-12 18:14:30] OUT=/root/autodl-tmp/experiments/roundB_ext_20261012T101430Z HEAD=37c0a08
+[2026-10-12 18:14:30] OK  cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z
+[2026-10-12 18:14:30] OK  cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z
+[2026-10-12 18:14:30] OK  cuhkpedes_ViT-B-16_test_seed2_20261012T072847431176Z
+[2026-10-12 18:14:30] OK  icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z
+[2026-10-12 18:14:30] OK  icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z
+[2026-10-12 18:14:30] OK  icfgpedes_ViT-B-16_test_seed2_20261012T075418804352Z
+[2026-10-12 18:14:30] OK  aeri_ViT-B-16_test_seed0_20260901T142211175107Z
+[2026-10-12 18:14:30] OK  aeri_ViT-B-16_test_seed1_20261012T064713194376Z
+[2026-10-12 18:14:30] OK  aeri_ViT-B-16_test_seed2_20261012T080842414782Z
+[2026-10-12 18:14:30] OK  tbapr_ViT-B-16_test_seed0_20260901T134331815055Z
+[2026-10-12 18:14:30] OK  tbapr_ViT-B-16_test_seed1_20261012T071625394253Z
+[2026-10-12 18:14:30] OK  tbapr_ViT-B-16_test_seed2_20261012T083753567095Z
+[2026-10-12 18:14:30] OK  cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z
+[2026-10-12 18:14:30] OK  cohort
+[2026-10-12 18:14:30] OK  /root/autodl-tmp/datasets/TBAGPR
+[2026-10-12 18:14:30] START S7a_seed0
+[2026-10-12 18:14:30] END S7a_seed0 rc=1
+[2026-10-12 18:14:30] MISSING /root/autodl-tmp/experiments/roundB_ext_20261012T101430Z/ext_s7a/S7a_csls_seed0/S7a_summary_seed0.json ; S7a stdout tail:
+S7a_csls: [Errno 2] No such file or directory: '/root/autodl-tmp/TAG-PR/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/meta.json'
+[2026-10-12 18:14:30] START S7a_seed1
+[2026-10-12 18:14:30] END S7a_seed1 rc=1
+[2026-10-12 18:14:30] MISSING /root/autodl-tmp/experiments/roundB_ext_20261012T101430Z/ext_s7a/S7a_csls_seed1/S7a_summary_seed1.json ; S7a stdout tail:
+S7a_csls: [Errno 2] No such file or directory: '/root/autodl-tmp/TAG-PR/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z/meta.json'
+[2026-10-12 18:14:30] START S7a_seed2
+[2026-10-12 18:14:30] END S7a_seed2 rc=1
+[2026-10-12 18:14:30] MISSING /root/autodl-tmp/experiments/roundB_ext_20261012T101430Z/ext_s7a/S7a_csls_seed2/S7a_summary_seed2.json ; S7a stdout tail:
+S7a_csls: [Errno 2] No such file or directory: '/root/autodl-tmp/TAG-PR/cuhkpedes_ViT-B-16_test_seed2_20261012T072847431176Z/meta.json'
+[2026-10-12 18:14:30] START S7c_seed0
+[2026-10-12 18:14:31] END S7c_seed0 rc=1
+[2026-10-12 18:14:31] START S7_aggregate
+[2026-10-12 18:14:31] END S7_aggregate rc=2
+[2026-10-12 18:14:31] ===== 完成 =====

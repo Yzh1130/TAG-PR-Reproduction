@@ -1,0 +1,343 @@
+S9 enrichment_definition: P(predicted source equals true source | top-1 error, query view) / mean(same-source gallery fraction after removing ALL true-identity images | the same top-1 error queries and query view)
+PASS exact: full_gallery.uncorrected.R1
+PASS exact: full_gallery.uncorrected.R5
+PASS exact: full_gallery.uncorrected.R10
+PASS exact: full_gallery.uncorrected.mAP
+AUTHORITATIVE S11 identity_group [{"fold": 0, "calibration": {"identities": 1000, "images": 4126, "texts": 8252, "queries": 8252}, "evaluation": {"identities": 1000, "images": 4126, "texts": 8252, "queries": 8252}, "overlap": {"queries": 0, "images": 0, "identities": 0}, "metrics": {"uncorrected": {"R1": 63.342220306396484, "R5": 78.80513763427734, "R10": 84.24624633789062, "mAP": 50.173590738013374, "n_query": 8252, "skipped_no_positive": 0, "gallery_size": 8252}, "crossfit_csls": {"R1": 65.25690460205078, "R5": 80.1502685546875, "R10": 85.42171478271484, "mAP": 52.33188847211912, "n_query": 8252, "skipped_no_positive": 0, "gallery_size": 8252}, "full_query_transductive_csls": {"R1": 64.15414428710938, "R5": 79.2171630859375, "R10": 85.08240509033203, "mAP": 50.777217364558446, "n_query": 8252, "skipped_no_positive": 0, "gallery_size": 8252}}}, {"fold": 1, "calibration": {"identities": 1000, "images": 4126, "texts": 8252, "queries": 8252}, "evaluation": {"identities": 1000, "images": 4126, "texts": 8252, "queries": 8252}, "overlap": {"queries": 0, "images": 0, "identities": 0}, "metrics": {"uncorrected": {"R1": 63.92389678955078, "R5": 79.7140121459961, "R10": 84.97334289550781, "mAP": 50.75637298126833, "n_query": 8252, "skipped_no_positive": 0, "gallery_size": 8252}, "crossfit_csls": {"R1": 65.95977020263672, "R5": 80.99854278564453, "R10": 85.95491790771484, "mAP": 52.80743026651251, "n_query": 8252, "skipped_no_positive": 0, "gallery_size": 8252}, "full_query_transductive_csls": {"R1": 65.17208099365234, "R5": 80.46533966064453, "R10": 85.72467041015625, "mAP": 51.48294791958854, "n_query": 8252, "skipped_no_positive": 0, "gallery_size": 8252}}}]
+PASS exact: F.fold0.calibration.identities
+PASS exact: F.fold0.calibration.images
+PASS exact: F.fold0.calibration.texts
+PASS exact: F.fold0.calibration.queries
+PASS exact: F.fold0.evaluation.identities
+PASS exact: F.fold0.evaluation.images
+PASS exact: F.fold0.evaluation.texts
+PASS exact: F.fold0.evaluation.queries
+PASS exact: F.fold0.overlap
+PASS exact: F.fold0.uncorrected.R1
+PASS exact: F.fold0.uncorrected.R5
+PASS exact: F.fold0.uncorrected.R10
+PASS exact: F.fold0.uncorrected.mAP
+PASS exact: F.fold0.crossfit_csls.R1
+RESTORED fold=0 counts={'calibration': {'identities': 1000, 'images': 4126, 'texts': 8252, 'queries': 8252}, 'evaluation': {'identities': 1000, 'images': 4126, 'texts': 8252, 'queries': 8252}}; all full-gallery metric gates PASS
+PASS exact: F.fold1.calibration.identities
+PASS exact: F.fold1.calibration.images
+PASS exact: F.fold1.calibration.texts
+PASS exact: F.fold1.calibration.queries
+PASS exact: F.fold1.evaluation.identities
+PASS exact: F.fold1.evaluation.images
+PASS exact: F.fold1.evaluation.texts
+PASS exact: F.fold1.evaluation.queries
+PASS exact: F.fold1.overlap
+PASS exact: F.fold1.uncorrected.R1
+PASS exact: F.fold1.uncorrected.R5
+PASS exact: F.fold1.uncorrected.R10
+PASS exact: F.fold1.uncorrected.mAP
+PASS exact: F.fold1.crossfit_csls.R1
+RESTORED fold=1 counts={'calibration': {'identities': 1000, 'images': 4126, 'texts': 8252, 'queries': 8252}, 'evaluation': {'identities': 1000, 'images': 4126, 'texts': 8252, 'queries': 8252}}; all full-gallery metric gates PASS
+PASS exact: A.fold0.calibration_source_overlap_evaluation_gallery
+PASS exact: A.fold0.identities_disjoint
+PASS exact: A.fold0.evaluation_gallery_all_id_images
+PASS exact: A.fold0.uncorrected.same_queries
+PASS exact: A.fold0.uncorrected.no_skipped
+PASS exact: A.fold0.crossfit_csls.same_queries
+PASS exact: A.fold0.crossfit_csls.no_skipped
+PASS exact: A.fold0.evaluation_query_transductive_csls.same_queries
+PASS exact: A.fold0.evaluation_query_transductive_csls.no_skipped
+A fold=0 scan=100: {"R1": {"mean": 69.00953420003255, "std": 0.1386402902224568}, "R5": {"mean": 83.5958964029948, "std": 0.03022743026882305}, "R10": {"mean": 88.82695007324219, "std": 0.04534420399216188}, "mAP": {"mean": 56.220884324265235, "std": 0.036009562964628934}}
+A fold=0 scan=500: {"R1": {"mean": 69.13475290934245, "std": 0.3440385014627486}, "R5": {"mean": 83.79382832845052, "std": 0.09352027757281785}, "R10": {"mean": 88.91177876790364, "std": 0.12397758637776526}, "mAP": {"mean": 56.30303413997634, "std": 0.04695491700845266}}
+A fold=0 scan=1000: {"R1": {"mean": 69.2195816040039, "std": 0.2417573419036164}, "R5": {"mean": 83.70496368408203, "std": 0.10106663994163809}, "R10": {"mean": 88.77039845784505, "std": 0.03745857194948097}, "mAP": {"mean": 56.34418377336707, "std": 0.057469780315924486}}
+A fold=0 scan=5000: {"R1": {"mean": 69.21958414713542, "std": 0.16467984753914153}, "R5": {"mean": 83.83826192220052, "std": 0.05077257691089347}, "R10": {"mean": 88.79867299397786, "std": 0.03474663728322578}, "mAP": {"mean": 56.27632336201896, "std": 0.021727332717589344}}
+PASS exact: A.fold0.full_scan.seed2026.R1
+PASS exact: A.fold0.full_scan.seed2026.R5
+PASS exact: A.fold0.full_scan.seed2026.R10
+PASS exact: A.fold0.full_scan.seed2026.mAP
+PASS exact: A.fold0.full_scan.seed2027.R1
+PASS exact: A.fold0.full_scan.seed2027.R5
+PASS exact: A.fold0.full_scan.seed2027.R10
+PASS exact: A.fold0.full_scan.seed2027.mAP
+PASS exact: A.fold0.full_scan.seed2028.R1
+PASS exact: A.fold0.full_scan.seed2028.R5
+PASS exact: A.fold0.full_scan.seed2028.R10
+PASS exact: A.fold0.full_scan.seed2028.mAP
+A fold=0 scan=full: {"R1": {"mean": 69.26805877685547, "std": 0.0}, "R5": {"mean": 84.04022979736328, "std": 0.0}, "R10": {"mean": 88.8027114868164, "std": 0.0}, "mAP": {"mean": 56.30606119735088, "std": 0.0}}
+A fold  setting                             R1                 R5                 R10                mAP              
+0       uncorrected                         69.40135955810547  83.93116760253906  89.02084350585938  56.3881917482944 
+0       crossfit_csls                       69.26805877685547  84.04022979736328  88.8027114868164   56.30606119735088
+0       evaluation_query_transductive_csls  70.09210205078125  84.63402557373047  89.37227630615234  56.91385500924182
+PASS exact: A.fold1.calibration_source_overlap_evaluation_gallery
+PASS exact: A.fold1.identities_disjoint
+PASS exact: A.fold1.evaluation_gallery_all_id_images
+PASS exact: A.fold1.uncorrected.same_queries
+PASS exact: A.fold1.uncorrected.no_skipped
+PASS exact: A.fold1.crossfit_csls.same_queries
+PASS exact: A.fold1.crossfit_csls.no_skipped
+PASS exact: A.fold1.evaluation_query_transductive_csls.same_queries
+PASS exact: A.fold1.evaluation_query_transductive_csls.no_skipped
+A fold=1 scan=100: {"R1": {"mean": 69.93860117594402, "std": 0.17317524125618108}, "R5": {"mean": 84.51284535725911, "std": 0.10424641577640485}, "R10": {"mean": 89.34803771972656, "std": 0.04534420399216188}, "mAP": {"mean": 56.850048861639955, "std": 0.054889129195522086}}
+A fold=1 scan=500: {"R1": {"mean": 69.88608805338542, "std": 0.19863046285707014}, "R5": {"mean": 84.44417317708333, "std": 0.044616051399710414}, "R10": {"mean": 89.15010579427083, "std": 0.06588219753277398}, "mAP": {"mean": 56.82240873716836, "std": 0.014282342584905048}}
+A fold=1 scan=1000: {"R1": {"mean": 70.00323232014973, "std": 0.168302504911737}, "R5": {"mean": 84.55324045817058, "std": 0.13139206968733796}, "R10": {"mean": 89.38843282063802, "std": 0.0562626599310406}, "mAP": {"mean": 56.86888129774851, "std": 0.038250725262216075}}
+A fold=1 scan=5000: {"R1": {"mean": 70.04362487792969, "std": 0.12158508485255787}, "R5": {"mean": 84.4764912923177, "std": 0.03957833123992115}, "R10": {"mean": 89.25512949625652, "std": 0.005711291343812243}, "mAP": {"mean": 56.75637175965866, "std": 0.018018229316718693}}
+PASS exact: A.fold1.full_scan.seed2026.R1
+PASS exact: A.fold1.full_scan.seed2026.R5
+PASS exact: A.fold1.full_scan.seed2026.R10
+PASS exact: A.fold1.full_scan.seed2026.mAP
+PASS exact: A.fold1.full_scan.seed2027.R1
+PASS exact: A.fold1.full_scan.seed2027.R5
+PASS exact: A.fold1.full_scan.seed2027.R10
+PASS exact: A.fold1.full_scan.seed2027.mAP
+PASS exact: A.fold1.full_scan.seed2028.R1
+PASS exact: A.fold1.full_scan.seed2028.R5
+PASS exact: A.fold1.full_scan.seed2028.R10
+PASS exact: A.fold1.full_scan.seed2028.mAP
+A fold=1 scan=full: {"R1": {"mean": 70.2859878540039, "std": 0.0}, "R5": {"mean": 84.48860931396484, "std": 0.0}, "R10": {"mean": 89.166259765625, "std": 0.0}, "mAP": {"mean": 56.757448556829495, "std": 0.0}}
+A fold  setting                             R1                 R5                 R10                mAP               
+1       uncorrected                         69.91032409667969  84.57344055175781  89.40863037109375  56.966849919758076
+1       crossfit_csls                       70.2859878540039   84.48860931396484  89.166259765625    56.757448556829495
+1       evaluation_query_transductive_csls  71.40087127685547  85.45806884765625  90.05089569091797  57.66338930053022 
+S9 enrichment_definition: P(predicted source equals true source | top-1 error, query view) / mean(same-source gallery fraction after removing ALL true-identity images | the same top-1 error queries and query view)
+PASS exact: B.S9.enrichment_definition
+PASS exact: B.aerial.same_source_error_probability
+PASS exact: B.aerial.mean_conditional_prior
+PASS exact: B.aerial.enrichment_ratio
+PASS exact: B.aerial.n_errors
+PASS exact: B.ground.same_source_error_probability
+PASS exact: B.ground.mean_conditional_prior
+PASS exact: B.ground.enrichment_ratio
+PASS exact: B.ground.n_errors
+B view  quantity                       point                identity 95%                               query 95%                                 
+aerial  same_source_error_probability  0.7295353982300885   [0.7082179281478219, 0.75063918803229]     [0.7151548672566371, 0.7439159292035398]  
+aerial  mean_conditional_prior         0.26169382358985355  [0.2535347004494572, 0.26969064321586217]  [0.25797598454510384, 0.26555126482160923]
+aerial  enrichment_ratio               2.7877440446338997   [2.7096019671545504, 2.8678871637937973]   [2.731883574028205, 2.8447198819756068]   
+B view  quantity                       point                identity 95%                                query 95%                               
+ground  same_source_error_probability  0.8478625314333613   [0.8308947693537775, 0.864132902276861]     [0.8336127409891031, 0.8621123218776194]
+ground  mean_conditional_prior         0.32040738454777234  [0.31434751020006174, 0.32639260079308674]  [0.3166844576853779, 0.3240994878426002]
+ground  enrichment_ratio               2.6462015931063725   [2.585331290940325, 2.7068574247164374]     [2.5968839537308535, 2.695181624994299] 
+PASS exact: C.error_count
+PASS exact: C.same_source_same_view.count
+PASS exact: C.same_source_cross_view.count
+PASS exact: C.cross_source_same_view.count
+PASS exact: C.cross_source_cross_view.count
+C category                        proportion           identity 95%                              
+same_source_same_view             0.5601466177940686   [0.5455163560993849, 0.5751031388394611]  
+same_source_cross_view            0.21642785738087303  [0.20283161732960003, 0.22973867019517036]
+cross_source_same_view            0.11312895701432855  [0.10347626757702152, 0.12304284015008046]
+cross_source_cross_view           0.11029656781072976  [0.10035604502889042, 0.12073846477411193]
+P(cross_view|same_source,error)   0.27869555889294145  [0.2633113938862074, 0.29393333142416495] 
+P(cross_view|cross_source,error)  0.4936614466815809   [0.46394961018983577, 0.5231692842439406] 
+PASS exact: D.A.common_queries
+PASS exact: D.A.common_count
+PASS exact: D.G.common_queries
+PASS exact: D.G.common_count
+PASS exact: D.original.A->A.R1
+PASS exact: D.original.A->G.R1
+PASS exact: D.A.gallery_seeds
+PASS exact: D.A.effective_gallery_size
+PASS exact: D.A.seed2026.same_gallery_indices.replay
+PASS exact: D.A.seed2026.same.R1
+PASS exact: D.A.seed2026.same.effective_min
+PASS exact: D.A.seed2026.same.effective_max
+PASS exact: D.A.seed2026.same.query_set
+PASS exact: D.A.seed2026.cross_gallery_indices.replay
+PASS exact: D.A.seed2026.cross.R1
+PASS exact: D.A.seed2026.cross.effective_min
+PASS exact: D.A.seed2026.cross.effective_max
+PASS exact: D.A.seed2026.cross.query_set
+PASS exact: D.A.seed2027.same_gallery_indices.replay
+PASS exact: D.A.seed2027.same.R1
+PASS exact: D.A.seed2027.same.effective_min
+PASS exact: D.A.seed2027.same.effective_max
+PASS exact: D.A.seed2027.same.query_set
+PASS exact: D.A.seed2027.cross_gallery_indices.replay
+PASS exact: D.A.seed2027.cross.R1
+PASS exact: D.A.seed2027.cross.effective_min
+PASS exact: D.A.seed2027.cross.effective_max
+PASS exact: D.A.seed2027.cross.query_set
+PASS exact: D.A.seed2028.same_gallery_indices.replay
+PASS exact: D.A.seed2028.same.R1
+PASS exact: D.A.seed2028.same.effective_min
+PASS exact: D.A.seed2028.same.effective_max
+PASS exact: D.A.seed2028.same.query_set
+PASS exact: D.A.seed2028.cross_gallery_indices.replay
+PASS exact: D.A.seed2028.cross.R1
+PASS exact: D.A.seed2028.cross.effective_min
+PASS exact: D.A.seed2028.cross.effective_max
+PASS exact: D.A.seed2028.cross.query_set
+PASS exact: D.A.seed2029.same_gallery_indices.replay
+PASS exact: D.A.seed2029.same.R1
+PASS exact: D.A.seed2029.same.effective_min
+PASS exact: D.A.seed2029.same.effective_max
+PASS exact: D.A.seed2029.same.query_set
+PASS exact: D.A.seed2029.cross_gallery_indices.replay
+PASS exact: D.A.seed2029.cross.R1
+PASS exact: D.A.seed2029.cross.effective_min
+PASS exact: D.A.seed2029.cross.effective_max
+PASS exact: D.A.seed2029.cross.query_set
+PASS exact: D.A.seed2030.same_gallery_indices.replay
+PASS exact: D.A.seed2030.same.R1
+PASS exact: D.A.seed2030.same.effective_min
+PASS exact: D.A.seed2030.same.effective_max
+PASS exact: D.A.seed2030.same.query_set
+PASS exact: D.A.seed2030.cross_gallery_indices.replay
+PASS exact: D.A.seed2030.cross.R1
+PASS exact: D.A.seed2030.cross.effective_min
+PASS exact: D.A.seed2030.cross.effective_max
+PASS exact: D.A.seed2030.cross.query_set
+PASS exact: D.A.seed2031.same_gallery_indices.replay
+PASS exact: D.A.seed2031.same.R1
+PASS exact: D.A.seed2031.same.effective_min
+PASS exact: D.A.seed2031.same.effective_max
+PASS exact: D.A.seed2031.same.query_set
+PASS exact: D.A.seed2031.cross_gallery_indices.replay
+PASS exact: D.A.seed2031.cross.R1
+PASS exact: D.A.seed2031.cross.effective_min
+PASS exact: D.A.seed2031.cross.effective_max
+PASS exact: D.A.seed2031.cross.query_set
+PASS exact: D.A.seed2032.same_gallery_indices.replay
+PASS exact: D.A.seed2032.same.R1
+PASS exact: D.A.seed2032.same.effective_min
+PASS exact: D.A.seed2032.same.effective_max
+PASS exact: D.A.seed2032.same.query_set
+PASS exact: D.A.seed2032.cross_gallery_indices.replay
+PASS exact: D.A.seed2032.cross.R1
+PASS exact: D.A.seed2032.cross.effective_min
+PASS exact: D.A.seed2032.cross.effective_max
+PASS exact: D.A.seed2032.cross.query_set
+PASS exact: D.A.seed2033.same_gallery_indices.replay
+PASS exact: D.A.seed2033.same.R1
+PASS exact: D.A.seed2033.same.effective_min
+PASS exact: D.A.seed2033.same.effective_max
+PASS exact: D.A.seed2033.same.query_set
+PASS exact: D.A.seed2033.cross_gallery_indices.replay
+PASS exact: D.A.seed2033.cross.R1
+PASS exact: D.A.seed2033.cross.effective_min
+PASS exact: D.A.seed2033.cross.effective_max
+PASS exact: D.A.seed2033.cross.query_set
+PASS exact: D.A.seed2034.same_gallery_indices.replay
+PASS exact: D.A.seed2034.same.R1
+PASS exact: D.A.seed2034.same.effective_min
+PASS exact: D.A.seed2034.same.effective_max
+PASS exact: D.A.seed2034.same.query_set
+PASS exact: D.A.seed2034.cross_gallery_indices.replay
+PASS exact: D.A.seed2034.cross.R1
+PASS exact: D.A.seed2034.cross.effective_min
+PASS exact: D.A.seed2034.cross.effective_max
+PASS exact: D.A.seed2034.cross.query_set
+PASS exact: D.A.seed2035.same_gallery_indices.replay
+PASS exact: D.A.seed2035.same.R1
+PASS exact: D.A.seed2035.same.effective_min
+PASS exact: D.A.seed2035.same.effective_max
+PASS exact: D.A.seed2035.same.query_set
+PASS exact: D.A.seed2035.cross_gallery_indices.replay
+PASS exact: D.A.seed2035.cross.R1
+PASS exact: D.A.seed2035.cross.effective_min
+PASS exact: D.A.seed2035.cross.effective_max
+PASS exact: D.A.seed2035.cross.query_set
+PASS exact: D.original.G->G.R1
+PASS exact: D.original.G->A.R1
+PASS exact: D.G.gallery_seeds
+PASS exact: D.G.effective_gallery_size
+PASS exact: D.G.seed2026.same_gallery_indices.replay
+PASS exact: D.G.seed2026.same.R1
+PASS exact: D.G.seed2026.same.effective_min
+PASS exact: D.G.seed2026.same.effective_max
+PASS exact: D.G.seed2026.same.query_set
+PASS exact: D.G.seed2026.cross_gallery_indices.replay
+PASS exact: D.G.seed2026.cross.R1
+PASS exact: D.G.seed2026.cross.effective_min
+PASS exact: D.G.seed2026.cross.effective_max
+PASS exact: D.G.seed2026.cross.query_set
+PASS exact: D.G.seed2027.same_gallery_indices.replay
+PASS exact: D.G.seed2027.same.R1
+PASS exact: D.G.seed2027.same.effective_min
+PASS exact: D.G.seed2027.same.effective_max
+PASS exact: D.G.seed2027.same.query_set
+PASS exact: D.G.seed2027.cross_gallery_indices.replay
+PASS exact: D.G.seed2027.cross.R1
+PASS exact: D.G.seed2027.cross.effective_min
+PASS exact: D.G.seed2027.cross.effective_max
+PASS exact: D.G.seed2027.cross.query_set
+PASS exact: D.G.seed2028.same_gallery_indices.replay
+PASS exact: D.G.seed2028.same.R1
+PASS exact: D.G.seed2028.same.effective_min
+PASS exact: D.G.seed2028.same.effective_max
+PASS exact: D.G.seed2028.same.query_set
+PASS exact: D.G.seed2028.cross_gallery_indices.replay
+PASS exact: D.G.seed2028.cross.R1
+PASS exact: D.G.seed2028.cross.effective_min
+PASS exact: D.G.seed2028.cross.effective_max
+PASS exact: D.G.seed2028.cross.query_set
+PASS exact: D.G.seed2029.same_gallery_indices.replay
+PASS exact: D.G.seed2029.same.R1
+PASS exact: D.G.seed2029.same.effective_min
+PASS exact: D.G.seed2029.same.effective_max
+PASS exact: D.G.seed2029.same.query_set
+PASS exact: D.G.seed2029.cross_gallery_indices.replay
+PASS exact: D.G.seed2029.cross.R1
+PASS exact: D.G.seed2029.cross.effective_min
+PASS exact: D.G.seed2029.cross.effective_max
+PASS exact: D.G.seed2029.cross.query_set
+PASS exact: D.G.seed2030.same_gallery_indices.replay
+PASS exact: D.G.seed2030.same.R1
+PASS exact: D.G.seed2030.same.effective_min
+PASS exact: D.G.seed2030.same.effective_max
+PASS exact: D.G.seed2030.same.query_set
+PASS exact: D.G.seed2030.cross_gallery_indices.replay
+PASS exact: D.G.seed2030.cross.R1
+PASS exact: D.G.seed2030.cross.effective_min
+PASS exact: D.G.seed2030.cross.effective_max
+PASS exact: D.G.seed2030.cross.query_set
+PASS exact: D.G.seed2031.same_gallery_indices.replay
+PASS exact: D.G.seed2031.same.R1
+PASS exact: D.G.seed2031.same.effective_min
+PASS exact: D.G.seed2031.same.effective_max
+PASS exact: D.G.seed2031.same.query_set
+PASS exact: D.G.seed2031.cross_gallery_indices.replay
+PASS exact: D.G.seed2031.cross.R1
+PASS exact: D.G.seed2031.cross.effective_min
+PASS exact: D.G.seed2031.cross.effective_max
+PASS exact: D.G.seed2031.cross.query_set
+PASS exact: D.G.seed2032.same_gallery_indices.replay
+PASS exact: D.G.seed2032.same.R1
+PASS exact: D.G.seed2032.same.effective_min
+PASS exact: D.G.seed2032.same.effective_max
+PASS exact: D.G.seed2032.same.query_set
+PASS exact: D.G.seed2032.cross_gallery_indices.replay
+PASS exact: D.G.seed2032.cross.R1
+PASS exact: D.G.seed2032.cross.effective_min
+PASS exact: D.G.seed2032.cross.effective_max
+PASS exact: D.G.seed2032.cross.query_set
+PASS exact: D.G.seed2033.same_gallery_indices.replay
+PASS exact: D.G.seed2033.same.R1
+PASS exact: D.G.seed2033.same.effective_min
+PASS exact: D.G.seed2033.same.effective_max
+PASS exact: D.G.seed2033.same.query_set
+PASS exact: D.G.seed2033.cross_gallery_indices.replay
+PASS exact: D.G.seed2033.cross.R1
+PASS exact: D.G.seed2033.cross.effective_min
+PASS exact: D.G.seed2033.cross.effective_max
+PASS exact: D.G.seed2033.cross.query_set
+PASS exact: D.G.seed2034.same_gallery_indices.replay
+PASS exact: D.G.seed2034.same.R1
+PASS exact: D.G.seed2034.same.effective_min
+PASS exact: D.G.seed2034.same.effective_max
+PASS exact: D.G.seed2034.same.query_set
+PASS exact: D.G.seed2034.cross_gallery_indices.replay
+PASS exact: D.G.seed2034.cross.R1
+PASS exact: D.G.seed2034.cross.effective_min
+PASS exact: D.G.seed2034.cross.effective_max
+PASS exact: D.G.seed2034.cross.query_set
+PASS exact: D.G.seed2035.same_gallery_indices.replay
+PASS exact: D.G.seed2035.same.R1
+PASS exact: D.G.seed2035.same.effective_min
+PASS exact: D.G.seed2035.same.effective_max
+PASS exact: D.G.seed2035.same.query_set
+PASS exact: D.G.seed2035.cross_gallery_indices.replay
+PASS exact: D.G.seed2035.cross.R1
+PASS exact: D.G.seed2035.cross.effective_min
+PASS exact: D.G.seed2035.cross.effective_max
+PASS exact: D.G.seed2035.cross.query_set
+D A: original identity CI=[-19.020044543429844, -14.72157242293339]; controlled mean endpoints=[-19.782887151972485, -15.515775454485638], range lower=[-20.191964039023382, -19.546729274663356], upper=[-15.944569630058842, -15.264100268576545]
+D G: original identity CI=[-26.418034003903394, -21.06595752383563]; controlled mean endpoints=[-26.714725238945768, -21.343830023525815], range lower=[-27.13934904212345, -26.27164987061098], upper=[-21.75771626921761, -20.928300786942586]
+S14 status=complete
+JSON: /root/autodl-tmp/experiments/_e1_s14/S14.json
+LOG: /root/autodl-tmp/experiments/_e1_s14/S14.log

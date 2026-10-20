@@ -23,6 +23,9 @@
 
 ---
 
+## Reproduction records for the revised paper (this fork)
+
+This fork reproduces and analyses TAG-CLIP on a single RTX 5090. Complete records of the revision-stage experiments live in [`records/`](records/README.md): per-run `config_used.yaml`, `run_command.txt`, `git_commit.txt`, `environment_summary.txt`, `metrics_by_epoch.csv` and `final_results.txt` for every TAG-PEDES and external-dataset run, the analysis archives behind the tables of the paper and the supplementary material, SHA-256 checksums of all saved checkpoints (`records/checksums.txt`), the ViT-L/14 configuration used by the minimal reproduction command (`records/configs/cfg_l14.yaml`) and the exact Python environment (`records/environment/requirements_tagpr5090.txt`: Python 3.10.12, PyTorch 2.7.1+cu128). `results_ext/` holds the original seed-0 external analyses of 2026-09-01; `records/` holds the complete revision-stage records. The upstream `requirements.txt` below is kept unchanged for reference.
 ## 🛠️ Setup
 
 ### Requirements

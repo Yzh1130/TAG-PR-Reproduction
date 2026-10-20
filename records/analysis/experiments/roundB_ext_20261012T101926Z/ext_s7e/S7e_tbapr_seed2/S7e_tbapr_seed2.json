@@ -1,0 +1,205 @@
+{
+  "run": "tbapr_ViT-B-16_test_seed2_20261012T083753567095Z",
+  "variants": {
+    "official_merged": {
+      "nq": 3200,
+      "ng": 3200,
+      "n_ids": 529,
+      "base_r1": 38.5,
+      "trans_delta": 1.094,
+      "trans_ci": [
+        -0.235,
+        2.458
+      ],
+      "ind_delta": 0.562,
+      "ind_ci": [
+        -0.651,
+        1.866
+      ]
+    },
+    "AG-ReID_only": {
+      "nq": 1149,
+      "ng": 1149,
+      "n_ids": 189,
+      "base_r1": 53.873,
+      "trans_delta": 2.437,
+      "trans_ci": [
+        0.0,
+        5.523
+      ],
+      "ind_delta": 0.261,
+      "ind_ci": [
+        -1.472,
+        2.02
+      ]
+    },
+    "G2APS_only": {
+      "nq": 2051,
+      "ng": 2051,
+      "n_ids": 340,
+      "base_r1": 37.738,
+      "trans_delta": 1.17,
+      "trans_ci": [
+        -0.794,
+        3.153
+      ],
+      "ind_delta": 1.073,
+      "ind_ci": [
+        -0.588,
+        2.803
+      ]
+    },
+    "merged_unique_text": {
+      "nq": 2241,
+      "ng": 3200,
+      "n_ids": 518,
+      "base_r1": 43.552,
+      "trans_delta": 1.071,
+      "trans_ci": [
+        -0.133,
+        2.256
+      ],
+      "ind_delta": 0.714,
+      "ind_ci": [
+        -0.405,
+        1.9
+      ]
+    },
+    "G2APS_unique_text": {
+      "nq": 1199,
+      "ng": 2051,
+      "n_ids": 329,
+      "base_r1": 43.953,
+      "trans_delta": 1.501,
+      "trans_ci": [
+        -0.162,
+        3.122
+      ],
+      "ind_delta": 0.917,
+      "ind_ci": [
+        -0.584,
+        2.408
+      ]
+    },
+    "merged_gallery_keepfirst": {
+      "nq": 3200,
+      "ng": 3083,
+      "n_ids": 529,
+      "base_r1": 38.5,
+      "trans_delta": 1.094,
+      "trans_ci": [
+        -0.235,
+        2.458
+      ],
+      "ind_delta": 0.562,
+      "ind_ci": [
+        -0.651,
+        1.866
+      ]
+    },
+    "merged_gallery_dropconflict": {
+      "nq": 3200,
+      "ng": 2969,
+      "n_ids": 529,
+      "base_r1": 39.25,
+      "trans_delta": 1.25,
+      "trans_ci": [
+        0.0,
+        2.589
+      ],
+      "ind_delta": 0.969,
+      "ind_ci": [
+        -0.19,
+        2.171
+      ]
+    },
+    "merged_unique_text_and_dropconflict": {
+      "nq": 2241,
+      "ng": 2969,
+      "n_ids": 518,
+      "base_r1": 44.266,
+      "trans_delta": 1.473,
+      "trans_ci": [
+        0.348,
+        2.62
+      ],
+      "ind_delta": 1.071,
+      "ind_ci": [
+        -0.043,
+        2.242
+      ]
+    }
+  },
+  "duplicate_text_stats": {
+    "queries": 3200,
+    "unique_texts": 2241,
+    "texts_shared_by_multiple_identities": 91
+  },
+  "gallery_dup_stats": {
+    "rows": 3200,
+    "unique_paths": 3083,
+    "nonfirst_duplicate_rows": 117,
+    "rows_in_conflicting_paths": 231
+  },
+  "_meta": {
+    "alpha": 0.5,
+    "k": 10,
+    "peak_rss_gb": 0.186624,
+    "elapsed_sec": 3.1,
+    "provenance": {
+      "argv": [
+        "S7e_tbapr.py",
+        "--root",
+        "/root/autodl-tmp/TAG-PR/experiments_ext",
+        "--run-dir",
+        "tbapr=/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed2_20261012T083753567095Z",
+        "--dataset-root",
+        "/root/autodl-tmp/datasets/TBAGPR",
+        "--s7a-json",
+        "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed2/S7a_summary_seed2.json",
+        "--tag",
+        "seed2",
+        "--out",
+        "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7e"
+      ],
+      "seeds": {
+        "bootstrap": 2026,
+        "run_seed": 2
+      },
+      "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+      "inputs": [
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed2_20261012T083753567095Z/meta.json",
+          "sha256_16": "29b2a1c3f923369c",
+          "bytes": 563315
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed2_20261012T083753567095Z/sim_qg.npy",
+          "sha256_16": "c926b93eabb68cf9",
+          "bytes": 40960128
+        },
+        {
+          "path": "/root/autodl-tmp/datasets/TBAGPR/AG-ReID/agtext_test.json",
+          "sha256_16": "0c1d8ccf66f412eb",
+          "bytes": 420595
+        },
+        {
+          "path": "/root/autodl-tmp/datasets/TBAGPR/G2APS-AG/g2aps_test.json",
+          "sha256_16": "821bca1674ecbd46",
+          "bytes": 677929
+        },
+        {
+          "path": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed2/S7a_summary_seed2.json",
+          "sha256_16": "6f8cac0003e213fa",
+          "bytes": 18223
+        },
+        {
+          "path": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed2/tbapr_r_inductive_seed2.npy",
+          "sha256_16": "aae6d68ccae0e4e7",
+          "bytes": 12928
+        }
+      ],
+      "tag": "seed2"
+    }
+  }
+}

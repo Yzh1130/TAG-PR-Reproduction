@@ -1,0 +1,31 @@
+S13 INFO: The bank filename contains '_fresh': classified by the E3 filename convention as a fresh-forward training bank, without a test-fitted W. This filename classification does not verify the extraction provenance; retain the corresponding E3 JSON as evidence.
+S13 fixing train top-30/top-10 and test top-10 penalties from complete banks; no bootstrap recalibration.
+S13 a: train_full, alpha=0.5, k=30; evaluating once then paired bootstrap x10000.
+S13 b: train_full, alpha=0.25, k=10; evaluating once then paired bootstrap x10000.
+S13 c: test_full, alpha=0.5, k=10; evaluating once then paired bootstrap x10000.
+S13 RAW R1=62.16674805 R5=79.18686676 R10=84.54920197 mAP=48.95115176
+config  bank        alpha  k   unit      R1           delta_pp   boot_mean_pp  CI95_pp                 p_sign_tail 
+a       train_full  0.5    30  query     62.64542007  +0.478672  +0.478983     [+0.187833, +0.775570]  0.00179982  
+a       train_full  0.5    30  image     62.64542007  +0.478672  +0.478166     [+0.181774, +0.781629]  0.00179982  
+a       train_full  0.5    30  identity  62.64542007  +0.478672  +0.478426     [+0.145896, +0.809237]  0.0057994201
+b       train_full  0.25   10  query     62.53635406  +0.369607  +0.368253     [+0.139360, +0.593795]  0.00279972  
+b       train_full  0.25   10  image     62.53635406  +0.369607  +0.368952     [+0.133301, +0.605914]  0.00139986  
+b       train_full  0.25   10  identity  62.53635406  +0.369607  +0.369809     [+0.122106, +0.617512]  0.00379962  
+c       test_full   0.5    10  query     63.09379578  +0.927048  +0.928083     [+0.581677, +1.284689]  0.00019998  
+c       test_full   0.5    10  image     63.09379578  +0.927048  +0.927213     [+0.581677, +1.278478]  0.00019998  
+c       test_full   0.5    10  identity  63.09379578  +0.927048  +0.927019     [+0.536320, +1.320892]  0.00019998  
+comparison       unit      delta_pp   boot_mean_pp  CI95_pp                 p_sign_tail 
+gain(a)-gain(c)  query     -0.448376  -0.449101     [-0.763451, -0.133301]  0.0049995   
+gain(a)-gain(c)  image     -0.448376  -0.449048     [-0.775570, -0.127242]  0.0057994201
+gain(a)-gain(c)  identity  -0.448376  -0.448594     [-0.804081, -0.103105]  0.01119888  
+S13 p: two-sided bootstrap sign-tail probability (+1 correction), NOT a null-bootstrap p-value.
+JSON: /root/autodl-tmp/roundC_out/final_20261012T150714Z/s13_b16_c0_seed2/S13_b16_c0_seed2_summary_table.json
+LOG: /root/autodl-tmp/roundC_out/final_20261012T150714Z/s13_b16_c0_seed2/S13_b16_c0_seed2_summary_table.log
+summary setting    R1                 R5                 R10                mAP                 delta_R1_pp          identity_CI95_pp                          
+uncorrected        62.166748046875    79.1868667602539   84.54920196533203  48.951151758925086  0.0                  None                                      
+inductive_default  62.566650390625    79.1505126953125   84.51284790039062  49.00744048424754   0.3999030538051382   [0.029971080268192517, 0.754697254723765] 
+inductive_075_30   62.42123031616211  78.85967254638672  84.27047729492188  48.9068492562652    0.25448376151236063  [-0.15197984583420887, 0.6630652731126462]
+transductive_k10   63.09379577636719  79.7806625366211   85.03392791748047  49.60088978281348   0.9270479883664566   [0.5363204766392644, 1.320891904992729]   
+S13 SUMMARY status=complete elapsed_sec=35.773
+JSON: /root/autodl-tmp/roundC_out/final_20261012T150714Z/s13_b16_c0_seed2/S13_b16_c0_seed2_20261012T180912_067312Z.json
+LOG: /root/autodl-tmp/roundC_out/final_20261012T150714Z/s13_b16_c0_seed2/S13_b16_c0_seed2_20261012T180912_067312Z.log

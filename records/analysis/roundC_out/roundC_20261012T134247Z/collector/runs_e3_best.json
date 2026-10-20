@@ -1,0 +1,799 @@
+{
+  "provenance": {
+    "argv": [
+      "/root/autodl-tmp/TAG-PR-roundc/scripts/revision/collect_revision_runs.py",
+      "--root",
+      "/root/autodl-tmp/experiments",
+      "--include",
+      "e3_",
+      "--pair",
+      "e3_c0_b0|e3_c1_b80",
+      "--by",
+      "seed",
+      "--metric",
+      "best",
+      "--tag",
+      "e3_best",
+      "--out",
+      "/root/autodl-tmp/roundC_out/roundC_20261012T134247Z//collector"
+    ],
+    "roots": [
+      "/root/autodl-tmp/experiments"
+    ],
+    "scanned_at_utc": "2026-10-12T14:24:57.362584+00:00",
+    "git_HEAD": "3debe7a44570bd681270a46c8a202def3425ebe9",
+    "seeds": [],
+    "read_only_scan": true
+  },
+  "runs": [
+    {
+      "directory": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0",
+      "directory_name": "20261012_e3_c0_b0_seed0",
+      "exp_name": "e3_c0_b0_seed0",
+      "command": "/root/autodl-tmp/envs/tagpr5090/bin/python main.py --exp_name e3_c0_b0_seed0 --output_dir /root/autodl-tmp/experiments --config config/config.local.yaml --batch_size 320 --epoch 10 --grad_checkpoint --save_last --itc_block_size 0 --seed 0",
+      "argv": [
+        "main.py",
+        "--exp_name",
+        "e3_c0_b0_seed0",
+        "--output_dir",
+        "/root/autodl-tmp/experiments",
+        "--config",
+        "config/config.local.yaml",
+        "--batch_size",
+        "320",
+        "--epoch",
+        "10",
+        "--grad_checkpoint",
+        "--save_last",
+        "--itc_block_size",
+        "0",
+        "--seed",
+        "0"
+      ],
+      "args": null,
+      "config_source_path": "config/config.local.yaml",
+      "config_source_sha256_16": null,
+      "config_used_path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/config_used.yaml",
+      "config_used_sha256_16": "db2e2218a19896c7",
+      "effective_configuration_source": "config_used.yaml",
+      "config_hash_note": "Only archived config_used bytes are hashed here; a current source config is not evidence of its training-time bytes.",
+      "seed": 0,
+      "batch_size": 320,
+      "itc_block_size": 0,
+      "grad_checkpoint": true,
+      "eval_router_mode": "gumbel",
+      "eval_seed": null,
+      "training_git_commit": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+      "evaluation_only": false,
+      "completed_epochs": 10,
+      "completed_epoch_numbers_observed": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "run_status": "completed",
+      "epochs": [
+        {
+          "epoch": 1,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 50.03029251098633,
+            "R5": 68.11075592041016,
+            "R10": 75.07270812988281,
+            "mAP": 39.660911560058594
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 2,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 55.74406051635742,
+            "R5": 72.09767150878906,
+            "R10": 78.58094787597656,
+            "mAP": 43.417842864990234
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 3,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 57.525447845458984,
+            "R5": 74.46073150634766,
+            "R10": 80.82888793945312,
+            "mAP": 45.00286865234375
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 4,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 58.29495620727539,
+            "R5": 75.73921203613281,
+            "R10": 81.59839630126953,
+            "mAP": 45.49086380004883
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 5,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 60.00363540649414,
+            "R5": 76.98133850097656,
+            "R10": 82.92534637451172,
+            "mAP": 46.81455993652344
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 6,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 59.85215377807617,
+            "R5": 77.17523193359375,
+            "R10": 83.16165924072266,
+            "mAP": 46.935813903808594
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 7,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 61.14274978637695,
+            "R5": 78.24769592285156,
+            "R10": 83.9493408203125,
+            "mAP": 47.98645782470703
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 8,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 61.66989517211914,
+            "R5": 78.88390350341797,
+            "R10": 84.3492431640625,
+            "mAP": 48.47056198120117
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 9,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 62.22127914428711,
+            "R5": 79.09597778320312,
+            "R10": 84.58555603027344,
+            "mAP": 48.80402374267578
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 10,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 62.2515754699707,
+            "R5": 79.21109771728516,
+            "R10": 84.46437072753906,
+            "mAP": 48.99555969238281
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        }
+      ],
+      "best": {
+        "epoch": 10,
+        "metrics": {
+          "R1": 62.2515754699707,
+          "R5": 79.21109771728516,
+          "R10": 84.46437072753906,
+          "mAP": 48.99555969238281
+        },
+        "source": "final_results.txt"
+      },
+      "last": {
+        "epoch": 10,
+        "metrics": {
+          "R1": 62.2515754699707,
+          "R5": 79.21109771728516,
+          "R10": 84.46437072753906,
+          "mAP": 48.99555969238281
+        },
+        "source": "metrics_by_epoch.csv"
+      },
+      "checkpoints": [
+        {
+          "name": "checkpoint_best.pth",
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_best.pth",
+          "bytes": 2705081622,
+          "sha256_16": "20e1e7d745cac697"
+        },
+        {
+          "name": "checkpoint_last.pth",
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth",
+          "bytes": 2705081686,
+          "sha256_16": "4f90ebc8156e8962"
+        }
+      ],
+      "missing_fields": [
+        "config_source_sha256_16"
+      ],
+      "warnings": [],
+      "input_files": {
+        "config_used.yaml": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/config_used.yaml",
+          "bytes": 2006,
+          "sha256_16": "db2e2218a19896c7"
+        },
+        "run_command.txt": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/run_command.txt",
+          "bytes": 778,
+          "sha256_16": "534ab489799b152c"
+        },
+        "train.log": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/train.log",
+          "bytes": 13681,
+          "sha256_16": "2a02e2acd6129ea9"
+        },
+        "git_commit.txt": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/git_commit.txt",
+          "bytes": 637,
+          "sha256_16": "cbea14637502142d"
+        },
+        "final_results.txt": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/final_results.txt",
+          "bytes": 449,
+          "sha256_16": "d709fefa198cd1a8"
+        },
+        "metrics_by_epoch.csv": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/metrics_by_epoch.csv",
+          "bytes": 1497,
+          "sha256_16": "28ec758e373c45fb"
+        }
+      }
+    },
+    {
+      "directory": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1",
+      "directory_name": "20261012_e3_c0_b0_seed1",
+      "exp_name": "e3_c0_b0_seed1",
+      "command": "/root/autodl-tmp/envs/tagpr5090/bin/python main.py --exp_name e3_c0_b0_seed1 --output_dir /root/autodl-tmp/experiments --config config/config.local.yaml --batch_size 320 --epoch 10 --grad_checkpoint --save_last --itc_block_size 0 --seed 1",
+      "argv": [
+        "main.py",
+        "--exp_name",
+        "e3_c0_b0_seed1",
+        "--output_dir",
+        "/root/autodl-tmp/experiments",
+        "--config",
+        "config/config.local.yaml",
+        "--batch_size",
+        "320",
+        "--epoch",
+        "10",
+        "--grad_checkpoint",
+        "--save_last",
+        "--itc_block_size",
+        "0",
+        "--seed",
+        "1"
+      ],
+      "args": null,
+      "config_source_path": "config/config.local.yaml",
+      "config_source_sha256_16": null,
+      "config_used_path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/config_used.yaml",
+      "config_used_sha256_16": "1a87bed2b4428844",
+      "effective_configuration_source": "config_used.yaml",
+      "config_hash_note": "Only archived config_used bytes are hashed here; a current source config is not evidence of its training-time bytes.",
+      "seed": 1,
+      "batch_size": 320,
+      "itc_block_size": 0,
+      "grad_checkpoint": true,
+      "eval_router_mode": "gumbel",
+      "eval_seed": null,
+      "training_git_commit": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+      "evaluation_only": false,
+      "completed_epochs": 5,
+      "completed_epoch_numbers_observed": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "run_status": null,
+      "epochs": [
+        {
+          "epoch": 1,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 49.757633209228516,
+            "R5": 67.29883575439453,
+            "R10": 74.04265594482422,
+            "mAP": 39.33845138549805
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 2,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 54.98666763305664,
+            "R5": 72.35821533203125,
+            "R10": 78.81119537353516,
+            "mAP": 43.32976531982422
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 3,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 57.88899612426758,
+            "R5": 74.91516876220703,
+            "R10": 80.9197769165039,
+            "mAP": 45.12228012084961
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 4,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": 58.137420654296875,
+            "R5": 75.92098999023438,
+            "R10": 82.06494903564453,
+            "mAP": 45.55840301513672
+          },
+          "metrics_source": "metrics_by_epoch.csv"
+        },
+        {
+          "epoch": 5,
+          "completed_evidence": true,
+          "actual_iterations": 124,
+          "measured_loader_iterations": 124,
+          "observed_iteration_indices": [
+            50,
+            100
+          ],
+          "observed_iteration_max": 100,
+          "log_denominators": [
+            124
+          ],
+          "metrics": {
+            "R1": null,
+            "R5": null,
+            "R10": null,
+            "mAP": null
+          },
+          "metrics_source": null
+        }
+      ],
+      "best": {
+        "epoch": 4,
+        "metrics": {
+          "R1": 58.137420654296875,
+          "R5": 75.92098999023438,
+          "R10": 82.06494903564453,
+          "mAP": 45.55840301513672
+        },
+        "source": "metrics_by_epoch.csv"
+      },
+      "last": {
+        "epoch": 5,
+        "metrics": {
+          "R1": null,
+          "R5": null,
+          "R10": null,
+          "mAP": null
+        },
+        "source": null
+      },
+      "checkpoints": [
+        {
+          "name": "checkpoint_best.pth",
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/checkpoint_best.pth",
+          "bytes": 2705080470,
+          "sha256_16": "2a0bd30db632e790"
+        }
+      ],
+      "missing_fields": [
+        "config_source_sha256_16",
+        "epochs.5.metrics.R1",
+        "epochs.5.metrics.R10",
+        "epochs.5.metrics.R5",
+        "epochs.5.metrics.mAP",
+        "last.metrics.R1",
+        "last.metrics.R10",
+        "last.metrics.R5",
+        "last.metrics.mAP"
+      ],
+      "warnings": [],
+      "input_files": {
+        "config_used.yaml": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/config_used.yaml",
+          "bytes": 2006,
+          "sha256_16": "1a87bed2b4428844"
+        },
+        "run_command.txt": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/run_command.txt",
+          "bytes": 778,
+          "sha256_16": "758bcba79566bb97"
+        },
+        "train.log": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/train.log",
+          "bytes": 9819,
+          "sha256_16": "bf255ef98e74f55e"
+        },
+        "git_commit.txt": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/git_commit.txt",
+          "bytes": 637,
+          "sha256_16": "cbea14637502142d"
+        },
+        "metrics_by_epoch.csv": {
+          "path": "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/metrics_by_epoch.csv",
+          "bytes": 652,
+          "sha256_16": "ce5052fc1d0f99ae"
+        }
+      }
+    }
+  ],
+  "paired_comparisons": [
+    {
+      "specification": "e3_c0_b0|e3_c1_b80",
+      "by": "seed",
+      "metric": "best",
+      "prefix_A": "e3_c0_b0",
+      "prefix_B": "e3_c1_b80",
+      "rows": [
+        {
+          "seed": 0,
+          "A_directories": [
+            "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0"
+          ],
+          "B_directories": [],
+          "status": "unpaired",
+          "reason": "requires exactly one directory per side; A=1, B=0",
+          "A": null,
+          "B": null,
+          "delta_B_minus_A": {
+            "R1": null,
+            "R5": null,
+            "R10": null,
+            "mAP": null
+          }
+        },
+        {
+          "seed": 1,
+          "A_directories": [
+            "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1"
+          ],
+          "B_directories": [],
+          "status": "unpaired",
+          "reason": "requires exactly one directory per side; A=1, B=0",
+          "A": null,
+          "B": null,
+          "delta_B_minus_A": {
+            "R1": null,
+            "R5": null,
+            "R10": null,
+            "mAP": null
+          }
+        }
+      ],
+      "unknown_seed_unpaired": [],
+      "summary_A": {
+        "R1": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "R5": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "R10": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "mAP": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        }
+      },
+      "summary_B": {
+        "R1": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "R5": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "R10": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "mAP": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        }
+      },
+      "summary": {
+        "R1": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "R5": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "R10": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        },
+        "mAP": {
+          "n": 0,
+          "mean": null,
+          "population_std": null,
+          "min": null,
+          "max": null,
+          "range": null,
+          "sign_counts": {
+            "negative": 0,
+            "zero": 0,
+            "positive": 0
+          }
+        }
+      },
+      "description": "Descriptive paired differences only; no statistical test or additive decomposition."
+    }
+  ],
+  "metric_scope": "best"
+}

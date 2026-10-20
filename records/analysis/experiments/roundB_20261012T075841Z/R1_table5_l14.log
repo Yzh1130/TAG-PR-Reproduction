@@ -1,0 +1,12 @@
+Side  Policy                    Delta(pp)            Identity 95%                                                    Two-stage 95%                              Draw std(pp)      
+A     a_fixed_misses            -17.614042933810374  [-19.756378295828277, -15.528413545296168]                      [-19.81839783365555, -15.543064598035894]  0.1766547406082286
+A     b_common_valid_queries    -17.614042933810374  [-19.756378295828277, -15.528413545296168]                      [-19.81839783365555, -15.543064598035894]  0.1766547406082286
+A     c_at_least_two_positives  infeasible           identity 4850 has only 1 target-view images; >=2 is infeasible  -                                          -                 
+Side  Policy                    Delta(pp)           Identity 95%                                                    Two-stage 95%                              Draw std(pp)       
+G     a_fixed_misses            -24.03250380904012  [-26.669345150819773, -21.393535853907544]                      [-26.700687295559202, -21.36130110641372]  0.23223693987148156
+G     b_common_valid_queries    -24.03250380904012  [-26.669345150819773, -21.393535853907544]                      [-26.700687295559202, -21.36130110641372]  0.23223693987148156
+G     c_at_least_two_positives  infeasible          identity 4861 has only 1 target-view images; >=2 is infeasible  -                                          -                  
+JSON: /root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_table5_l14/R1_table5_clusters.json
+LOG: /root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_table5_l14/R1_table5_clusters.log
+JSON: /root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_table5_l14/R1_table5_clusters.json
+LOG: /root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_table5_l14/R1_table5_clusters.log

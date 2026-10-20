@@ -1,0 +1,22 @@
+2026-08-22 15:37:11,248 TAG INFO: OVERRIDE SUMMARY
+2026-08-22 15:37:11,248 TAG INFO: data.batch_size: 80 -> 320
+2026-08-22 15:37:11,248 TAG INFO: schedule.epoch: 10 -> 1
+2026-08-22 15:37:11,248 TAG INFO: experiment.bridge_cv_ratio: 0.0 -> 1.0
+2026-08-22 15:37:11,248 TAG INFO: experiment.bridge_tg_ratio: 0.0 -> 0.5
+2026-08-22 15:37:11,248 TAG INFO: experiment.grad_checkpoint: False -> True
+2026-08-22 15:37:11,248 TAG INFO: experiment.use_bridge: False -> True
+2026-08-22 15:37:11,248 TAG INFO: model.saved_path: 'ckpts/' -> '/root/autodl-tmp/experiments/20260822_smoke_bridge_loss'
+2026-08-22 15:37:11,248 TAG INFO: experiment.grad_checkpoint effective: True
+2026-08-22 15:37:11,248 TAG INFO: experiment.use_bridge effective: True
+2026-08-22 15:37:11,248 TAG INFO: experiment.bridge_cv_ratio effective: 1.0
+2026-08-22 15:37:11,248 TAG INFO: experiment.bridge_tg_ratio effective: 0.5
+2026-08-22 15:37:11,248 TAG INFO: END OVERRIDE SUMMARY
+2026-08-22 15:37:11,248 TAG INFO: 
+{'device': 'cuda:0', 'misc': {'seed': 0}, 'num_of_experts_groups': 2, 'num_of_experts': 6, 'num_of_selected_experts': 5, 'expert_blocks': [6, 7, 8], 'experiment': {'grad_checkpoint': True, 'use_bridge': True, 'bridge_cv_ratio': 1.0, 'bridge_tg_ratio': 0.5, 'input_resolution': [224, 224], 'dropout': 0.05, 'text_length': 77, 'nitc_ratio': 1.0, 'ritc': True, 'ritc_eps': 0.01, 'ritc_ratio': 1.0, 'id': True, 'id_ratio': 0.5}, 'schedule': {'lr': 0.0001, 'epoch': 1, 'epoch_warmup': 1, 'lr_start': 1e-06, 'lr_end': 5e-06, 'weight_decay': 0.02, 'betas': [0.9, 0.98], 'eps': 1e-08, 'ratio_factor': 1.0}, 'model': {'ckpt_type': 'original_clip', 'saved_path': '/root/autodl-tmp/experiments/20260822_smoke_bridge_loss', 'checkpoint': '/root/autodl-tmp/checkpoints/ViT-B-16.pt', 'use_gather': True, 'softlabel_ratio': 0.5, 'embed_dim': 512, 'vocab_size': 49408}, 'log': {'print_period': 50}, 'data': {'batch_size': 320, 'test_batch_size': 256, 'num_workers': 8}, 'distributed': {'backend': 'nccl', 'url': 'env://', 'rank': 0, 'world_size': 1, 'local_rank': 0}, 'anno_dir': '/root/autodl-tmp/datasets/TAG-PEDES', 'image_dir': '/root/autodl-tmp/datasets/TAG-PEDES'}
+2026-08-22 15:37:11,880 TAG INFO: DataLoader batch_size verified: expected=320, actual=320
+2026-08-22 15:37:11,881 TAG INFO: Evaluation DataLoader batch_size: config=256, actual=32
+2026-08-22 15:38:32,093 TAG INFO: Epoch[1] Iteration[50/124], loss: 15.4125, itc_loss: 6.8894, view_loss: 0.6517, view_acc: 0.6354, ortho_loss: 2.1963, ritc_loss: -0.8063, id_loss: 4.2391, bridge_cv_loss: 1.0038, bridge_tg_loss: 1.2386, Base Lr: 4.04e-05
+2026-08-22 15:39:40,257 TAG INFO: Epoch[1] Iteration[100/124], loss: 13.1604, itc_loss: 6.5085, view_loss: 0.5124, view_acc: 0.8396, ortho_loss: 1.3908, ritc_loss: -0.9232, id_loss: 4.2232, bridge_cv_loss: 0.5724, bridge_tg_loss: 0.8764, Base Lr: 8.07e-05
+2026-08-22 15:40:13,026 TAG INFO: Epoch 1 done. Time per batch: 1.425[s] Speed: 224.6[samples/s]
+2026-08-22 15:41:09,493 TAG INFO: Acc@1 45.26175 Acc@5 64.20867 Acc@10 71.67959 mAP 38.42604
+2026-08-22 15:41:09,575 TAG INFO: Epoch 1 peak CUDA memory: allocated=15.468 GiB, reserved=17.143 GiB

@@ -1,0 +1,35 @@
+git rev-parse HEAD:
+5131eae14c5ba0dafef24e6f36ac4cbc089525f1
+
+WORKTREE: DIRTY
+git status --porcelain:
+ M tools/probe_ortho.py
+?? check_after_boot.sh
+?? check_fork.sh
+?? check_n7.sh
+?? check_recon.sh
+?? check_s12.sh
+?? check_t15.sh
+?? chk.sh
+?? dump_b16.sh
+?? dump_lastepoch.sh
+?? make_manifest.sh
+?? pack_for_codex.sh
+?? run_bs80ep10.sh
+?? run_e2.sh
+?? run_e2b.sh
+?? run_e2d.sh
+?? run_e3.sh
+?? run_e3_s12.sh
+?? run_s11.sh
+?? run_s11_all.sh
+?? run_s12.sh
+?? run_s12_help.sh
+?? run_s13_e3.sh
+?? run_s13_s12.sh
+?? run_s13e3_help.sh
+?? run_s14_go.sh
+?? run_s14_prep.sh
+?? run_s15.sh
+?? s12_summary.py
+?? watchdog_bs80.sh

@@ -1,0 +1,59 @@
+
+==============================================================================
+### aeri  K=300 nq=1850 |P|=1668 |Pool|=3857
+  D=250   ng=1918   base= 50.19±0.22 | transΔ cohortQ=-2.21±0.29  fullQ=-1.30±0.13 | indΔ=-0.00±0.42 | ex_skew=0.653 ex_gini=0.1548
+  D=500   ng=2168   base= 48.13±0.41 | transΔ cohortQ=-3.44±0.57  fullQ=-1.88±0.37 | indΔ=-0.65±0.39 | ex_skew=0.672 ex_gini=0.1517
+  [Lock-A assertion] r sliced vs recomputed on Gallery(D=1000,seed=2026): array_equal=True max|diff|=0
+  D=1000  ng=2668   base= 45.09±0.42 | transΔ cohortQ=-4.37±0.25  fullQ=-1.97±0.44 | indΔ=-0.72±0.45 | ex_skew=0.703 ex_gini=0.1385
+  D=2000  ng=3668   base= 41.10±0.42 | transΔ cohortQ=-4.25±0.23  fullQ=-1.66±0.40 | indΔ=+0.11±0.38 | ex_skew=0.827 ex_gini=0.1215
+  D=full  ng=5525   base= 37.19±0.00 | transΔ cohortQ=-4.38±0.00  fullQ=-1.41±0.00 | indΔ=+0.32±0.00 | ex_skew=1.050 ex_gini=0.0952
+  trans_cohortQ_delta  slope=-1.738 CI=[-2.184,-1.202]  ρ(Δ,D)=-0.684  ρ(Δ,ex_skew)=-0.719
+  trans_fullQ_delta    slope=-0.004 CI=[-0.350,+0.376]  ρ(Δ,D)=-0.055  ρ(Δ,ex_skew)=-0.019
+  ind_delta            slope=+0.468 CI=[+0.037,+1.003]  ρ(Δ,D)=+0.451  ρ(Δ,ex_skew)=+0.438
+  hub vs D: ρ(excess_skew, D)=+0.928
+
+==============================================================================
+### cuhkpedes  K=300 nq=1828 |P|=910 |Pool|=2164
+  D=250   ng=1160   base= 80.70±0.30 | transΔ cohortQ=-2.25±0.29  fullQ=+0.18±0.27 | indΔ=-0.15±0.21 | ex_skew=0.267 ex_gini=0.0473
+  D=500   ng=1410   base= 78.79±0.28 | transΔ cohortQ=-3.82±0.34  fullQ=+0.22±0.17 | indΔ=-0.14±0.19 | ex_skew=0.220 ex_gini=0.0789
+  D=1000  ng=1910   base= 75.60±0.27 | transΔ cohortQ=-5.27±0.36  fullQ=+0.55±0.31 | indΔ=-0.07±0.12 | ex_skew=0.244 ex_gini=0.1105
+  D=2000  ng=2910   base= 71.83±0.11 | transΔ cohortQ=-6.48±0.11  fullQ=+0.62±0.15 | indΔ=-0.26±0.07 | ex_skew=0.416 ex_gini=0.1214
+  D=full  ng=3074   base= 71.39±0.00 | transΔ cohortQ=-6.62±0.00  fullQ=+0.66±0.00 | indΔ=-0.27±0.00 | ex_skew=0.440 ex_gini=0.1214
+  trans_cohortQ_delta  slope=-4.622 CI=[-4.905,-4.341]  ρ(Δ,D)=-0.953  ρ(Δ,ex_skew)=-0.737
+  trans_fullQ_delta    slope=+0.553 CI=[+0.309,+0.791]  ρ(Δ,D)=+0.697  ρ(Δ,ex_skew)=+0.402
+  ind_delta            slope=-0.130 CI=[-0.329,+0.049]  ρ(Δ,D)=-0.148  ρ(Δ,ex_skew)=-0.281
+  hub vs D: ρ(excess_skew, D)=+0.747
+
+==============================================================================
+### icfgpedes  K=300 nq=5958 |P|=5958 |Pool|=13890
+  D=250   ng=6208   base= 77.34±0.10 | transΔ cohortQ=-1.53±0.09  fullQ=-0.11±0.04 | indΔ=+0.20±0.06 | ex_skew=0.095 ex_gini=0.0770
+  D=500   ng=6458   base= 76.70±0.13 | transΔ cohortQ=-2.09±0.05  fullQ=-0.09±0.08 | indΔ=+0.25±0.10 | ex_skew=0.069 ex_gini=0.0791
+  D=1000  ng=6958   base= 75.74±0.08 | transΔ cohortQ=-2.92±0.16  fullQ=-0.02±0.08 | indΔ=+0.31±0.15 | ex_skew=0.054 ex_gini=0.0836
+  D=2000  ng=7958   base= 74.37±0.09 | transΔ cohortQ=-4.25±0.10  fullQ=-0.09±0.05 | indΔ=+0.32±0.07 | ex_skew=0.114 ex_gini=0.0895
+  D=full  ng=19848  base= 66.82±0.00 | transΔ cohortQ=-7.27±0.00  fullQ=-0.77±0.00 | indΔ=+0.37±0.00 | ex_skew=1.052 ex_gini=0.0778
+  trans_cohortQ_delta  slope=-3.393 CI=[-3.553,-3.209]  ρ(Δ,D)=-0.965  ρ(Δ,ex_skew)=-0.571
+  trans_fullQ_delta    slope=-0.391 CI=[-0.484,-0.204]  ρ(Δ,D)=-0.359  ρ(Δ,ex_skew)=-0.635
+  ind_delta            slope=+0.092 CI=[+0.059,+0.131]  ρ(Δ,D)=+0.590  ρ(Δ,ex_skew)=+0.354
+  hub vs D: ρ(excess_skew, D)=+0.579
+  [tbapr] row-level gallery: |P| rows=931 (unique imgs 920)  |Pool| rows=2269 (unique imgs 2216)
+
+==============================================================================
+### tbapr  K=159 nq=931 |P|=931 |Pool|=2269
+  D=250   ng=1181   base= 53.98±1.21 | transΔ cohortQ=-0.24±0.83  fullQ=+0.90±0.76 | indΔ=+0.39±0.85 | ex_skew=0.512 ex_gini=0.2098
+  D=500   ng=1431   base= 52.01±0.76 | transΔ cohortQ=-1.10±0.94  fullQ=+1.57±1.15 | indΔ=+0.34±0.91 | ex_skew=0.606 ex_gini=0.1983
+  D=1000  ng=1931   base= 48.10±0.77 | transΔ cohortQ=-2.17±0.69  fullQ=+1.14±0.36 | indΔ=+0.21±0.60 | ex_skew=0.754 ex_gini=0.1728
+  D=2000  ng=2931   base= 44.21±0.31 | transΔ cohortQ=-3.11±0.24  fullQ=+0.58±0.49 | indΔ=-0.67±0.31 | ex_skew=1.044 ex_gini=0.1363
+  D=full  ng=3200   base= 43.61±0.00 | transΔ cohortQ=-3.33±0.00  fullQ=+0.43±0.00 | indΔ=-0.75±0.00 | ex_skew=1.053 ex_gini=0.1286
+  trans_cohortQ_delta  slope=-3.252 CI=[-4.030,-2.562]  ρ(Δ,D)=-0.875  ρ(Δ,ex_skew)=-0.873
+  trans_fullQ_delta    slope=-0.699 CI=[-1.660,+0.046]  ρ(Δ,D)=-0.225  ρ(Δ,ex_skew)=-0.205
+  ind_delta            slope=-1.257 CI=[-2.098,-0.573]  ρ(Δ,D)=-0.625  ρ(Δ,ex_skew)=-0.661
+  hub vs D: ρ(excess_skew, D)=+0.951
+
+=== S7b SUMMARY: slope of Δ vs log10(D) within dataset ===
+  dataset         trans cohortQ (pre-reg)       trans fullQ (post-hoc)                    inductive   ρ(hub,D)
+  aeri             -1.738 [-2.184,-1.202]       -0.004 [-0.350,+0.376]       +0.468 [+0.037,+1.003]     +0.928
+  cuhkpedes        -4.622 [-4.905,-4.341]       +0.553 [+0.309,+0.791]       -0.130 [-0.329,+0.049]     +0.747
+  icfgpedes        -3.393 [-3.553,-3.209]       -0.391 [-0.484,-0.204]       +0.092 [+0.059,+0.131]     +0.579
+  tbapr            -3.252 [-4.030,-2.562]       -0.699 [-1.660,+0.046]       -1.257 [-2.098,-0.573]     +0.951
+peak RSS 2.88 GB, elapsed 119.0s
+wrote /root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7b/S7b_distractor_seed2/S7b_distractor_seed2.json

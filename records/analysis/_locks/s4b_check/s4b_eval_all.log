@@ -1,0 +1,55 @@
+
+################ S4b cuhk : eval_only ################
+checkpoint = /root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T125039573753Z/checkpoint_smoke.pth
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T131932509030Z
+EXTERNAL ADAPTER SUMMARY train_samples=68126 num_classes=11003 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:20:27.745710357 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+################ S4b cuhk : eval_only VAL ################
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T132035899108Z
+EXTERNAL ADAPTER SUMMARY train_samples=68126 num_classes=11003 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:21:30.083490905 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+
+################ S4b icfg : eval_only ################
+checkpoint = /root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T125208724999Z/checkpoint_smoke.pth
+ICFG DUPLICATE SUMMARY
+path: test/2868/2868_005_05_0114afternoon_0833_1_ex.jpg
+rows: [3, 21]
+ids: [1, 5]
+preserved_as_independent_training_samples: true
+END ICFG DUPLICATE SUMMARY
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132139513428Z
+EXTERNAL ADAPTER SUMMARY train_samples=34674 num_classes=3102 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:23:12.307578290 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+
+################ S4b aeri : eval_only ################
+checkpoint = /root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T125354681739Z/checkpoint_smoke.pth
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T132322481973Z
+EXTERNAL ADAPTER SUMMARY train_samples=76007 num_classes=3522 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:24:38.415687743 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+
+################ S4b tbapr : eval_only ################
+checkpoint = /root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T125451531670Z/checkpoint_smoke.pth
+External output directory: /root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T132445563137Z
+EXTERNAL ADAPTER SUMMARY train_samples=31340 num_classes=1180 paths_checked=2000 paths_resolved=2000 path_ratio=1.000000
+EVALUATION COMPLETE
+array_equal=True
+/root/autodl-tmp/envs/tagpr5090/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W901 21:25:25.683235363 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+S4B EVAL COMPLETE

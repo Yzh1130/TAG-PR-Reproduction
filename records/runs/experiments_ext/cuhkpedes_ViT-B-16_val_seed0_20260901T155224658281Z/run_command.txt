@@ -1,0 +1,16 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --config cfg_cuhk.yaml --external_split val --eval_only --resume experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/checkpoint_last.pth --quiet_metrics
+cwd: /root/autodl-tmp/TAG-PR
+config_source: cfg_cuhk.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--config", "cfg_cuhk.yaml", "--external_split", "val", "--eval_only", "--resume", "experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/checkpoint_last.pth", "--quiet_metrics"]
+environment:
+CUDA_VISIBLE_DEVICES=<unset>
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=37109
+OMP_NUM_THREADS=0
+PYTHONHASHSEED=0
+external_environment:
+CLIP_B16_CHECKPOINT=/root/autodl-tmp/checkpoints/ViT-B-16.pt

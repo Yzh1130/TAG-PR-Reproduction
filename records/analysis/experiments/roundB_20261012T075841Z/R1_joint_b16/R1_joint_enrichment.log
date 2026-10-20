@@ -1,0 +1,2816 @@
+{
+  "status": "complete",
+  "raw": {
+    "n_query": 16504,
+    "n_query_input": 16504,
+    "skipped_no_positive": 0,
+    "gallery_size": 8252,
+    "gallery_size_min": 8252,
+    "gallery_size_max": 8252,
+    "exclude_source": false,
+    "top1_tied_queries": 128,
+    "tie_policy": "score descending, gallery index ascending",
+    "R1": 62.2818717956543,
+    "R5": 79.39287567138672,
+    "R10": 84.64009094238281,
+    "mAP": 49.018836099255914
+  },
+  "counts": {
+    "same_source_same_view": 3461,
+    "same_source_cross_view": 1340,
+    "cross_source_same_view": 740,
+    "cross_source_cross_view": 684
+  },
+  "s11_four_cell_gate": "PASS",
+  "strata": {
+    "all": {
+      "n_queries": 16504,
+      "n_errors": 6225,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.5559839357429719,
+            "ci95_percentile": [
+              0.5419057173673374,
+              0.5701995770392356
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.16079315314048528,
+            "ci95_percentile": [
+              0.1588589320506844,
+              0.16270024033848912
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.39519078260248663,
+            "ci95_percentile": [
+              0.3812791364913405,
+              0.40934187321865395
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 3.4577587719621845,
+            "ci95_percentile": [
+              3.3669725588725843,
+              3.5499199083761415
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "same_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.21526104417670683,
+            "ci95_percentile": [
+              0.20187488165331702,
+              0.2289418697026431
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.12474757155097775,
+            "ci95_percentile": [
+              0.12017408058699353,
+              0.129283314124133
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.09051347262572908,
+            "ci95_percentile": [
+              0.07830945799156364,
+              0.1028190613389236
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.7255730231890005,
+            "ci95_percentile": [
+              1.625624650487198,
+              1.8251670184130449
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.11887550200803212,
+            "ci95_percentile": [
+              0.10832911162663124,
+              0.12975407938114353
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.34817839949308654,
+            "ci95_percentile": [
+              0.34500682838064256,
+              0.35135782155890183
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.22930289748505442,
+            "ci95_percentile": [
+              -0.23915829273513292,
+              -0.21905555639959323
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.3414212431934409,
+            "ci95_percentile": [
+              0.3119346314642817,
+              0.37180194638670055
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.10987951807228916,
+            "ci95_percentile": [
+              0.1004427424022855,
+              0.11945582048036298
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.36628087581544816,
+            "ci95_percentile": [
+              0.36220214066951945,
+              0.37049243524822995
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.256401357743159,
+            "ci95_percentile": [
+              -0.2647889661259825,
+              -0.24773986095499298
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.2999870463552466,
+            "ci95_percentile": [
+              0.2755476686975461,
+              0.32460506040945825
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 0.7208914809414705,
+          "ci95_percentile": [
+            0.7054453098596839,
+            0.7363775008753709
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.5631181097345328,
+          "ci95_percentile": [
+            0.5562679444723265,
+            0.5703398905703988
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.15777337120693768,
+          "ci95_percentile": [
+            0.14317628789365888,
+            0.17245768704156766
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.2801781162415746,
+          "ci95_percentile": [
+            1.2537711870601613,
+            1.3068307560690047
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.2791085190585295,
+          "ci95_percentile": [
+            0.2636224991246291,
+            0.2945546901403161
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.4368818902654672,
+          "ci95_percentile": [
+            0.4296601094296012,
+            0.4437320555276735
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": -0.15777337120693768,
+          "ci95_percentile": [
+            -0.17245768704156766,
+            -0.14317628789365888
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 0.6388649318673563,
+          "ci95_percentile": [
+            0.6054040479481126,
+            0.6717742684160521
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.674859437751004,
+            "ci95_percentile": [
+              0.6613126319195132,
+              0.6882905814917597
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5089715526335719,
+            "ci95_percentile": [
+              0.507326705464019,
+              0.5106313369519511
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.16588788511743213,
+            "ci95_percentile": [
+              0.15251577123053978,
+              0.1791309969775327
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.3259276166989655,
+            "ci95_percentile": [
+              1.2995451432278764,
+              1.3518978281005203
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.325140562248996,
+            "ci95_percentile": [
+              0.31170941850824024,
+              0.33868736808048683
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.49102844736642814,
+            "ci95_percentile": [
+              0.489368663048049,
+              0.49267329453598097
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.16588788511743213,
+            "ci95_percentile": [
+              -0.1791309969775327,
+              -0.15251577123053978
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.6621623736727438,
+            "ci95_percentile": [
+              0.6351266805463837,
+              0.6893996879158729
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    },
+    "aerial": {
+      "n_queries": 8996,
+      "n_errors": 3738,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.534242910647405,
+            "ci95_percentile": [
+              0.5148647931370861,
+              0.5532948824826921
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.14631156114203991,
+            "ci95_percentile": [
+              0.14474401261561703,
+              0.14787340185648287
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.3879313495053651,
+            "ci95_percentile": [
+              0.3687329226569083,
+              0.40661919816786024
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 3.6514059892284223,
+            "ci95_percentile": [
+              3.518637399513427,
+              3.779947574535792
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "same_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.19234884965222043,
+            "ci95_percentile": [
+              0.17549007648211518,
+              0.2097301992165876
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.11536808603510612,
+            "ci95_percentile": [
+              0.10873491854232557,
+              0.12211657067591788
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.07698076361711431,
+            "ci95_percentile": [
+              0.06188289408675755,
+              0.0922825125175884
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.6672622062369078,
+            "ci95_percentile": [
+              1.5341185234456434,
+              1.801286878875073
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.17495987158908508,
+            "ci95_percentile": [
+              0.15913781644723735,
+              0.19090007856911773
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.3986830670263015,
+            "ci95_percentile": [
+              0.39712588670529203,
+              0.4002432099581923
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.22372319543721644,
+            "ci95_percentile": [
+              -0.23890981369015651,
+              -0.20832574002502688
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.4388445009568034,
+            "ci95_percentile": [
+              0.3997364146677665,
+              0.47826662425328376
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.09844836811128946,
+            "ci95_percentile": [
+              0.0861842443313438,
+              0.11114072672684817
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.3396372857965484,
+            "ci95_percentile": [
+              0.3328816787760277,
+              0.3462753578598572
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.24118891768525894,
+            "ci95_percentile": [
+              -0.2517676791821099,
+              -0.23040402588558767
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.28986325185233813,
+            "ci95_percentile": [
+              0.25609868717831874,
+              0.3243179465096781
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 0.7352724594992637,
+          "ci95_percentile": [
+            0.7145019428748289,
+            0.755852874906117
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.5591247264369521,
+          "ci95_percentile": [
+            0.546881762986827,
+            0.5719260070099736
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.17614773306231157,
+          "ci95_percentile": [
+            0.15524228633787235,
+            0.19634569915145061
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.315041930241256,
+          "ci95_percentile": [
+            1.2757918236284171,
+            1.3537979889883183
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.2647275405007363,
+          "ci95_percentile": [
+            0.24414712509388306,
+            0.285498057125171
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.4408752735630479,
+          "ci95_percentile": [
+            0.4280739929900263,
+            0.45311823701317294
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": -0.17614773306231157,
+          "ci95_percentile": [
+            -0.19634569915145061,
+            -0.15524228633787235
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 0.6004590331439367,
+          "ci95_percentile": [
+            0.5567477846300165,
+            0.6461214195810271
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.7092027822364901,
+            "ci95_percentile": [
+              0.6916261066180012,
+              0.7260639581804842
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5449946281683414,
+            "ci95_percentile": [
+              0.5449867266457481,
+              0.5450025669145869
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.1642081540681487,
+            "ci95_percentile": [
+              0.14663486587199112,
+              0.1810705345734312
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.3013023350707726,
+            "ci95_percentile": [
+              1.269058270936101,
+              1.3322405477752968
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.29079721776350986,
+            "ci95_percentile": [
+              0.27393604181951575,
+              0.30837389338199883
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.45500537183165857,
+            "ci95_percentile": [
+              0.4549974330854131,
+              0.4550132733542519
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.1642081540681487,
+            "ci95_percentile": [
+              -0.1810705345734312,
+              -0.14663486587199112
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.6391072188727874,
+            "ci95_percentile": [
+              0.6020442657942344,
+              0.6777317735364187
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    },
+    "ground": {
+      "n_queries": 7508,
+      "n_errors": 2487,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.5886610373944512,
+            "ci95_percentile": [
+              0.5670356461056724,
+              0.6113608962874193
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.1825592130078735,
+            "ci95_percentile": [
+              0.17892740067372015,
+              0.18610728762453857
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.4061018243865777,
+            "ci95_percentile": [
+              0.3848517507918073,
+              0.4281334881287078
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 3.224493728339326,
+            "ci95_percentile": [
+              3.1008054766045237,
+              3.353146957393399
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "same_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.24969843184559712,
+            "ci95_percentile": [
+              0.2287270805963329,
+              0.2706653420450353
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.1388450853661591,
+            "ci95_percentile": [
+              0.13528971250835575,
+              0.14220191039577607
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.11085334647943801,
+            "ci95_percentile": [
+              0.09085263537855512,
+              0.13091984212550406
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.7983958970322793,
+            "ci95_percentile": [
+              1.655729771817678,
+              1.9393032215150694
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.03457981503819863,
+            "ci95_percentile": [
+              0.02720797582910532,
+              0.04227059290006628
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.2722690921994682,
+            "ci95_percentile": [
+              0.26872236402251515,
+              0.275906685732933
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.23768927716126959,
+            "ci95_percentile": [
+              -0.24576317755143,
+              -0.22911269515461222
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.12700602466057723,
+            "ci95_percentile": [
+              0.10007956164850865,
+              0.15572262291596137
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.12706071572175312,
+            "ci95_percentile": [
+              0.11280837106990342,
+              0.1417023552167482
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.406326609426496,
+            "ci95_percentile": [
+              0.4029687563098599,
+              0.4098806065875581
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.27926589370474286,
+            "ci95_percentile": [
+              -0.29243596867932453,
+              -0.2657193350321515
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.31270586954935387,
+            "ci95_percentile": [
+              0.2785786432169624,
+              0.3476105274125906
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 0.702158273381295,
+          "ci95_percentile": [
+            0.6790604244665699,
+            0.7260638571143231
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.5680048895781137,
+          "ci95_percentile": [
+            0.5620062762473009,
+            0.5741697193991442
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.13415338380318131,
+          "ci95_percentile": [
+            0.1126922652251987,
+            0.15625804987147734
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.236183501699825,
+          "ci95_percentile": [
+            1.1986886260728111,
+            1.2745708571070855
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.297841726618705,
+          "ci95_percentile": [
+            0.27393614288567686,
+            0.3209395755334301
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.4319951104218863,
+          "ci95_percentile": [
+            0.42583028060085576,
+            0.43799372375269907
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": -0.13415338380318131,
+          "ci95_percentile": [
+            -0.15625804987147734,
+            -0.1126922652251987
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 0.6894562448353474,
+          "ci95_percentile": [
+            0.6370893585473602,
+            0.7394407076259036
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.6232408524326498,
+            "ci95_percentile": [
+              0.6020006412038744,
+              0.6456257300069244
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.45482830520734174,
+            "ci95_percentile": [
+              0.4548221310653149,
+              0.45483456543279344
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.16841254722530807,
+            "ci95_percentile": [
+              0.14717275977162253,
+              0.19079684480031325
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.3702771909688738,
+            "ci95_percentile": [
+              1.3235790191997805,
+              1.4194914857076693
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.3767591475673502,
+            "ci95_percentile": [
+              0.35437426999307564,
+              0.3979993587961255
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5451716947926583,
+            "ci95_percentile": [
+              0.5451654345672066,
+              0.5451778689346851
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.16841254722530807,
+            "ci95_percentile": [
+              -0.19079684480031325,
+              -0.14717275977162253
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.691083471805411,
+            "ci95_percentile": [
+              0.6500239289553449,
+              0.7300434949741121
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    },
+    "AG-ReID.v2": {
+      "n_queries": 4842,
+      "n_errors": 1581,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.5698924731182796,
+            "ci95_percentile": [
+              0.5424639821771851,
+              0.5972047956300651
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.15253577535220894,
+            "ci95_percentile": [
+              0.15098391465240804,
+              0.15413779040759895
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.41735669776607065,
+            "ci95_percentile": [
+              0.39013601318668645,
+              0.4443621958577907
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 3.7361233573067274,
+            "ci95_percentile": [
+              3.5586732377415005,
+              3.9125148446182854
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "same_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.4155597722960152,
+            "ci95_percentile": [
+              0.3882891436753469,
+              0.44311808970266153
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.14039883268681827,
+            "ci95_percentile": [
+              0.13880573605084448,
+              0.1419458129898099
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.27516093960919696,
+            "ci95_percentile": [
+              0.24816346808705392,
+              0.3022634849389851
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 2.9598520467971894,
+            "ci95_percentile": [
+              2.7691873664799926,
+              3.152173744917807
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.006957621758380772,
+            "ci95_percentile": [
+              0.0031545244071747667,
+              0.011292346298619825
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.35772645046975854,
+            "ci95_percentile": [
+              0.356661447082857,
+              0.35882492781096714
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.35076882871137777,
+            "ci95_percentile": [
+              -0.35475088821765854,
+              -0.3463618372013212
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.019449559151256988,
+            "ci95_percentile": [
+              0.008820259353118478,
+              0.0315487266445798
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.007590132827324478,
+            "ci95_percentile": [
+              0.0037404737999432035,
+              0.012033855330041171
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.3493389414912045,
+            "ci95_percentile": [
+              0.34823401331751197,
+              0.3504105235584644
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.34174880866388,
+            "ci95_percentile": [
+              -0.3457461921924481,
+              -0.3372727594673808
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.021727130662630635,
+            "ci95_percentile": [
+              0.010686681315069673,
+              0.0344280475705687
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 0.5783055198973042,
+          "ci95_percentile": [
+            0.5504925105502159,
+            0.6060037523452158
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.520716129696382,
+          "ci95_percentile": [
+            0.515430161969258,
+            0.5261738686437837
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.05758939020092213,
+          "ci95_percentile": [
+            0.03029866633331186,
+            0.08444254499747482
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.110596516828663,
+          "ci95_percentile": [
+            1.058210927678043,
+            1.1621699902676879
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.42169448010269583,
+          "ci95_percentile": [
+            0.39399624765478425,
+            0.4495074894497841
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.47928387030361796,
+          "ci95_percentile": [
+            0.4738261313562163,
+            0.48456983803074205
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": -0.05758939020092213,
+          "ci95_percentile": [
+            -0.08444254499747482,
+            -0.030298666333311863
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 0.8798428368464805,
+          "ci95_percentile": [
+            0.8235981928876329,
+            0.936778641851813
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.5768500948766604,
+            "ci95_percentile": [
+              0.549689140452815,
+              0.6041408424844302
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5102622258219675,
+            "ci95_percentile": [
+              0.5076453039888155,
+              0.5129623958343859
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.06658786905469294,
+            "ci95_percentile": [
+              0.039650995767032515,
+              0.09367658792396821
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.1304973515282821,
+            "ci95_percentile": [
+              1.0776603347177949,
+              1.1833260997412038
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.4231499051233396,
+            "ci95_percentile": [
+              0.3958591575155698,
+              0.45031085954718497
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.48973777417803255,
+            "ci95_percentile": [
+              0.48703760416561415,
+              0.49235469601118453
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.06658786905469294,
+            "ci95_percentile": [
+              -0.09367658792396823,
+              -0.039650995767032536
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.8640336266352889,
+            "ci95_percentile": [
+              0.808456284687815,
+              0.9193103167566979
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    },
+    "G2APS": {
+      "n_queries": 6258,
+      "n_errors": 2950,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.5735593220338983,
+            "ci95_percentile": [
+              0.5544111712102772,
+              0.5926903612064955
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.19082550265699869,
+            "ci95_percentile": [
+              0.18914769738899753,
+              0.19243771683779512
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.38273381937689954,
+            "ci95_percentile": [
+              0.3639075912743568,
+              0.4016196900660931
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 3.0056743676700726,
+            "ci95_percentile": [
+              2.9071293270145944,
+              3.105511122496494
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "same_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.23152542372881357,
+            "ci95_percentile": [
+              0.21443295460127865,
+              0.24910484243163272
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.1879942638735581,
+            "ci95_percentile": [
+              0.18638846035042306,
+              0.18966511110685053
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.043531159855255463,
+            "ci95_percentile": [
+              0.026487297071132437,
+              0.06105736837601014
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.2315557877049579,
+            "ci95_percentile": [
+              1.1407205888306242,
+              1.3249449515598974
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.11288135593220339,
+            "ci95_percentile": [
+              0.10070934660633606,
+              0.12495981701285853
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.30717236941280845,
+            "ci95_percentile": [
+              0.303397594174228,
+              0.3110911861374637
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.19429101348060507,
+            "ci95_percentile": [
+              -0.205842966069194,
+              -0.18290723981663665
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.3674853833630534,
+            "ci95_percentile": [
+              0.32874535913135905,
+              0.40507385814533775
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.08203389830508474,
+            "ci95_percentile": [
+              0.0720779142694369,
+              0.0921584841653005
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.3140078640566228,
+            "ci95_percentile": [
+              0.3100974860192816,
+              0.31777669973421135
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.23197396575153806,
+            "ci95_percentile": [
+              -0.2419298127787242,
+              -0.22194235307829235
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.261247910308043,
+            "ci95_percentile": [
+              0.23010385375430026,
+              0.29287440662022246
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 0.712421052631579,
+          "ci95_percentile": [
+            0.6917805982788747,
+            0.7328655347805566
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.50373692060656,
+          "ci95_percentile": [
+            0.4993190411817199,
+            0.5079861704983791
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.208684132025019,
+          "ci95_percentile": [
+            0.18797428192081855,
+            0.22911030804984478
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.4142720604511938,
+          "ci95_percentile": [
+            1.3728410338253294,
+            1.4554735520831248
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.28757894736842105,
+          "ci95_percentile": [
+            0.2671344652194434,
+            0.3082194017211252
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.49626307939344005,
+          "ci95_percentile": [
+            0.49201382950162087,
+            0.50068095881828
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": -0.208684132025019,
+          "ci95_percentile": [
+            -0.22911030804984478,
+            -0.18797428192081855
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 0.5794889027809923,
+          "ci95_percentile": [
+            0.5386371304042816,
+            0.6209801898348883
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.6864406779661016,
+            "ci95_percentile": [
+              0.667713732377029,
+              0.7050172036284017
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.49799787206980717,
+            "ci95_percentile": [
+              0.4958354932522655,
+              0.5002436431075099
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.18844280589629447,
+            "ci95_percentile": [
+              0.16979369968265326,
+              0.20699988809929523
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.3784008255157352,
+            "ci95_percentile": [
+              1.3406893410373084,
+              1.4158657673031367
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.31355932203389836,
+            "ci95_percentile": [
+              0.2949827963715983,
+              0.332286267622971
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5020021279301928,
+            "ci95_percentile": [
+              0.4997563568924901,
+              0.5041645067477345
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.18844280589629447,
+            "ci95_percentile": [
+              -0.20699988809929523,
+              -0.16979369968265326
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.6246175157199755,
+            "ci95_percentile": [
+              0.5877670683703966,
+              0.6617642351087438
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    },
+    "Market": {
+      "n_queries": 1842,
+      "n_errors": 338,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.5857988165680473,
+            "ci95_percentile": [
+              0.5254166272133322,
+              0.6453514799154334
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.11128621651109216,
+            "ci95_percentile": [
+              0.11128621651109205,
+              0.11128621651109226
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.47451260005695517,
+            "ci95_percentile": [
+              0.4141304107022399,
+              0.5340652634043412
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 5.263893723169746,
+            "ci95_percentile": [
+              4.721309104447471,
+              5.79902435492638
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.08579881656804733,
+            "ci95_percentile": [
+              0.0580089442123703,
+              0.11666798107255519
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.34343556794763297,
+            "ci95_percentile": [
+              0.3434355679476307,
+              0.3434355679476313
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.25763675137958564,
+            "ci95_percentile": [
+              -0.285426623735261,
+              -0.22676758687507573
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.24982507513936333,
+            "ci95_percentile": [
+              0.16890779414325477,
+              0.33970849836480943
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.32840236686390534,
+            "ci95_percentile": [
+              0.27173836926074774,
+              0.3854756699862359
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.5452782155412796,
+            "ci95_percentile": [
+              0.5452782155412778,
+              0.5452782155412788
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.2168758486773743,
+            "ci95_percentile": [
+              -0.2735398462805306,
+              -0.15980254555504209
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.6022657012584138,
+            "ci95_percentile": [
+              0.4983481120568933,
+              0.7069339265710224
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "inapplicable_cells": {
+        "same_source_cross_view": "pure-view source; no such same-source negatives"
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": null,
+          "ci95_percentile": null,
+          "undefined_replicates": 10000,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.6715976331360947,
+            "ci95_percentile": [
+              0.614524330013764,
+              0.7282616307392522
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.45472178445872513,
+            "ci95_percentile": [
+              0.45472178445872286,
+              0.45472178445872347
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.21687584867736953,
+            "ci95_percentile": [
+              0.15980254555504095,
+              0.27353984628052896
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.476941849037486,
+            "ci95_percentile": [
+              1.3514292717364784,
+              1.601554303377254
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.32840236686390534,
+            "ci95_percentile": [
+              0.2717383692607478,
+              0.3854756699862359
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5452782155412749,
+            "ci95_percentile": [
+              0.5452782155412765,
+              0.5452782155412772
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.21687584867736953,
+            "ci95_percentile": [
+              -0.27353984628052896,
+              -0.15980254555504098
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.6022657012584192,
+            "ci95_percentile": [
+              0.4983481120568947,
+              0.7069339265710238
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    },
+    "PRAI-1581": {
+      "n_queries": 2028,
+      "n_errors": 1128,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.4734042553191489,
+            "ci95_percentile": [
+              0.4343428123600538,
+              0.5123676531078241
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.12245487132888767,
+            "ci95_percentile": [
+              0.12245392822502438,
+              0.12245637948237659
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.35094938399026127,
+            "ci95_percentile": [
+              0.3118883860711408,
+              0.389912338278614
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 3.8659487383534628,
+            "ci95_percentile": [
+              3.5469751933449727,
+              4.184119356716586
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.2872340425531915,
+            "ci95_percentile": [
+              0.25155924927449014,
+              0.3234530046853058
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.4224049776582108,
+            "ci95_percentile": [
+              0.4224042517108878,
+              0.42240543161978755
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.13517093510501926,
+            "ci95_percentile": [
+              -0.17084617146873307,
+              -0.09895220318645397
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.6799968223518594,
+            "ci95_percentile": [
+              0.5955398224530664,
+              0.7657410435704901
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.2393617021276596,
+            "ci95_percentile": [
+              0.2109218263576617,
+              0.2686008377964267
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.45514015101290545,
+            "ci95_percentile": [
+              0.4551393688067359,
+              0.45514064015518874
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.21577844888524586,
+            "ci95_percentile": [
+              -0.24421855381877372,
+              -0.1865395023381513
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.5259076827104021,
+            "ci95_percentile": [
+              0.4634214750971571,
+              0.5901494860293784
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "inapplicable_cells": {
+        "same_source_cross_view": "pure-view source; no such same-source negatives"
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": null,
+          "ci95_percentile": null,
+          "undefined_replicates": 10000,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.7606382978723405,
+            "ci95_percentile": [
+              0.7313991622035733,
+              0.7890781736423383
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5448598489870985,
+            "ci95_percentile": [
+              0.5448593598448117,
+              0.5448606311932644
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.215778448885242,
+            "ci95_percentile": [
+              0.18653950233815061,
+              0.24421855381877366
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.3960256005032798,
+            "ci95_percentile": [
+              1.3423624762175543,
+              1.4482228906921781
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.2393617021276595,
+            "ci95_percentile": [
+              0.21092182635766168,
+              0.2686008377964267
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.4551401510129015,
+            "ci95_percentile": [
+              0.45513936880673556,
+              0.4551406401551883
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.215778448885242,
+            "ci95_percentile": [
+              -0.2442185538187737,
+              -0.18653950233815064
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.5259076827104064,
+            "ci95_percentile": [
+              0.4634214750971571,
+              0.5901494860293793
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    },
+    "uavhuman": {
+      "n_queries": 1534,
+      "n_errors": 228,
+      "n_identity_clusters": 2000,
+      "identity_universe": "all query identities, including zero-error clusters",
+      "bootstrap": 10000,
+      "seed": 2026,
+      "cells": {
+        "same_source_same_view": {
+          "observed_share": {
+            "estimate": 0.5964912280701754,
+            "ci95_percentile": [
+              0.5260078234004385,
+              0.6680506753774167
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.09254056399047846,
+            "ci95_percentile": [
+              0.09252588991596587,
+              0.09255751346148974
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.5039506640796969,
+            "ci95_percentile": [
+              0.43347357633171535,
+              0.5755123668812188
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 6.445727174642556,
+            "ci95_percentile": [
+              5.684082833876764,
+              7.219042509184331
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_same_view": {
+          "observed_share": {
+            "estimate": 0.18859649122807018,
+            "ci95_percentile": [
+              0.13765089328826655,
+              0.2418047083492184
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.45233549175036963,
+            "ci95_percentile": [
+              0.4523270430561361,
+              0.4523428062422881
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.2637390005222995,
+            "ci95_percentile": [
+              -0.31468276900800524,
+              -0.21053137418015355
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.41693940596673523,
+            "ci95_percentile": [
+              0.3043127336347458,
+              0.5345686928246853
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_source_cross_view": {
+          "observed_share": {
+            "estimate": 0.2149122807017544,
+            "ci95_percentile": [
+              0.15492957746478872,
+              0.27906976744186046
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected_share": {
+            "estimate": 0.45512394425915137,
+            "ci95_percentile": [
+              0.4551154434823735,
+              0.45513130384174505
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.24021166355739698,
+            "ci95_percentile": [
+              -0.3002022888207238,
+              -0.17605135253374415
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.4722060515879638,
+            "ci95_percentile": [
+              0.34040591077318494,
+              0.6131769219078181
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "inapplicable_cells": {
+        "same_source_cross_view": "pure-view source; no such same-source negatives"
+      },
+      "same_view_given_same_source": {
+        "observed": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.0,
+          "ci95_percentile": [
+            1.0,
+            1.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view_given_same_source": {
+        "observed": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.0,
+          "ci95_percentile": [
+            0.0,
+            0.0
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": null,
+          "ci95_percentile": null,
+          "undefined_replicates": 10000,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "view_marginals_among_all_errors": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.7850877192982456,
+            "ci95_percentile": [
+              0.7209302325581395,
+              0.8450704225352113
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5448760557408481,
+            "ci95_percentile": [
+              0.544868696158254,
+              0.5448845565176258
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.24021166355739754,
+            "ci95_percentile": [
+              0.1760513525337447,
+              0.30020228882072436
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.4408556056492343,
+            "ci95_percentile": [
+              1.3231018103067198,
+              1.5509631968643407
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.2149122807017544,
+            "ci95_percentile": [
+              0.15492957746478875,
+              0.2790697674418605
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.4551239442591519,
+            "ci95_percentile": [
+              0.45511544348237415,
+              0.45513130384174605
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.24021166355739754,
+            "ci95_percentile": [
+              -0.30020228882072436,
+              -0.1760513525337447
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.4722060515879632,
+            "ci95_percentile": [
+              0.3404059107731845,
+              0.6131769219078174
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      }
+    }
+  },
+  "mixed_source_conditionals": {
+    "AG-ReID.v2": {
+      "same_view": {
+        "observed": {
+          "estimate": 0.5783055198973042,
+          "ci95_percentile": [
+            0.5504925105502159,
+            0.6060037523452158
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.520716129696382,
+          "ci95_percentile": [
+            0.515430161969258,
+            0.5261738686437837
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.05758939020092213,
+          "ci95_percentile": [
+            0.03029866633331186,
+            0.08444254499747482
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.110596516828663,
+          "ci95_percentile": [
+            1.058210927678043,
+            1.1621699902676879
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view": {
+        "observed": {
+          "estimate": 0.42169448010269583,
+          "ci95_percentile": [
+            0.39399624765478425,
+            0.4495074894497841
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.47928387030361796,
+          "ci95_percentile": [
+            0.4738261313562163,
+            0.48456983803074205
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": -0.05758939020092213,
+          "ci95_percentile": [
+            -0.08444254499747482,
+            -0.030298666333311863
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 0.8798428368464805,
+          "ci95_percentile": [
+            0.8235981928876329,
+            0.936778641851813
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "all_error_view_marginals": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.5768500948766604,
+            "ci95_percentile": [
+              0.549689140452815,
+              0.6041408424844302
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5102622258219675,
+            "ci95_percentile": [
+              0.5076453039888155,
+              0.5129623958343859
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.06658786905469294,
+            "ci95_percentile": [
+              0.039650995767032515,
+              0.09367658792396821
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.1304973515282821,
+            "ci95_percentile": [
+              1.0776603347177949,
+              1.1833260997412038
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.4231499051233396,
+            "ci95_percentile": [
+              0.3958591575155698,
+              0.45031085954718497
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.48973777417803255,
+            "ci95_percentile": [
+              0.48703760416561415,
+              0.49235469601118453
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.06658786905469294,
+            "ci95_percentile": [
+              -0.09367658792396823,
+              -0.039650995767032536
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.8640336266352889,
+            "ci95_percentile": [
+              0.808456284687815,
+              0.9193103167566979
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "conditioning": "query source is this mixed source AND predicted/negative source is the same"
+    },
+    "G2APS": {
+      "same_view": {
+        "observed": {
+          "estimate": 0.712421052631579,
+          "ci95_percentile": [
+            0.6917805982788747,
+            0.7328655347805566
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.50373692060656,
+          "ci95_percentile": [
+            0.4993190411817199,
+            0.5079861704983791
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": 0.208684132025019,
+          "ci95_percentile": [
+            0.18797428192081855,
+            0.22911030804984478
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 1.4142720604511938,
+          "ci95_percentile": [
+            1.3728410338253294,
+            1.4554735520831248
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "cross_view": {
+        "observed": {
+          "estimate": 0.28757894736842105,
+          "ci95_percentile": [
+            0.2671344652194434,
+            0.3082194017211252
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "expected": {
+          "estimate": 0.49626307939344005,
+          "ci95_percentile": [
+            0.49201382950162087,
+            0.50068095881828
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "absolute_excess": {
+          "estimate": -0.208684132025019,
+          "ci95_percentile": [
+            -0.22911030804984478,
+            -0.18797428192081855
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        },
+        "enrichment_ratio": {
+          "estimate": 0.5794889027809923,
+          "ci95_percentile": [
+            0.5386371304042816,
+            0.6209801898348883
+          ],
+          "undefined_replicates": 0,
+          "ci95_valid_only_descriptive": null
+        }
+      },
+      "all_error_view_marginals": {
+        "same_view": {
+          "observed": {
+            "estimate": 0.6864406779661016,
+            "ci95_percentile": [
+              0.667713732377029,
+              0.7050172036284017
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.49799787206980717,
+            "ci95_percentile": [
+              0.4958354932522655,
+              0.5002436431075099
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": 0.18844280589629447,
+            "ci95_percentile": [
+              0.16979369968265326,
+              0.20699988809929523
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 1.3784008255157352,
+            "ci95_percentile": [
+              1.3406893410373084,
+              1.4158657673031367
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        },
+        "cross_view": {
+          "observed": {
+            "estimate": 0.31355932203389836,
+            "ci95_percentile": [
+              0.2949827963715983,
+              0.332286267622971
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "expected": {
+            "estimate": 0.5020021279301928,
+            "ci95_percentile": [
+              0.4997563568924901,
+              0.5041645067477345
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "absolute_excess": {
+            "estimate": -0.18844280589629447,
+            "ci95_percentile": [
+              -0.20699988809929523,
+              -0.16979369968265326
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          },
+          "enrichment_ratio": {
+            "estimate": 0.6246175157199755,
+            "ci95_percentile": [
+              0.5877670683703966,
+              0.6617642351087438
+            ],
+            "undefined_replicates": 0,
+            "ci95_valid_only_descriptive": null
+          }
+        }
+      },
+      "conditioning": "query source is this mixed source AND predicted/negative source is the same"
+    }
+  },
+  "definitions": {
+    "negative_set": "all gallery images excluding ALL images of the true query identity",
+    "observed": "one-hot error cell mean over the selected top-1 ERROR queries",
+    "expected": "per-query negative-cell fractions averaged equally over the SAME error queries",
+    "conditional_expected": "mean prior(same_source_same_view) / mean prior(same_source_any_view), same error queries",
+    "bootstrap": "uniform whole-identity resampling, retain every query and multiplicity; numerator AND denominator reformed each replicate",
+    "small_prior": "expected <1%: ratio suppressed; share and absolute excess retained",
+    "undefined": "no redraw; undefined count recorded and unconditional CI null; valid-only CI explicitly descriptive"
+  },
+  "provenance": {
+    "argv": [
+      "scripts/R1_joint_enrichment.py",
+      "--sim",
+      "/root/autodl-tmp/experiments/_dump/20260830_dump_b16f/sim_qg.npy",
+      "--anno",
+      "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+      "--s11-json",
+      "/root/autodl-tmp/experiments/_e1/s11/b16f_20260831T045113_025902Z.json",
+      "--out",
+      "/root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_joint_b16",
+      "--seed",
+      "2026",
+      "--bootstrap",
+      "10000"
+    ],
+    "arguments": {
+      "sim": "/root/autodl-tmp/experiments/_dump/20260830_dump_b16f/sim_qg.npy",
+      "anno": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+      "s11_json": "/root/autodl-tmp/experiments/_e1/s11/b16f_20260831T045113_025902Z.json",
+      "out": "/root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_joint_b16",
+      "seed": 2026,
+      "bootstrap": 10000
+    },
+    "seeds": {
+      "bootstrap": 2026
+    },
+    "inputs": {
+      "sim": {
+        "path": "/root/autodl-tmp/experiments/_dump/20260830_dump_b16f/sim_qg.npy",
+        "available": true,
+        "bytes": 544764160,
+        "sha256_16": "5d18ebd73fe26c04"
+      },
+      "anno": {
+        "path": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+        "available": true,
+        "bytes": 5373276,
+        "sha256_16": "40d549b5669bcc46"
+      },
+      "s11_json": {
+        "path": "/root/autodl-tmp/experiments/_e1/s11/b16f_20260831T045113_025902Z.json",
+        "available": true,
+        "bytes": 3684043,
+        "sha256_16": "7086caa9b0c7499e"
+      }
+    },
+    "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+    "created_utc": "2026-10-12T07:58:58.564188+00:00"
+  }
+}

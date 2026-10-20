@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --config /root/autodl-tmp/cfg_e3_b16.yaml --seed 0 --itc_block_size 0 --debug_max_iters 30 --output_dir /root/autodl-tmp/roundA_checks/debug_short_20261012T052316Z_kD3g6B/block0 --exp_name debug_itc_block0
+cwd: /root/autodl-tmp/TAG-PR
+config_source: /root/autodl-tmp/cfg_e3_b16.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--config", "/root/autodl-tmp/cfg_e3_b16.yaml", "--seed", "0", "--itc_block_size", "0", "--debug_max_iters", "30", "--output_dir", "/root/autodl-tmp/roundA_checks/debug_short_20261012T052316Z_kD3g6B/block0", "--exp_name", "debug_itc_block0"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=42377
+OMP_NUM_THREADS=1
+PYTHONHASHSEED=0

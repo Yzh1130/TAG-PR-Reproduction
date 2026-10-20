@@ -1,0 +1,6 @@
+ANNOTATION INSPECTION path=/root/autodl-tmp/datasets/TAG-PEDES/train_reid.json records=19954 fields=['cam_id', 'captions', 'file_path', 'id', 'split']
+ANNOTATION INSPECTION path=/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json records=8252 fields=['cam_id', 'captions', 'file_path', 'id', 'split']
+E3 STOPPED: ValueError: Expected a torch.device with a specified index or an integer, but got:cuda
+E3 SUMMARY status=stopped elapsed_sec=6.189
+JSON: /root/autodl-tmp/experiments/_e1_e3/E3_fk32_20260831T122510799171Z.json
+LOG: /root/autodl-tmp/experiments/_e1_e3/E3_fk32_20260831T122510799171Z.log

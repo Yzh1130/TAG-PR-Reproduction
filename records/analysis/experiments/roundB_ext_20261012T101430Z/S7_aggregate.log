@@ -1,0 +1,2 @@
+usage: S7_aggregate_seeds.py [-h] --s7a-json INPUTS --tag TAG --out OUT
+S7_aggregate_seeds.py: error: [Errno 2] No such file or directory: '/root/autodl-tmp/experiments/roundB_ext_20261012T101430Z/ext_s7a/S7a_csls_seed0/S7a_summary_seed0.json'

@@ -1,0 +1,10 @@
+python: 3.10.12
+python_full: 3.10.12 (main, Jul 15 2026, 23:40:17) [GCC 11.4.0]
+platform: Linux-5.15.0-78-generic-x86_64-with-glibc2.35
+torch: 2.7.1+cu128
+torchvision: 0.22.1+cu128
+cuda_runtime: 12.8
+cuda_available: True
+gpu_count: 1
+world_size: 1
+gpu_0: NVIDIA GeForce RTX 5090

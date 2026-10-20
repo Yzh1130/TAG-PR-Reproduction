@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --exp_name e3_c0_b0_seed1 --output_dir /root/autodl-tmp/experiments --config config/config.local.yaml --batch_size 320 --epoch 10 --grad_checkpoint --save_last --itc_block_size 0 --seed 1
+cwd: /root/autodl-tmp/TAG-PR
+config_source: config/config.local.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--exp_name", "e3_c0_b0_seed1", "--output_dir", "/root/autodl-tmp/experiments", "--config", "config/config.local.yaml", "--batch_size", "320", "--epoch", "10", "--grad_checkpoint", "--save_last", "--itc_block_size", "0", "--seed", "1"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=41671
+OMP_NUM_THREADS=1
+PYTHONHASHSEED=1

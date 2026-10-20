@@ -163,3 +163,7 @@ outputs/
 runs/
 *.pth
 output.json
+
+# revision records: re-include archived logs and json under records/
+!records/
+!records/**

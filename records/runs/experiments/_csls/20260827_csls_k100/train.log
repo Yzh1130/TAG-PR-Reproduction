@@ -1,0 +1,66 @@
+2026-08-27 16:06:14,696 TAG INFO: OVERRIDE SUMMARY
+2026-08-27 16:06:14,696 TAG INFO: data.batch_size: 80 -> 320
+2026-08-27 16:06:14,696 TAG INFO: experiment.csls_k: 10 -> 100
+2026-08-27 16:06:14,696 TAG INFO: experiment.grad_checkpoint: False -> True
+2026-08-27 16:06:14,696 TAG INFO: experiment.csls: False -> True
+2026-08-27 16:06:14,696 TAG INFO: model.saved_path: 'ckpts/' -> '/root/autodl-tmp/experiments/_csls/20260827_csls_k100'
+2026-08-27 16:06:14,696 TAG INFO: experiment.grad_checkpoint effective: True
+2026-08-27 16:06:14,696 TAG INFO: experiment.use_bridge effective: False
+2026-08-27 16:06:14,696 TAG INFO: experiment.bridge_cv_ratio effective: 0.0
+2026-08-27 16:06:14,696 TAG INFO: experiment.bridge_tg_ratio effective: 0.0
+2026-08-27 16:06:14,696 TAG INFO: experiment.dhn_margin effective: 0.0
+2026-08-27 16:06:14,696 TAG INFO: experiment.sdm_ratio effective: 0.0
+2026-08-27 16:06:14,696 TAG INFO: experiment.tal_ratio effective: 0.0
+2026-08-27 16:06:14,696 TAG INFO: experiment.tal_margin effective: 0.1
+2026-08-27 16:06:14,696 TAG INFO: experiment.tal_tau effective: 0.02
+2026-08-27 16:06:14,697 TAG INFO: experiment.nrw_mode effective: 'off'
+2026-08-27 16:06:14,697 TAG INFO: experiment.nrw_alpha effective: 2.0
+2026-08-27 16:06:14,697 TAG INFO: experiment.nrw_min_weight effective: 0.2
+2026-08-27 16:06:14,697 TAG INFO: experiment.nrw_warmup_epochs effective: 3
+2026-08-27 16:06:14,697 TAG INFO: experiment.nrw_ema effective: 0.99
+2026-08-27 16:06:14,697 TAG INFO: experiment.nrw_fixed_aerial effective: 0.8
+2026-08-27 16:06:14,697 TAG INFO: experiment.view_ratio effective: 1.0
+2026-08-27 16:06:14,697 TAG INFO: experiment.ortho_ratio effective: 1.0
+2026-08-27 16:06:14,697 TAG INFO: experiment.disable_moe effective: False
+2026-08-27 16:06:14,697 TAG INFO: experiment.max_words effective: 77
+2026-08-27 16:06:14,697 TAG INFO: experiment.use_ema effective: False
+2026-08-27 16:06:14,697 TAG INFO: experiment.ema_decay effective: 0.999
+2026-08-27 16:06:14,697 TAG INFO: experiment.view_prompt effective: False
+2026-08-27 16:06:14,697 TAG INFO: experiment.rerank effective: False
+2026-08-27 16:06:14,697 TAG INFO: experiment.rerank_k1 effective: 20
+2026-08-27 16:06:14,697 TAG INFO: experiment.rerank_k2 effective: 6
+2026-08-27 16:06:14,697 TAG INFO: experiment.rerank_lambda effective: 0.3
+2026-08-27 16:06:14,697 TAG INFO: experiment.csls effective: True
+2026-08-27 16:06:14,697 TAG INFO: experiment.csls_k effective: 100
+2026-08-27 16:06:14,697 TAG INFO: model.backbone effective: 'ViT-B/16'
+2026-08-27 16:06:14,697 TAG INFO: model.expert_blocks_auto effective: True
+2026-08-27 16:06:14,697 TAG INFO: END OVERRIDE SUMMARY
+2026-08-27 16:06:14,697 TAG INFO: BACKBONE STRUCTURE SUMMARY
+2026-08-27 16:06:14,697 TAG INFO:   source: /root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth
+2026-08-27 16:06:14,697 TAG INFO:   patch_size: 16
+2026-08-27 16:06:14,697 TAG INFO:   vision_width: 768
+2026-08-27 16:06:14,697 TAG INFO:   vision_layers: 12
+2026-08-27 16:06:14,697 TAG INFO:   vision_heads: 12
+2026-08-27 16:06:14,697 TAG INFO:   embed_dim: 512
+2026-08-27 16:06:14,697 TAG INFO:   text_width: 512
+2026-08-27 16:06:14,697 TAG INFO:   text_layers: 12
+2026-08-27 16:06:14,697 TAG INFO:   text_heads: 8
+2026-08-27 16:06:14,697 TAG INFO:   pretrained_grid_size: [14, 14]
+2026-08-27 16:06:14,697 TAG INFO:   actual_patch_count: 196
+2026-08-27 16:06:14,698 TAG INFO:   expert_blocks: [6, 7, 8] -> [6, 7, 8] (auto=True)
+2026-08-27 16:06:14,698 TAG INFO: END BACKBONE STRUCTURE SUMMARY
+2026-08-27 16:06:14,698 TAG INFO: 
+{'device': 'cuda:0', 'misc': {'seed': 0}, 'num_of_experts_groups': 2, 'num_of_experts': 6, 'num_of_selected_experts': 5, 'expert_blocks': [6, 7, 8], 'experiment': {'grad_checkpoint': True, 'use_bridge': False, 'bridge_cv_ratio': 0.0, 'bridge_tg_ratio': 0.0, 'nrw_mode': 'off', 'nrw_alpha': 2.0, 'nrw_min_weight': 0.2, 'nrw_warmup_epochs': 3, 'nrw_ema': 0.99, 'nrw_fixed_aerial': 0.8, 'view_ratio': 1.0, 'ortho_ratio': 1.0, 'disable_moe': False, 'max_words': 77, 'use_ema': False, 'ema_decay': 0.999, 'view_prompt': False, 'rerank': False, 'rerank_k1': 20, 'rerank_k2': 6, 'rerank_lambda': 0.3, 'input_resolution': [224, 224], 'dropout': 0.05, 'text_length': 77, 'nitc_ratio': 1.0, 'dhn_margin': 0.0, 'sdm_ratio': 0.0, 'tal_ratio': 0.0, 'tal_margin': 0.1, 'tal_tau': 0.02, 'ritc': True, 'ritc_eps': 0.01, 'ritc_ratio': 1.0, 'id': True, 'id_ratio': 0.5, 'csls': True, 'csls_k': 100}, 'schedule': {'lr': 0.0001, 'epoch': 10, 'epoch_warmup': 1, 'lr_start': 1e-06, 'lr_end': 5e-06, 'weight_decay': 0.02, 'betas': [0.9, 0.98], 'eps': 1e-08, 'ratio_factor': 1.0}, 'model': {'backbone': 'ViT-B/16', 'expert_blocks_auto': True, 'ckpt_type': 'original_clip', 'saved_path': '/root/autodl-tmp/experiments/_csls/20260827_csls_k100', 'checkpoint': '/root/autodl-tmp/checkpoints/ViT-B-16.pt', 'use_gather': True, 'softlabel_ratio': 0.5, 'embed_dim': 512, 'vocab_size': 49408, 'expert_blocks_source': [6, 7, 8], 'patch_size': 16, 'vision_width': 768, 'vision_layers': 12, 'vision_heads': 12, 'text_width': 512, 'text_heads': 8, 'text_layers': 12, 'source_context_length': 77, 'pretrained_grid_size': [14, 14], 'architecture_source': '/root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth'}, 'log': {'print_period': 50}, 'data': {'batch_size': 320, 'test_batch_size': 256, 'num_workers': 2}, 'distributed': {'backend': 'nccl', 'url': 'env://', 'rank': 0, 'world_size': 1, 'local_rank': 0}, 'anno_dir': '/root/autodl-tmp/datasets/TAG-PEDES', 'image_dir': '/root/autodl-tmp/datasets/TAG-PEDES'}
+2026-08-27 16:06:22,000 TAG INFO: DataLoader batch_size verified: expected=320, actual=320
+2026-08-27 16:06:22,001 TAG INFO: Evaluation DataLoader batch_size: config=256, actual=32
+2026-08-27 16:06:26,111 TAG INFO: Loaded model weights from /root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth (missing=0 unexpected=0)
+2026-08-27 16:07:23,255 TAG INFO: CSLS BLOCKS query=1024
+2026-08-27 16:07:23,269 TAG INFO: CSLS correction completed in 0.014 seconds
+2026-08-27 16:07:23,270 TAG INFO: HUBNESS SUMMARY
+2026-08-27 16:07:23,270 TAG INFO:   before top-1 counts: 18/17/15/14/13/13/13/12/12/12
+2026-08-27 16:07:23,270 TAG INFO:   after top-1 counts: 17/14/13/12/11/11/11/11/10/10
+2026-08-27 16:07:23,270 TAG INFO:   before unique top-1 gallery images: 6545
+2026-08-27 16:07:23,270 TAG INFO:   after unique top-1 gallery images: 6778
+2026-08-27 16:07:23,270 TAG INFO: END HUBNESS SUMMARY
+2026-08-27 16:07:25,658 TAG INFO: Acc@1 62.28187 Acc@5 79.39288 Acc@10 84.64008 mAP 49.01884
+2026-08-27 16:07:25,658 TAG INFO: CSLS Acc@1 62.79084 Acc@5 79.60494 Acc@10 85.11876 mAP 49.60000

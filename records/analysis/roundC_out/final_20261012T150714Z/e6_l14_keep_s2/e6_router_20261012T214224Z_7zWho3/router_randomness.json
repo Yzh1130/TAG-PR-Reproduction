@@ -1,0 +1,128 @@
+{
+  "status": "complete",
+  "task": "e6_router_randomness",
+  "argmax": {
+    "label": "argmax",
+    "eval_router_mode": "argmax",
+    "eval_seed": 0,
+    "startup_misc_seed": 0,
+    "metrics": {
+      "r1": 62.796897888183594,
+      "r5": 79.07779693603516,
+      "r10": 84.3795394897461,
+      "mAP": 50.37329864501953
+    },
+    "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/argmax/20261013_e6_argmax/evaluation_revision.json",
+    "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/argmax/20261013_e6_argmax/config_used.yaml"
+  },
+  "gumbel": [
+    {
+      "label": "gumbel_seed0",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 0,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 62.802955627441406,
+        "r5": 79.07779693603516,
+        "r10": 84.37348175048828,
+        "mAP": 50.374107360839844
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed0/20261013_e6_gumbel_seed0/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed0/20261013_e6_gumbel_seed0/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.0060577392578125,
+        "r5": 0.0,
+        "r10": -0.0060577392578125,
+        "mAP": 0.0008087158203125
+      }
+    },
+    {
+      "label": "gumbel_seed1",
+      "eval_router_mode": "gumbel",
+      "eval_seed": 1,
+      "startup_misc_seed": 0,
+      "metrics": {
+        "r1": 62.796897888183594,
+        "r5": 79.07779693603516,
+        "r10": 84.3795394897461,
+        "mAP": 50.37321472167969
+      },
+      "evaluation_json": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed1/20261013_e6_gumbel_seed1/evaluation_revision.json",
+      "config_used": "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed1/20261013_e6_gumbel_seed1/config_used.yaml",
+      "minus_argmax_pp": {
+        "r1": 0.0,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -8.392333984375e-05
+      }
+    }
+  ],
+  "n_repetitions": 2,
+  "observed_maximum_pairwise_difference_pp": {
+    "r1": 0.0060577392578125,
+    "r5": 0.0,
+    "r10": 0.0060577392578125,
+    "mAP": 0.00089263916015625
+  },
+  "maximum_scope": "n=2 次重复中观测到的最大差异; not a bound over other seeds",
+  "provenance": {
+    "argv": [
+      "bash",
+      "scripts/revision/e6_router_randomness.sh",
+      "/root/autodl-tmp/cfg_l14.yaml",
+      "ViT-L/14",
+      "/root/autodl-tmp/experiments/20260827_l14_keep_s2/checkpoint_best.pth",
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2",
+      "2"
+    ],
+    "seeds": {
+      "argmax_eval": 0,
+      "gumbel_eval": [
+        0,
+        1
+      ],
+      "startup_misc_seed_by_run": {
+        "argmax": 0,
+        "gumbel_seed0": 0,
+        "gumbel_seed1": 0
+      }
+    },
+    "inputs": {
+      "/root/autodl-tmp/cfg_l14.yaml": {
+        "bytes": 1568,
+        "sha256_16": "b93c6198657e6a95"
+      },
+      "/root/autodl-tmp/experiments/20260827_l14_keep_s2/checkpoint_best.pth": {
+        "bytes": 6727423470,
+        "sha256_16": "aa9107a71af8eac3"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/argmax/20261013_e6_argmax/evaluation_revision.json": {
+        "bytes": 259,
+        "sha256_16": "9f0e24f3eb01d96e"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/argmax/20261013_e6_argmax/config_used.yaml": {
+        "bytes": 2111,
+        "sha256_16": "820fbc205e6d7284"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed0/20261013_e6_gumbel_seed0/evaluation_revision.json": {
+        "bytes": 261,
+        "sha256_16": "b82d3bcd73e48c1a"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed0/20261013_e6_gumbel_seed0/config_used.yaml": {
+        "bytes": 2123,
+        "sha256_16": "25f5b2dee56f5b7c"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed1/20261013_e6_gumbel_seed1/evaluation_revision.json": {
+        "bytes": 259,
+        "sha256_16": "680d1efe194af64d"
+      },
+      "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_l14_keep_s2/e6_router_20261012T214224Z_7zWho3/gumbel_seed1/20261013_e6_gumbel_seed1/config_used.yaml": {
+        "bytes": 2123,
+        "sha256_16": "e64946dcc0843840"
+      }
+    },
+    "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075"
+  },
+  "training_executed": false,
+  "postprocessing_enabled": false
+}

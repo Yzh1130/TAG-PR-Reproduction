@@ -1,0 +1,25 @@
+2026-08-22 13:36:55,455 TAG INFO: OVERRIDE SUMMARY
+2026-08-22 13:36:55,455 TAG INFO: data.batch_size: 80 -> 80
+2026-08-22 13:36:55,455 TAG INFO: schedule.epoch: 10 -> 1
+2026-08-22 13:36:55,455 TAG INFO: experiment.grad_checkpoint: False -> True
+2026-08-22 13:36:55,456 TAG INFO: experiment.use_bridge: False -> True
+2026-08-22 13:36:55,456 TAG INFO: model.saved_path: 'ckpts/' -> '/root/autodl-tmp/experiments/20260822_smoke_bridge_on'
+2026-08-22 13:36:55,456 TAG INFO: experiment.grad_checkpoint effective: True
+2026-08-22 13:36:55,456 TAG INFO: experiment.use_bridge effective: True
+2026-08-22 13:36:55,456 TAG INFO: END OVERRIDE SUMMARY
+2026-08-22 13:36:55,456 TAG INFO: 
+{'device': 'cuda:0', 'misc': {'seed': 0}, 'num_of_experts_groups': 2, 'num_of_experts': 6, 'num_of_selected_experts': 5, 'expert_blocks': [6, 7, 8], 'experiment': {'grad_checkpoint': True, 'use_bridge': True, 'input_resolution': [224, 224], 'dropout': 0.05, 'text_length': 77, 'nitc_ratio': 1.0, 'ritc': True, 'ritc_eps': 0.01, 'ritc_ratio': 1.0, 'id': True, 'id_ratio': 0.5}, 'schedule': {'lr': 0.0001, 'epoch': 1, 'epoch_warmup': 1, 'lr_start': 1e-06, 'lr_end': 5e-06, 'weight_decay': 0.02, 'betas': [0.9, 0.98], 'eps': 1e-08, 'ratio_factor': 1.0}, 'model': {'ckpt_type': 'original_clip', 'saved_path': '/root/autodl-tmp/experiments/20260822_smoke_bridge_on', 'checkpoint': '/root/autodl-tmp/checkpoints/ViT-B-16.pt', 'use_gather': True, 'softlabel_ratio': 0.5, 'embed_dim': 512, 'vocab_size': 49408}, 'log': {'print_period': 50}, 'data': {'batch_size': 80, 'test_batch_size': 256, 'num_workers': 8}, 'distributed': {'backend': 'nccl', 'url': 'env://', 'rank': 0, 'world_size': 1, 'local_rank': 0}, 'anno_dir': '/root/autodl-tmp/datasets/TAG-PEDES', 'image_dir': '/root/autodl-tmp/datasets/TAG-PEDES'}
+2026-08-22 13:36:56,057 TAG INFO: DataLoader batch_size verified: expected=80, actual=80
+2026-08-22 13:36:56,057 TAG INFO: Evaluation DataLoader batch_size: config=256, actual=32
+2026-08-22 13:37:20,453 TAG INFO: Epoch[1] Iteration[50/498], loss: 12.6813, itc_loss: 6.1711, view_loss: 0.6725, view_acc: 0.5625, ortho_loss: 0.7652, ritc_loss: 0.8299, id_loss: 4.2426, Base Lr: 1.08e-05
+2026-08-22 13:37:37,199 TAG INFO: Epoch[1] Iteration[100/498], loss: 10.8278, itc_loss: 3.9353, view_loss: 0.6520, view_acc: 0.5667, ortho_loss: 0.6164, ritc_loss: 1.3813, id_loss: 4.2428, Base Lr: 2.07e-05
+2026-08-22 13:37:54,171 TAG INFO: Epoch[1] Iteration[150/498], loss: 8.7066, itc_loss: 2.2615, view_loss: 0.6314, view_acc: 0.6417, ortho_loss: 0.3264, ritc_loss: 1.2494, id_loss: 4.2378, Base Lr: 3.07e-05
+2026-08-22 13:38:10,977 TAG INFO: Epoch[1] Iteration[200/498], loss: 10.0069, itc_loss: 2.6937, view_loss: 0.5125, view_acc: 0.8875, ortho_loss: 1.3758, ritc_loss: 1.1860, id_loss: 4.2389, Base Lr: 4.06e-05
+2026-08-22 13:38:27,980 TAG INFO: Epoch[1] Iteration[250/498], loss: 8.4662, itc_loss: 2.2246, view_loss: 0.4261, view_acc: 0.7917, ortho_loss: 0.5094, ritc_loss: 1.0767, id_loss: 4.2293, Base Lr: 5.06e-05
+2026-08-22 13:38:44,816 TAG INFO: Epoch[1] Iteration[300/498], loss: 8.8962, itc_loss: 2.2254, view_loss: 0.3146, view_acc: 0.8958, ortho_loss: 1.2282, ritc_loss: 0.9098, id_loss: 4.2182, Base Lr: 6.06e-05
+2026-08-22 13:39:02,029 TAG INFO: Epoch[1] Iteration[350/498], loss: 8.6420, itc_loss: 2.5094, view_loss: 0.2633, view_acc: 0.9167, ortho_loss: 0.7229, ritc_loss: 0.9320, id_loss: 4.2144, Base Lr: 7.05e-05
+2026-08-22 13:39:18,829 TAG INFO: Epoch[1] Iteration[400/498], loss: 8.7811, itc_loss: 2.7573, view_loss: 0.1464, view_acc: 0.9500, ortho_loss: 0.7805, ritc_loss: 0.8929, id_loss: 4.2040, Base Lr: 8.05e-05
+2026-08-22 13:39:35,741 TAG INFO: Epoch[1] Iteration[450/498], loss: 10.1477, itc_loss: 3.2469, view_loss: 0.3093, view_acc: 0.8500, ortho_loss: 1.6454, ritc_loss: 0.7563, id_loss: 4.1898, Base Lr: 9.04e-05
+2026-08-22 13:39:51,652 TAG INFO: Epoch 1 done. Time per batch: 0.343[s] Speed: 232.9[samples/s]
+2026-08-22 13:40:47,549 TAG INFO: Acc@1 40.00848 Acc@5 60.05817 Acc@10 68.43189 mAP 32.66114
+2026-08-22 13:40:47,580 TAG INFO: Epoch 1 peak CUDA memory: allocated=8.137 GiB, reserved=8.916 GiB

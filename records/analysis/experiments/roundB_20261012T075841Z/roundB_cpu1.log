@@ -1,0 +1,27 @@
+[2026-10-12 15:58:41] OUT=/root/autodl-tmp/experiments/roundB_20261012T075841Z
+[2026-10-12 15:58:41] OK  /root/autodl-tmp/experiments/_dump/20260830_dump_fk32/sim_qg.npy
+[2026-10-12 15:58:41] OK  /root/autodl-tmp/experiments/_dump/20260830_dump_b16f/sim_qg.npy
+[2026-10-12 15:58:41] OK  /root/autodl-tmp/experiments/_e1/s11/fk32_20260831T044856_037170Z.json
+[2026-10-12 15:58:41] OK  /root/autodl-tmp/experiments/_e1/s11/b16f_20260831T045113_025902Z.json
+[2026-10-12 15:58:41] OK  /root/autodl-tmp/experiments/_e1_s13/S13_fk32_20260831T122510_659688Z.json
+[2026-10-12 15:58:41] OK  /root/autodl-tmp/experiments/_e1/s12/S12_fk32_20260831T082416598896Z_sim_bank_g.npy
+[2026-10-12 15:58:41] OK  /root/autodl-tmp/datasets/TAG-PEDES/test_reid.json
+[2026-10-12 15:58:41] START R1_joint_l14
+[2026-10-12 15:58:50] END R1_joint_l14 rc=0
+[2026-10-12 15:58:50] START R1_joint_b16
+[2026-10-12 15:58:58] END R1_joint_b16 rc=0
+[2026-10-12 15:58:58] START R1_table5_l14
+[2026-10-12 15:59:17] END R1_table5_l14 rc=0
+[2026-10-12 15:59:17] START R1_table5_b16
+[2026-10-12 15:59:35] END R1_table5_b16 rc=0
+[2026-10-12 15:59:35] START R3_causes
+[2026-10-12 15:59:44] END R3_causes rc=0
+[2026-10-12 15:59:44] START R2_pool
+[2026-10-12 16:00:10] END R2_pool rc=0
+[2026-10-12 16:00:10] ===== 完成 =====
+/root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_joint_b16/R1_joint_enrichment.json
+/root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_joint_l14/R1_joint_enrichment.json
+/root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_table5_b16/R1_table5_clusters.json
+/root/autodl-tmp/experiments/roundB_20261012T075841Z/R1_table5_l14/R1_table5_clusters.json
+/root/autodl-tmp/experiments/roundB_20261012T075841Z/R2/R2_hard_case_pool.json
+/root/autodl-tmp/experiments/roundB_20261012T075841Z/R3/R3_finegrained_causes.json

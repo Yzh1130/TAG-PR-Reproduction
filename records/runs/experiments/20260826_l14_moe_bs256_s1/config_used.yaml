@@ -1,0 +1,99 @@
+device: cuda:0
+misc:
+  seed: 1
+num_of_experts_groups: 2
+num_of_experts: 6
+num_of_selected_experts: 5
+expert_blocks:
+- 12
+- 13
+- 14
+experiment:
+  grad_checkpoint: true
+  use_bridge: false
+  bridge_cv_ratio: 0.0
+  bridge_tg_ratio: 0.0
+  nrw_mode: 'off'
+  nrw_alpha: 2.0
+  nrw_min_weight: 0.2
+  nrw_warmup_epochs: 3
+  nrw_ema: 0.99
+  nrw_fixed_aerial: 0.8
+  view_ratio: 1.0
+  ortho_ratio: 1.0
+  disable_moe: false
+  max_words: 77
+  use_ema: false
+  ema_decay: 0.999
+  view_prompt: false
+  rerank: false
+  rerank_k1: 20
+  rerank_k2: 6
+  rerank_lambda: 0.3
+  input_resolution:
+  - 224
+  - 224
+  dropout: 0.05
+  text_length: 77
+  nitc_ratio: 1.0
+  sdm_ratio: 0.0
+  tal_ratio: 0.0
+  tal_margin: 0.1
+  tal_tau: 0.02
+  ritc: true
+  ritc_eps: 0.01
+  ritc_ratio: 1.0
+  id: true
+  id_ratio: 0.5
+schedule:
+  lr: 0.0001
+  epoch: 10
+  epoch_warmup: 1
+  lr_start: 1.0e-06
+  lr_end: 5.0e-06
+  weight_decay: 0.02
+  betas:
+  - 0.9
+  - 0.98
+  eps: 1.0e-08
+  ratio_factor: 1.0
+model:
+  backbone: ViT-L/14
+  expert_blocks_auto: true
+  ckpt_type: original_clip
+  saved_path: /root/autodl-tmp/experiments/20260826_l14_moe_bs256_s1
+  checkpoint: /root/autodl-tmp/checkpoints/ViT-L-14.pt
+  use_gather: true
+  softlabel_ratio: 0.5
+  embed_dim: 768
+  vocab_size: 49408
+  expert_blocks_source:
+  - 6
+  - 7
+  - 8
+  patch_size: 14
+  vision_width: 1024
+  vision_layers: 24
+  vision_heads: 16
+  text_width: 768
+  text_heads: 12
+  text_layers: 12
+  source_context_length: 77
+  pretrained_grid_size:
+  - 16
+  - 16
+  architecture_source: /root/autodl-tmp/checkpoints/ViT-L-14.pt
+log:
+  print_period: 50
+data:
+  batch_size: 256
+  test_batch_size: 256
+  num_workers: 2
+distributed:
+  backend: nccl
+  url: env://
+  rank: 0
+  world_size: 1
+  local_rank: 0
+anno_dir: /root/autodl-tmp/datasets/TAG-PEDES
+image_dir: /root/autodl-tmp/datasets/TAG-PEDES

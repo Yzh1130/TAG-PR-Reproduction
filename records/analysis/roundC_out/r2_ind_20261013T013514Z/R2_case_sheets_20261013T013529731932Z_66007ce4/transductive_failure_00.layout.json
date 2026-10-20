@@ -1,0 +1,870 @@
+{
+  "text_enabled": true,
+  "font": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+  "title": "transductive_failure",
+  "correction_condition": "complete-test-query transductive CSLS alpha=.5 k=10",
+  "canvas_size": [
+    1440,
+    2030
+  ],
+  "rows": [
+    {
+      "query_index": 478,
+      "query_text": "The person appears to be an adult male with short dark hair, wearing a dark-colored jacket and pants, paired with black shoes. He is carrying a black bag over his shoulder.",
+      "pid": 4885,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 239,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000084_4_train.jpg",
+          "pid": 4885,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            50,
+            179,
+            249
+          ],
+          "label": "query_source g=239 pid=4885 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 235,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000112_4_train.jpg",
+          "pid": 4885,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.48268377780914307,
+          "image_rectangle": [
+            180,
+            50,
+            359,
+            249
+          ],
+          "label": "before_rank_1 g=235 pid=4885 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 237,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000119_4_train.jpg",
+          "pid": 4885,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.48239976167678833,
+          "image_rectangle": [
+            360,
+            50,
+            539,
+            249
+          ],
+          "label": "before_rank_2 g=237 pid=4885 hit=True"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 421,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D2_50_002520_8_train.jpg",
+          "pid": 4918,
+          "view": 0,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4812675416469574,
+          "image_rectangle": [
+            540,
+            50,
+            719,
+            249
+          ],
+          "label": "before_rank_3 g=421 pid=4918 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 1904,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_50_001393_1_train.jpg",
+          "pid": 5216,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.24210362136363983,
+          "image_rectangle": [
+            720,
+            50,
+            899,
+            249
+          ],
+          "label": "after_rank_1 g=1904 pid=5216 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 235,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000112_4_train.jpg",
+          "pid": 4885,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.24192580580711365,
+          "image_rectangle": [
+            900,
+            50,
+            1079,
+            249
+          ],
+          "label": "after_rank_2 g=235 pid=4885 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 234,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D2_30_000195_12_train.jpg",
+          "pid": 4885,
+          "view": 0,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.24124546349048615,
+          "image_rectangle": [
+            1080,
+            50,
+            1259,
+            249
+          ],
+          "label": "after_rank_3 g=234 pid=4885 hit=True"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 235,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000112_4_train.jpg",
+          "pid": 4885,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            50,
+            1439,
+            249
+          ],
+          "label": "best_positive g=235 pid=4885 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 511,
+      "query_text": "The man sports a cap and is dressed in sneakers, a gray jacket, dark pants, and carrying a bag while riding a bicycle.",
+      "pid": 4888,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 255,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000791_1_train.jpg",
+          "pid": 4888,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            380,
+            179,
+            579
+          ],
+          "label": "query_source g=255 pid=4888 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 255,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000791_1_train.jpg",
+          "pid": 4888,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.479887455701828,
+          "image_rectangle": [
+            180,
+            380,
+            359,
+            579
+          ],
+          "label": "before_rank_1 g=255 pid=4888 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 778,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_003381_0_train.jpg",
+          "pid": 4979,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4793051481246948,
+          "image_rectangle": [
+            360,
+            380,
+            539,
+            579
+          ],
+          "label": "before_rank_2 g=778 pid=4979 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 1069,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_004900_0_train.jpg",
+          "pid": 5030,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4763212203979492,
+          "image_rectangle": [
+            540,
+            380,
+            719,
+            579
+          ],
+          "label": "before_rank_3 g=1069 pid=5030 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 1069,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_004900_0_train.jpg",
+          "pid": 5030,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.24076160788536072,
+          "image_rectangle": [
+            720,
+            380,
+            899,
+            579
+          ],
+          "label": "after_rank_1 g=1069 pid=5030 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 255,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000791_1_train.jpg",
+          "pid": 4888,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.24071070551872253,
+          "image_rectangle": [
+            900,
+            380,
+            1079,
+            579
+          ],
+          "label": "after_rank_2 g=255 pid=4888 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 778,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_003381_0_train.jpg",
+          "pid": 4979,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.239193394780159,
+          "image_rectangle": [
+            1080,
+            380,
+            1259,
+            579
+          ],
+          "label": "after_rank_3 g=778 pid=4979 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 255,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_000791_1_train.jpg",
+          "pid": 4888,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            380,
+            1439,
+            579
+          ],
+          "label": "best_positive g=255 pid=4888 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 737,
+      "query_text": "In a white jacket and dark pants, the person also sports a beanie on their head.",
+      "pid": 4908,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 368,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_004074_2_train.jpg",
+          "pid": 4908,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            710,
+            179,
+            909
+          ],
+          "label": "query_source g=368 pid=4908 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 363,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D2_30_007770_9_train.jpg",
+          "pid": 4908,
+          "view": 0,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.47543466091156006,
+          "image_rectangle": [
+            180,
+            710,
+            359,
+            909
+          ],
+          "label": "before_rank_1 g=363 pid=4908 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 219,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D2_20_009765_13_train.jpg",
+          "pid": 4882,
+          "view": 0,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.47426021099090576,
+          "image_rectangle": [
+            360,
+            710,
+            539,
+            909
+          ],
+          "label": "before_rank_2 g=219 pid=4882 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 336,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S2_30_003752_3_train.jpg",
+          "pid": 4903,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.47268399596214294,
+          "image_rectangle": [
+            540,
+            710,
+            719,
+            909
+          ],
+          "label": "before_rank_3 g=336 pid=4903 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 219,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D2_20_009765_13_train.jpg",
+          "pid": 4882,
+          "view": 0,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.23507380485534668,
+          "image_rectangle": [
+            720,
+            710,
+            899,
+            909
+          ],
+          "label": "after_rank_1 g=219 pid=4882 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 363,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D2_30_007770_9_train.jpg",
+          "pid": 4908,
+          "view": 0,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.2346162348985672,
+          "image_rectangle": [
+            900,
+            710,
+            1079,
+            909
+          ],
+          "label": "after_rank_2 g=363 pid=4908 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 2012,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S3_30_002618_4_train.jpg",
+          "pid": 5242,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.2344169318675995,
+          "image_rectangle": [
+            1080,
+            710,
+            1259,
+            909
+          ],
+          "label": "after_rank_3 g=2012 pid=5242 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 363,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D2_30_007770_9_train.jpg",
+          "pid": 4908,
+          "view": 0,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            710,
+            1439,
+            909
+          ],
+          "label": "best_positive g=363 pid=4908 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 1517,
+      "query_text": "With short hair, the man is wearing a black t-shirt and black pants with white stripes down the sides. He is also carrying a microphone stand in his right hand.",
+      "pid": 4976,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 758,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_002912_0_train.jpg",
+          "pid": 4976,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            1040,
+            179,
+            1239
+          ],
+          "label": "query_source g=758 pid=4976 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 760,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_002926_0_train.jpg",
+          "pid": 4976,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.47315871715545654,
+          "image_rectangle": [
+            180,
+            1040,
+            359,
+            1239
+          ],
+          "label": "before_rank_1 g=760 pid=4976 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 1729,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S1_30_002695_3_train.jpg",
+          "pid": 5173,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4728453457355499,
+          "image_rectangle": [
+            360,
+            1040,
+            539,
+            1239
+          ],
+          "label": "before_rank_2 g=1729 pid=5173 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 758,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_002912_0_train.jpg",
+          "pid": 4976,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.47228744626045227,
+          "image_rectangle": [
+            540,
+            1040,
+            719,
+            1239
+          ],
+          "label": "before_rank_3 g=758 pid=4976 hit=True"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 1729,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S1_30_002695_3_train.jpg",
+          "pid": 5173,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.2343575805425644,
+          "image_rectangle": [
+            720,
+            1040,
+            899,
+            1239
+          ],
+          "label": "after_rank_1 g=1729 pid=5173 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 760,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_002926_0_train.jpg",
+          "pid": 4976,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.23332063853740692,
+          "image_rectangle": [
+            900,
+            1040,
+            1079,
+            1239
+          ],
+          "label": "after_rank_2 g=760 pid=4976 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 8175,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/1388_c5s3_047040_00.jpg",
+          "pid": 6816,
+          "view": 1,
+          "source": "Market",
+          "hit": false,
+          "score": 0.23331983387470245,
+          "image_rectangle": [
+            1080,
+            1040,
+            1259,
+            1239
+          ],
+          "label": "after_rank_3 g=8175 pid=6816 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 760,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_002926_0_train.jpg",
+          "pid": 4976,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            1040,
+            1439,
+            1239
+          ],
+          "label": "best_positive g=760 pid=4976 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 1850,
+      "query_text": "The person appears to be an adult male with short hair, wearing a dark brown t-shirt and light-colored shorts. He has no visible accessories or shoes in the image. There are no additional belongings discernible from the provided view.",
+      "pid": 5005,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 925,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_001827_0_train.jpg",
+          "pid": 5005,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            1370,
+            179,
+            1569
+          ],
+          "label": "query_source g=925 pid=5005 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 925,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_001827_0_train.jpg",
+          "pid": 5005,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.48014867305755615,
+          "image_rectangle": [
+            180,
+            1370,
+            359,
+            1569
+          ],
+          "label": "before_rank_1 g=925 pid=5005 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 2739,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_000196_2_train.jpg",
+          "pid": 5450,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4781861901283264,
+          "image_rectangle": [
+            360,
+            1370,
+            539,
+            1569
+          ],
+          "label": "before_rank_2 g=2739 pid=5450 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 928,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_001813_2_train.jpg",
+          "pid": 5005,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.4736640453338623,
+          "image_rectangle": [
+            540,
+            1370,
+            719,
+            1569
+          ],
+          "label": "before_rank_3 g=928 pid=5005 hit=True"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 2739,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_000196_2_train.jpg",
+          "pid": 5450,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.23997308313846588,
+          "image_rectangle": [
+            720,
+            1370,
+            899,
+            1569
+          ],
+          "label": "after_rank_1 g=2739 pid=5450 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 925,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_001827_0_train.jpg",
+          "pid": 5005,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.23982207477092743,
+          "image_rectangle": [
+            900,
+            1370,
+            1079,
+            1569
+          ],
+          "label": "after_rank_2 g=925 pid=5005 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 2209,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_20_002044_2_train.jpg",
+          "pid": 5304,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.23596163094043732,
+          "image_rectangle": [
+            1080,
+            1370,
+            1259,
+            1569
+          ],
+          "label": "after_rank_3 g=2209 pid=5304 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 925,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_001827_0_train.jpg",
+          "pid": 5005,
+          "view": 1,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            1370,
+            1439,
+            1569
+          ],
+          "label": "best_positive g=925 pid=5005 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 3148,
+      "query_text": "The person appears to be a young adult male with short dark hair, wearing a black t-shirt with a graphic design and gray pants. He has on dark shoes and is not carrying any visible belongings.",
+      "pid": 5134,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 1574,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D8_20_006165_0_gallery.jpg",
+          "pid": 5134,
+          "view": 0,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            1700,
+            179,
+            1899
+          ],
+          "label": "query_source g=1574 pid=5134 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 1574,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D8_20_006165_0_gallery.jpg",
+          "pid": 5134,
+          "view": 0,
+          "source": "G2APS",
+          "hit": true,
+          "score": 0.47359028458595276,
+          "image_rectangle": [
+            180,
+            1700,
+            359,
+            1899
+          ],
+          "label": "before_rank_1 g=1574 pid=5134 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 983,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_30_002506_0_train.jpg",
+          "pid": 5015,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4730524718761444,
+          "image_rectangle": [
+            360,
+            1700,
+            539,
+            1899
+          ],
+          "label": "before_rank_2 g=983 pid=5015 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 5578,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000058_0001_00000000.jpg",
+          "pid": 6080,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.47260820865631104,
+          "image_rectangle": [
+            540,
+            1700,
+            719,
+            1899
+          ],
+          "label": "before_rank_3 g=5578 pid=6080 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 5578,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000058_0001_00000000.jpg",
+          "pid": 6080,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.23775997757911682,
+          "image_rectangle": [
+            720,
+            1700,
+            899,
+            1899
+          ],
+          "label": "after_rank_1 g=5578 pid=6080 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 5577,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000058_0001_00000002.jpg",
+          "pid": 6080,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.23593692481517792,
+          "image_rectangle": [
+            900,
+            1700,
+            1079,
+            1899
+          ],
+          "label": "after_rank_2 g=5577 pid=6080 hit=False"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 2445,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/S4_50_000161_12_train.jpg",
+          "pid": 5366,
+          "view": 1,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.23554754257202148,
+          "image_rectangle": [
+            1080,
+            1700,
+            1259,
+            1899
+          ],
+          "label": "after_rank_3 g=2445 pid=5366 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 1574,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D8_20_006165_0_gallery.jpg",
+          "pid": 5134,
+          "view": 0,
+          "source": "G2APS",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            1700,
+            1439,
+            1899
+          ],
+          "label": "best_positive g=1574 pid=5134 hit=True"
+        }
+      ]
+    }
+  ]
+}

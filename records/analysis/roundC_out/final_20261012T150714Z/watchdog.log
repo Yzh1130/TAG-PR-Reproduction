@@ -1,0 +1,65 @@
+[2026-10-12 23:07:14] OUT=/root/autodl-tmp/roundC_out/final_20261012T150714Z HEAD=37c0a08 hard-deadline=2026-10-13 08:07:14
+[2026-10-12 23:07:14] OK /root/autodl-tmp/datasets/TAG-PEDES/test_reid.json
+[2026-10-12 23:07:14] OK /root/autodl-tmp/datasets/TAG-PEDES/train_reid.json
+[2026-10-12 23:07:14] OK /root/autodl-tmp/TAG-PR/config/config.local.yaml
+[2026-10-12 23:07:14] OK /root/autodl-tmp/cfg_l14.yaml
+[2026-10-13 00:55:14] E3 queue finished
+[2026-10-12 22:08:48] END e3_c0_b0_seed0 rc=0
+[2026-10-12 22:41:40] END e3_c0_b0_seed1 rc=0
+[2026-10-12 23:14:35] END e3_c0_b0_seed2 rc=0
+[2026-10-12 23:47:35] END e3_c1_b80_seed0 rc=0
+[2026-10-13 00:21:08] END e3_c1_b80_seed1 rc=0
+[2026-10-13 00:54:14] END e3_c1_b80_seed2 rc=0
+[2026-10-13 00:55:25] ckpt /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth sha16=4f90ebc8156e8962
+[2026-10-13 00:55:25] START E4_b16_c0_seed0
+[2026-10-13 01:12:48] END E4_b16_c0_seed0 rc=0
+[2026-10-13 01:12:58] ckpt /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1/checkpoint_last.pth sha16=a10ac04b93edd597
+[2026-10-13 01:12:58] START E4_b16_c0_seed1
+[2026-10-13 01:30:20] END E4_b16_c0_seed1 rc=0
+[2026-10-13 01:30:30] ckpt /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed2/checkpoint_last.pth sha16=df2aef4902e48025
+[2026-10-13 01:30:30] START E4_b16_c0_seed2
+[2026-10-13 01:47:53] END E4_b16_c0_seed2 rc=0
+[2026-10-13 01:47:53] START E4_l14_model1
+[2026-10-13 02:07:23] END E4_l14_model1 rc=0
+[2026-10-13 02:07:23] START S13_b16_c0_seed0
+[2026-10-13 02:08:00] END S13_b16_c0_seed0 rc=0
+[2026-10-13 02:08:00] START S13_b16_c0_seed1
+[2026-10-13 02:08:36] END S13_b16_c0_seed1 rc=0
+[2026-10-13 02:08:36] START S13_b16_c0_seed2
+[2026-10-13 02:09:12] END S13_b16_c0_seed2 rc=0
+[2026-10-13 02:09:12] START S13_l14_model1
+[2026-10-13 02:09:47] END S13_l14_model1 rc=0
+[2026-10-13 02:09:48] START S13_l14_keep_s1
+[2026-10-13 02:10:24] END S13_l14_keep_s1 rc=0
+[2026-10-13 02:10:24] START S13_l14_keep_s2
+[2026-10-13 02:11:01] END S13_l14_keep_s2 rc=0
+[2026-10-13 02:11:01] START E5_l14_model1
+[2026-10-13 02:49:31] END E5_l14_model1 rc=0
+[2026-10-13 02:49:31] START E5_l14_keep_s1
+[2026-10-13 03:28:01] END E5_l14_keep_s1 rc=0
+[2026-10-13 03:28:01] START E5_l14_keep_s2
+[2026-10-13 04:06:38] END E5_l14_keep_s2 rc=0
+[2026-10-13 04:06:38] START E5_b16_hist_seed0
+[2026-10-13 04:18:06] END E5_b16_hist_seed0 rc=0
+[2026-10-13 04:18:06] START E5_b16_c0_seed0
+[2026-10-13 04:29:34] END E5_b16_c0_seed0 rc=0
+[2026-10-13 04:29:34] START E5_b16_c0_seed1
+[2026-10-13 04:41:01] END E5_b16_c0_seed1 rc=0
+[2026-10-13 04:41:01] START E5_b16_c0_seed2
+[2026-10-13 04:52:27] END E5_b16_c0_seed2 rc=0
+[2026-10-13 04:52:27] START E6_l14_model1
+[2026-10-13 05:21:42] END E6_l14_model1 rc=0
+[2026-10-13 05:21:42] START E6_b16_hist_seed0
+[2026-10-13 05:34:18] END E6_b16_hist_seed0 rc=0
+[2026-10-13 05:34:18] START E6_l14_keep_s1
+[2026-10-13 05:42:23] END E6_l14_keep_s1 rc=0
+[2026-10-13 05:42:23] START E6_l14_keep_s2
+[2026-10-13 05:50:27] END E6_l14_keep_s2 rc=0
+[2026-10-13 05:50:27] START E6_b16_c0_seed0
+[2026-10-13 05:53:56] END E6_b16_c0_seed0 rc=0
+[2026-10-13 05:53:56] START E6_b16_c0_seed1
+[2026-10-13 05:57:24] END E6_b16_c0_seed1 rc=0
+[2026-10-13 05:57:24] START E6_b16_c0_seed2
+[2026-10-13 06:00:53] END E6_b16_c0_seed2 rc=0
+[2026-10-13 06:00:53] ===== ALL DONE =====
+[2026-10-13 06:00:53] shutdown in 60 s

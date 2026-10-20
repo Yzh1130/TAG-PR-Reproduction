@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --eval_only --resume /root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth --config /root/autodl-tmp/TAG-PR/config/config.local.yaml --backbone ViT-B/16 --dump_sim --dump_sim_dtype float32 --output_dir /root/autodl-tmp/roundA_checks/ab_gate_20261012T051834Z_8ISK6X/output_new --exp_name ab_new
+cwd: /root/autodl-tmp/roundA_checks/ab_gate_20261012T051834Z_8ISK6X/worktree_new
+config_source: /root/autodl-tmp/TAG-PR/config/config.local.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--eval_only", "--resume", "/root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth", "--config", "/root/autodl-tmp/TAG-PR/config/config.local.yaml", "--backbone", "ViT-B/16", "--dump_sim", "--dump_sim_dtype", "float32", "--output_dir", "/root/autodl-tmp/roundA_checks/ab_gate_20261012T051834Z_8ISK6X/output_new", "--exp_name", "ab_new"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=40419
+OMP_NUM_THREADS=1
+PYTHONHASHSEED=0

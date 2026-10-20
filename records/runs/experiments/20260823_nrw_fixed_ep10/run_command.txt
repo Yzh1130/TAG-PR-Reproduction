@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --config config/config.local.yaml --exp_name nrw_fixed_ep10 --output_dir /root/autodl-tmp/experiments --batch_size 320 --epoch 10 --grad_checkpoint --nrw_mode fixed
+cwd: /root/autodl-tmp/TAG-PR
+config_source: config/config.local.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--config", "config/config.local.yaml", "--exp_name", "nrw_fixed_ep10", "--output_dir", "/root/autodl-tmp/experiments", "--batch_size", "320", "--epoch", "10", "--grad_checkpoint", "--nrw_mode", "fixed"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=37081
+OMP_NUM_THREADS=1
+PYTHONHASHSEED=0

@@ -1,0 +1,89 @@
+{
+  "tool": "E3",
+  "tag": "fk32",
+  "arguments": {
+    "fresh_forward": true,
+    "sim": "/root/autodl-tmp/experiments/_dump/20260830_dump_fk32/sim_qg.npy",
+    "anno": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+    "train_anno": null,
+    "resume": "/root/autodl-tmp/experiments/20260827_l14_final_keep/checkpoint_best.pth",
+    "config": "/root/autodl-tmp/cfg_l14.yaml",
+    "backbone": "ViT-L/14",
+    "repo": null,
+    "out": "/root/autodl-tmp/experiments/_e1_e3",
+    "tag": "fk32",
+    "device": "cuda",
+    "seed": 0,
+    "image_batch_size": 32,
+    "text_batch_size": 256,
+    "score_block_size": 256,
+    "num_workers": 2,
+    "image_root": null
+  },
+  "started_utc": "2026-08-31T12:25:10.799193+00:00",
+  "annotation": {
+    "n_query": 16504,
+    "n_gallery": 8252,
+    "aerial": 4498,
+    "ground": 3754,
+    "identities": 2000,
+    "dual_view_identities": 800,
+    "domains": {
+      "AG-ReID.v2": 2421,
+      "G2APS": 3129,
+      "Market": 921,
+      "PRAI-1581": 1014,
+      "uavhuman": 767
+    },
+    "query_order": "annotation image order, then caption order; never sorted"
+  },
+  "train_annotation": {
+    "path": "/root/autodl-tmp/datasets/TAG-PEDES/train_reid.json",
+    "records": 19954,
+    "fields": [
+      "cam_id",
+      "captions",
+      "file_path",
+      "id",
+      "split"
+    ],
+    "captions": 39908,
+    "identities": 4840
+  },
+  "test_annotation": {
+    "path": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+    "records": 8252,
+    "fields": [
+      "cam_id",
+      "captions",
+      "file_path",
+      "id",
+      "split"
+    ],
+    "captions": 16504,
+    "identities": 2000
+  },
+  "fresh_forward": true,
+  "seed": 0,
+  "image_batch_size": 32,
+  "text_batch_size": 256,
+  "score_block_size": 256,
+  "num_workers": 2,
+  "extraction_order": [
+    "gallery_images",
+    "test_text",
+    "train_text"
+  ],
+  "pure_query_independent_inductive_pipeline": false,
+  "independence_status": "not_verified",
+  "inductive_scope": "train_* bank construction/calibration only; test_full scan rows remain transductive controls",
+  "test_query_use_in_training_bank": false,
+  "alignment_W_used": false,
+  "archive_parity_checked": false,
+  "archive_role": "metrics-only reference; no reconstruction, alignment, acceptance gate or routing retries",
+  "archived_similarity": "/root/autodl-tmp/experiments/_dump/20260830_dump_fk32/sim_qg.npy",
+  "warnings": [],
+  "status": "stopped",
+  "error": "ValueError: Expected a torch.device with a specified index or an integer, but got:cuda",
+  "elapsed_sec": 6.1885130144655704
+}

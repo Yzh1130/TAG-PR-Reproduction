@@ -1,0 +1,68 @@
+EVALUATION COMPLETE
+array_equal=True
+EVALUATION COMPLETE
+array_equal=True
+EVALUATION COMPLETE
+array_equal=True
+EVALUATION COMPLETE
+array_equal=True
+EVALUATION COMPLETE
+array_equal=True
+(clean)
+eval runs found: 5
+
+=== aeri_ViT-B-16_test_seed0_20260901T132322481973Z
+  dataset=aeri split=test protocol=official_aerial_gallery epoch=1
+  nq=6141 ng=5525 D_global=512 D_local=1024  expected=(6141, 5525)  PASS
+  sim_qg shape=(6141, 5525) dtype=float32 finite=True size=0.14 GB
+  feats: {'feats_text_global': (6141, 512), 'feats_text_local': (6141, 1024), 'feats_img_global': (5525, 512), 'feats_img_local': (5525, 1024)}
+  optional: {'feats_bank_text_global': True, 'feats_bank_text_local': True, 'feats_extra_img_global': True, 'feats_extra_img_local': True}
+  len(query_pid)=6141 len(gallery_pid)=5525 len(src_idx)=6141
+  strict_score_recomputation: {'array_equal': True, 'compared_elements': 33929025, 'shape': [6141, 5525]}
+  meta keys (metrics excluded): 29 | output.json exists: True (not opened)
+
+=== cuhkpedes_ViT-B-16_test_seed0_20260901T131932509030Z
+  dataset=cuhkpedes split=test protocol=identity_retrieval_unique_image_gallery epoch=1
+  nq=6156 ng=3074 D_global=512 D_local=1024  expected=(6156, 3074)  PASS
+  sim_qg shape=(6156, 3074) dtype=float32 finite=True size=0.08 GB
+  feats: {'feats_text_global': (6156, 512), 'feats_text_local': (6156, 1024), 'feats_img_global': (3074, 512), 'feats_img_local': (3074, 1024)}
+  optional: {'feats_bank_text_global': True, 'feats_bank_text_local': True, 'feats_extra_img_global': False, 'feats_extra_img_local': False}
+  len(query_pid)=6156 len(gallery_pid)=3074 len(src_idx)=6156
+  strict_score_recomputation: {'array_equal': True, 'compared_elements': 18923544, 'shape': [6156, 3074]}
+  meta keys (metrics excluded): 29 | output.json exists: True (not opened)
+
+=== cuhkpedes_ViT-B-16_val_seed0_20260901T132035899108Z
+  dataset=cuhkpedes split=val protocol=identity_retrieval_unique_image_gallery epoch=1
+  nq=6158 ng=3078 D_global=512 D_local=1024  expected=(6158, 3078)  PASS
+  sim_qg shape=(6158, 3078) dtype=float32 finite=True size=0.08 GB
+  feats: {'feats_text_global': (6158, 512), 'feats_text_local': (6158, 1024), 'feats_img_global': (3078, 512), 'feats_img_local': (3078, 1024)}
+  optional: {'feats_bank_text_global': True, 'feats_bank_text_local': True, 'feats_extra_img_global': False, 'feats_extra_img_local': False}
+  len(query_pid)=6158 len(gallery_pid)=3078 len(src_idx)=6158
+  strict_score_recomputation: {'array_equal': True, 'compared_elements': 18954324, 'shape': [6158, 3078]}
+  meta keys (metrics excluded): 29 | output.json exists: True (not opened)
+
+=== icfgpedes_ViT-B-16_test_seed0_20260901T132139513428Z
+  dataset=icfgpedes split=test protocol=identity_retrieval_unique_image_gallery epoch=1
+  nq=19848 ng=19848 D_global=512 D_local=1024  expected=(19848, 19848)  PASS
+  sim_qg shape=(19848, 19848) dtype=float32 finite=True size=1.58 GB
+  feats: {'feats_text_global': (19848, 512), 'feats_text_local': (19848, 1024), 'feats_img_global': (19848, 512), 'feats_img_local': (19848, 1024)}
+  optional: {'feats_bank_text_global': True, 'feats_bank_text_local': True, 'feats_extra_img_global': False, 'feats_extra_img_local': False}
+  len(query_pid)=19848 len(gallery_pid)=19848 len(src_idx)=19848
+  strict_score_recomputation: {'array_equal': True, 'compared_elements': 393943104, 'shape': [19848, 19848]}
+  meta keys (metrics excluded): 29 | output.json exists: True (not opened)
+
+=== tbapr_ViT-B-16_test_seed0_20260901T132445563137Z
+  dataset=tbapr split=test protocol=official_row_gallery epoch=1
+  nq=3200 ng=3200 D_global=512 D_local=1024  expected=(3200, 3200)  PASS
+  sim_qg shape=(3200, 3200) dtype=float32 finite=True size=0.04 GB
+  feats: {'feats_text_global': (3200, 512), 'feats_text_local': (3200, 1024), 'feats_img_global': (3200, 512), 'feats_img_local': (3200, 1024)}
+  optional: {'feats_bank_text_global': True, 'feats_bank_text_local': True, 'feats_extra_img_global': True, 'feats_extra_img_local': True}
+  len(query_pid)=3200 len(gallery_pid)=3200 len(src_idx)=3200
+  strict_score_recomputation: {'array_equal': True, 'compared_elements': 10240000, 'shape': [3200, 3200]}
+  meta keys (metrics excluded): 29 | output.json exists: True (not opened)
+
+=== 终端自检行 ===
+
+=== 盲化自检（必须为空）===
+
+S4B VERDICT: PASS []

@@ -1,0 +1,3 @@
+pair,metric,seed,status,reason,A_directories,B_directories,A_R1,B_R1,delta_R1,A_R5,B_R5,delta_R5,A_R10,B_R10,delta_R10,A_mAP,B_mAP,delta_mAP
+e3_c0_b0|e3_c1_b80,best,0,unpaired,"requires exactly one directory per side; A=1, B=0","[""/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0""]",[],,,,,,,,,,,,
+e3_c0_b0|e3_c1_b80,best,1,unpaired,"requires exactly one directory per side; A=1, B=0","[""/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed1""]",[],,,,,,,,,,,,

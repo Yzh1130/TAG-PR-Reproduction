@@ -1,0 +1,133 @@
+{
+  "lock_id": "lockB_v1.0",
+  "lock_type": "outcome-blinded prospective prediction lock",
+  "depends_on": {
+    "lockA_v1.0_sha256": "241199b4ecb9d98c75d0ba198b29c2208eb4f06daa342c7f129e0c88e01c784b"
+  },
+  "created_utc": "2026-09-01T15:03:14Z",
+  "git_commit": "5131eae14c5ba0dafef24e6f36ac4cbc089525f1",
+  "observed_before_prediction": {
+    "file": "lockB_baseline_observed.json",
+    "sha256": "380a5c3b3ed9a634be9bd43176300cb8075883d7fb725401ee5860718dc9dff0",
+    "content": {
+      "aeri": {
+        "nq": 6141,
+        "ng": 5525,
+        "nq_over_ng": 1.1115,
+        "metrics": {
+          "r1": 37.02979970688813,
+          "r5": 56.50545513759974,
+          "r10": 66.52011073115128,
+          "mAP": 37.20757254635323
+        },
+        "distinct_top1_ratio": 0.5190950226244344,
+        "max_top1_count": 22,
+        "gini_top1": 0.6667730062977053,
+        "skew_N10": 1.1144151622011376,
+        "null_norm_distinct_ratio": 0.7735743965216125,
+        "excess_gini": 0.16567418315144633,
+        "excess_skew_N10": 0.8164619482600417
+      },
+      "cuhkpedes": {
+        "nq": 6156,
+        "ng": 3074,
+        "nq_over_ng": 2.0026,
+        "metrics": {
+          "r1": 73.26185834957765,
+          "r5": 88.75893437296946,
+          "r10": 92.8849902534113,
+          "mAP": 66.88024419280367
+        },
+        "distinct_top1_ratio": 0.8497072218607677,
+        "max_top1_count": 10,
+        "gini_top1": 0.3994460022921711,
+        "skew_N10": 0.4678206117638488,
+        "null_norm_distinct_ratio": 0.9821055259603729,
+        "excess_gini": 0.014121157326555722,
+        "excess_skew_N10": 0.2453213947381751
+      },
+      "icfgpedes": {
+        "nq": 19848,
+        "ng": 19848,
+        "nq_over_ng": 1.0,
+        "metrics": {
+          "r1": 66.58605401047964,
+          "r5": 81.14671503426038,
+          "r10": 86.26058041112455,
+          "mAP": 43.36063230117525
+        },
+        "distinct_top1_ratio": 0.5594518339379283,
+        "max_top1_count": 14,
+        "gini_top1": 0.6075624768392951,
+        "skew_N10": 0.6570017974469201,
+        "null_norm_distinct_ratio": 0.885051822239127,
+        "excess_gini": 0.08376490973681316,
+        "excess_skew_N10": 0.3405425106435277
+      },
+      "tbapr": {
+        "nq": 3200,
+        "ng": 3200,
+        "nq_over_ng": 1.0,
+        "metrics": {
+          "r1": 39.53125,
+          "r5": 56.96875,
+          "r10": 64.875,
+          "mAP": 34.47059149903442
+        },
+        "distinct_top1_ratio": 0.3934375,
+        "max_top1_count": 35,
+        "gini_top1": 0.775764453125,
+        "skew_N10": 1.4385774881100062,
+        "null_norm_distinct_ratio": 0.6223449006769176,
+        "excess_gini": 0.252087633203125,
+        "excess_skew_N10": 1.1231217111035925
+      },
+      "TAG-PEDES(B16 ref)": {
+        "nq": 16504,
+        "ng": 8252,
+        "nq_over_ng": 2.0,
+        "metrics": null,
+        "distinct_top1_ratio": 0.793141056713524,
+        "max_top1_count": 18,
+        "gini_top1": 0.4701947429598289,
+        "skew_N10": 0.8149105395876909,
+        "null_norm_distinct_ratio": 0.9172186678733685,
+        "excess_gini": 0.08457566934228145,
+        "excess_skew_N10": 0.5915580177263631
+      }
+    },
+    "explicitly_not_observed": "no CSLS result, no delta, no post-processed ranking of any kind"
+  },
+  "pre_declared_ranking_rule": "predicted transductive delta R@1 ordered by excess_skew_N10 (observed minus random-null) descending; rule declared in writing before the statistics were computed",
+  "observation_recorded_before_prediction": "hub concentration ordering (TBAPR > AERI > TAG-PEDES > ICFG > CUHK) does NOT follow gallery size (ICFG 19848 is weaker than TBAPR 3200). Cross-dataset comparison must therefore use hub statistics, not ng, as the explanatory axis; the within-dataset distractor-scale experiment is the clean test of the size->hub->gain chain.",
+  "predictions": {
+    "transductive_delta_r1_ranking": [
+      "tbapr",
+      "aeri",
+      "icfgpedes",
+      "cuhkpedes"
+    ],
+    "direction": {
+      "tbapr": "positive",
+      "aeri": "positive",
+      "icfgpedes": "positive, small",
+      "cuhkpedes": "near zero: |delta| < 0.3; sign not predicted"
+    },
+    "anchor": {
+      "reference": "TAG-PEDES ViT-B/16(+HR-MoE) transductive CSLS delta R@1 reported in the paper, Section 4.5 (+1.13)",
+      "anchor_excess_skew_N10": 0.5915580177263631,
+      "anchor_delta_r1": 1.13,
+      "rule": "datasets with excess_skew above anchor predicted delta >= anchor; below predicted delta < anchor"
+    },
+    "inductive": "same ranking as transductive; magnitude roughly 40-60% of the transductive gain",
+    "within_dataset_distractor_scale": "for every dataset, excess_skew_N10 and delta R@1 increase monotonically with D; all four slopes positive; CUHK slope smallest",
+    "aeri_mixed_gallery": "mixed gallery (9745) shows higher hub concentration and larger delta than aerial-only (5525)",
+    "tbapr_dedup_sensitivity": "unique-text and gallery-dedup variants reduce excess_skew and delta but do not change sign"
+  },
+  "falsification": [
+    "any dataset predicted positive with identity-clustered 95% CI entirely below zero",
+    "rank correlation between predicted and observed ordering <= 0 across the four datasets",
+    "any dataset with a negative distractor-scale slope whose CI excludes zero"
+  ],
+  "policy": "all results reported regardless of agreement with these predictions; no amendment to Lock-A permitted from this point"
+}

@@ -1,0 +1,588 @@
+{
+  "alpha": 0.5,
+  "k": 10,
+  "nboot": 10000,
+  "seed": 2026,
+  "argv": [
+    "scripts/ext/S7a_csls.py",
+    "--root",
+    "/root/autodl-tmp/TAG-PR/experiments_ext",
+    "--run-dir",
+    "cuhkpedes=/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z",
+    "--run-dir",
+    "icfgpedes=/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z",
+    "--run-dir",
+    "aeri=/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z",
+    "--run-dir",
+    "tbapr=/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z",
+    "--tag",
+    "seed1",
+    "--out",
+    "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a"
+  ],
+  "git_head": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+  "datasets": {
+    "aeri": {
+      "run": "aeri_ViT-B-16_test_seed1_20261012T064713194376Z",
+      "run_dir": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z",
+      "seed": 1,
+      "nq": 6141,
+      "ng": 5525,
+      "artifacts": {
+        "r_transductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/aeri_r_transductive_seed1.npy",
+        "r_inductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/aeri_r_inductive_seed1.npy",
+        "per_query": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/aeri_per_query_seed1.npz"
+      },
+      "inputs_sha16": {
+        "sim_qg": "e0d89407d2af261a",
+        "meta": "31ca1501db6a1b87"
+      },
+      "baseline": {
+        "r1": 37.550887477609514,
+        "r5": 56.42403517342453,
+        "r10": 66.52011073115128,
+        "mAP": 37.62552352398754
+      },
+      "baseline_vs_online_diff": {
+        "r1": 0.0,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": -0.0
+      },
+      "baseline_hub": {
+        "distinct_top1_ratio": 0.5266968325791855,
+        "max_top1_count": 18
+      },
+      "transductive": {
+        "metrics": {
+          "r1": 36.81810780003257,
+          "r5": 56.22862725940401,
+          "r10": 65.9990229604299,
+          "mAP": 37.63749937793959
+        },
+        "delta": {
+          "r1": -0.733,
+          "r5": -0.195,
+          "r10": -0.521,
+          "mAP": 0.012
+        },
+        "bank_size": 6141,
+        "boot_identity": {
+          "ci95": [
+            -1.472,
+            0.016
+          ],
+          "n_clusters": 1000,
+          "excludes_zero": false
+        },
+        "boot_query": {
+          "ci95": [
+            -1.368,
+            -0.081
+          ],
+          "n_clusters": 6141,
+          "excludes_zero": true
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.609049773755656,
+          "max_top1_count": 12
+        }
+      },
+      "inductive": {
+        "metrics": {
+          "r1": 37.86028334147533,
+          "r5": 56.717147044455295,
+          "r10": 65.91760299625467,
+          "mAP": 37.64976454231855
+        },
+        "delta": {
+          "r1": 0.309,
+          "r5": 0.293,
+          "r10": -0.603,
+          "mAP": 0.024
+        },
+        "bank_size": 76007,
+        "boot_identity": {
+          "ci95": [
+            -0.567,
+            1.157
+          ],
+          "n_clusters": 1000,
+          "excludes_zero": false
+        },
+        "boot_query": {
+          "ci95": [
+            -0.391,
+            1.01
+          ],
+          "n_clusters": 6141,
+          "excludes_zero": false
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.5312217194570136,
+          "max_top1_count": 13
+        }
+      }
+    },
+    "cuhkpedes": {
+      "run": "cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z",
+      "run_dir": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z",
+      "seed": 1,
+      "nq": 6156,
+      "ng": 3074,
+      "artifacts": {
+        "r_transductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/cuhkpedes_r_transductive_seed1.npy",
+        "r_inductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/cuhkpedes_r_inductive_seed1.npy",
+        "per_query": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/cuhkpedes_per_query_seed1.npz"
+      },
+      "inputs_sha16": {
+        "sim_qg": "808335d510de90ba",
+        "meta": "c2583f01429c7888"
+      },
+      "baseline": {
+        "r1": 73.2943469785575,
+        "r5": 88.07667316439246,
+        "r10": 92.60883690708252,
+        "mAP": 66.87079146682139
+      },
+      "baseline_vs_online_diff": {
+        "r1": 0.0,
+        "r5": 0.0,
+        "r10": 0.0,
+        "mAP": 0.0
+      },
+      "baseline_hub": {
+        "distinct_top1_ratio": 0.8519843851659076,
+        "max_top1_count": 11
+      },
+      "transductive": {
+        "metrics": {
+          "r1": 73.99285250162443,
+          "r5": 88.87264457439896,
+          "r10": 92.93372319688109,
+          "mAP": 67.56049796110212
+        },
+        "delta": {
+          "r1": 0.699,
+          "r5": 0.796,
+          "r10": 0.325,
+          "mAP": 0.69
+        },
+        "bank_size": 6156,
+        "boot_identity": {
+          "ci95": [
+            0.129,
+            1.279
+          ],
+          "n_clusters": 1000,
+          "excludes_zero": true
+        },
+        "boot_query": {
+          "ci95": [
+            0.179,
+            1.235
+          ],
+          "n_clusters": 6156,
+          "excludes_zero": true
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.903708523096942,
+          "max_top1_count": 11
+        }
+      },
+      "inductive": {
+        "metrics": {
+          "r1": 73.58674463937622,
+          "r5": 88.04418453541261,
+          "r10": 92.72254710851202,
+          "mAP": 66.96990777829099
+        },
+        "delta": {
+          "r1": 0.292,
+          "r5": -0.032,
+          "r10": 0.114,
+          "mAP": 0.099
+        },
+        "bank_size": 68126,
+        "boot_identity": {
+          "ci95": [
+            -0.21,
+            0.808
+          ],
+          "n_clusters": 1000,
+          "excludes_zero": false
+        },
+        "boot_query": {
+          "ci95": [
+            -0.211,
+            0.78
+          ],
+          "n_clusters": 6156,
+          "excludes_zero": false
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.8666232921275211,
+          "max_top1_count": 11
+        }
+      }
+    },
+    "icfgpedes": {
+      "run": "icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z",
+      "run_dir": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z",
+      "seed": 1,
+      "nq": 19848,
+      "ng": 19848,
+      "artifacts": {
+        "r_transductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/icfgpedes_r_transductive_seed1.npy",
+        "r_inductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/icfgpedes_r_inductive_seed1.npy",
+        "per_query": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/icfgpedes_per_query_seed1.npz"
+      },
+      "inputs_sha16": {
+        "sim_qg": "5e89935f75a466f0",
+        "meta": "cf8d4f1ac7f3f522"
+      },
+      "baseline": {
+        "r1": 66.48528819024587,
+        "r5": 81.17190648931883,
+        "r10": 86.1043933897622,
+        "mAP": 43.30886984742532
+      },
+      "baseline_vs_online_diff": {
+        "r1": 0.0252,
+        "r5": 0.005,
+        "r10": 0.005,
+        "mAP": 0.0016
+      },
+      "baseline_hub": {
+        "distinct_top1_ratio": 0.5567815397017332,
+        "max_top1_count": 11
+      },
+      "transductive": {
+        "metrics": {
+          "r1": 66.01168883514713,
+          "r5": 81.55481660620717,
+          "r10": 86.60822249093107,
+          "mAP": 42.894120823517305
+        },
+        "delta": {
+          "r1": -0.474,
+          "r5": 0.383,
+          "r10": 0.504,
+          "mAP": -0.415
+        },
+        "bank_size": 19848,
+        "boot_identity": {
+          "ci95": [
+            -0.841,
+            -0.121
+          ],
+          "n_clusters": 1000,
+          "excludes_zero": true
+        },
+        "boot_query": {
+          "ci95": [
+            -0.816,
+            -0.131
+          ],
+          "n_clusters": 19848,
+          "excludes_zero": true
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.6293329302700524,
+          "max_top1_count": 9
+        }
+      },
+      "inductive": {
+        "metrics": {
+          "r1": 66.97400241837968,
+          "r5": 81.41374445787989,
+          "r10": 86.08927851672713,
+          "mAP": 43.30573370563104
+        },
+        "delta": {
+          "r1": 0.489,
+          "r5": 0.242,
+          "r10": -0.015,
+          "mAP": -0.003
+        },
+        "bank_size": 34674,
+        "boot_identity": {
+          "ci95": [
+            0.141,
+            0.835
+          ],
+          "n_clusters": 1000,
+          "excludes_zero": true
+        },
+        "boot_query": {
+          "ci95": [
+            0.181,
+            0.791
+          ],
+          "n_clusters": 19848,
+          "excludes_zero": true
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.5775392986698912,
+          "max_top1_count": 11
+        }
+      }
+    },
+    "tbapr": {
+      "run": "tbapr_ViT-B-16_test_seed1_20261012T071625394253Z",
+      "run_dir": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z",
+      "seed": 1,
+      "nq": 3200,
+      "ng": 3200,
+      "artifacts": {
+        "r_transductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/tbapr_r_transductive_seed1.npy",
+        "r_inductive": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/tbapr_r_inductive_seed1.npy",
+        "per_query": "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed1/tbapr_per_query_seed1.npz"
+      },
+      "inputs_sha16": {
+        "sim_qg": "0f93964d46b667d1",
+        "meta": "f86e1e1b09941506"
+      },
+      "baseline": {
+        "r1": 37.9375,
+        "r5": 56.21874999999999,
+        "r10": 64.03125,
+        "mAP": 34.38719949052381
+      },
+      "baseline_vs_online_diff": {
+        "r1": -0.5625,
+        "r5": 0.0312,
+        "r10": -0.0312,
+        "mAP": -0.1009
+      },
+      "baseline_hub": {
+        "distinct_top1_ratio": 0.3884375,
+        "max_top1_count": 31
+      },
+      "transductive": {
+        "metrics": {
+          "r1": 38.625,
+          "r5": 57.40625,
+          "r10": 65.625,
+          "mAP": 35.21056150129098
+        },
+        "delta": {
+          "r1": 0.688,
+          "r5": 1.188,
+          "r10": 1.594,
+          "mAP": 0.823
+        },
+        "bank_size": 3200,
+        "boot_identity": {
+          "ci95": [
+            -0.561,
+            1.939
+          ],
+          "n_clusters": 529,
+          "excludes_zero": false
+        },
+        "boot_query": {
+          "ci95": [
+            -0.219,
+            1.562
+          ],
+          "n_clusters": 3200,
+          "excludes_zero": false
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.46,
+          "max_top1_count": 33
+        }
+      },
+      "inductive": {
+        "metrics": {
+          "r1": 38.96875,
+          "r5": 55.90625,
+          "r10": 64.8125,
+          "mAP": 34.69633091283028
+        },
+        "delta": {
+          "r1": 1.031,
+          "r5": -0.312,
+          "r10": 0.781,
+          "mAP": 0.309
+        },
+        "bank_size": 31340,
+        "boot_identity": {
+          "ci95": [
+            -0.279,
+            2.32
+          ],
+          "n_clusters": 529,
+          "excludes_zero": false
+        },
+        "boot_query": {
+          "ci95": [
+            0.156,
+            1.938
+          ],
+          "n_clusters": 3200,
+          "excludes_zero": true
+        },
+        "hub_after": {
+          "distinct_top1_ratio": 0.419375,
+          "max_top1_count": 33
+        }
+      }
+    }
+  },
+  "peak_rss_gb": 3.522164,
+  "elapsed_sec": 191.2,
+  "provenance": {
+    "argv": [
+      "S7a_csls.py",
+      "--root",
+      "/root/autodl-tmp/TAG-PR/experiments_ext",
+      "--run-dir",
+      "cuhkpedes=/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z",
+      "--run-dir",
+      "icfgpedes=/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z",
+      "--run-dir",
+      "aeri=/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z",
+      "--run-dir",
+      "tbapr=/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z",
+      "--tag",
+      "seed1",
+      "--out",
+      "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a"
+    ],
+    "seeds": {
+      "bootstrap": 2026,
+      "run_seeds": {
+        "aeri": 1,
+        "cuhkpedes": 1,
+        "icfgpedes": 1,
+        "tbapr": 1
+      }
+    },
+    "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+    "inputs": [
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z/feats_bank_text_global.npy",
+        "sha256_16": "cb158714bb48536c",
+        "bytes": 155662464
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z/feats_bank_text_local.npy",
+        "sha256_16": "d9633ed8d53d77a5",
+        "bytes": 311324800
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z/feats_img_global.npy",
+        "sha256_16": "d767043ae9002f2c",
+        "bytes": 11315328
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z/feats_img_local.npy",
+        "sha256_16": "ef4f1cc203de74e4",
+        "bytes": 22630528
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z/meta.json",
+        "sha256_16": "31ca1501db6a1b87",
+        "bytes": 967358
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed1_20261012T064713194376Z/sim_qg.npy",
+        "sha256_16": "e0d89407d2af261a",
+        "bytes": 135716228
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z/feats_bank_text_global.npy",
+        "sha256_16": "85a2ae83c97cba69",
+        "bytes": 139522176
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z/feats_bank_text_local.npy",
+        "sha256_16": "21d30acfcf8009bc",
+        "bytes": 279044224
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z/feats_img_global.npy",
+        "sha256_16": "a2ff74433930fedd",
+        "bytes": 6295680
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z/feats_img_local.npy",
+        "sha256_16": "ded5dd0f22c55bcd",
+        "bytes": 12591232
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z/meta.json",
+        "sha256_16": "c2583f01429c7888",
+        "bytes": 426611
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed1_20261012T060723113733Z/sim_qg.npy",
+        "sha256_16": "808335d510de90ba",
+        "bytes": 75694304
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z/feats_bank_text_global.npy",
+        "sha256_16": "605534fbd7748ded",
+        "bytes": 71012480
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z/feats_bank_text_local.npy",
+        "sha256_16": "23d948d22fd50695",
+        "bytes": 142024832
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z/feats_img_global.npy",
+        "sha256_16": "138f872c7395c6f3",
+        "bytes": 40648832
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z/feats_img_local.npy",
+        "sha256_16": "a367d755a5086f06",
+        "bytes": 81297536
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z/meta.json",
+        "sha256_16": "cf8d4f1ac7f3f522",
+        "bytes": 2725319
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed1_20261012T063250180086Z/sim_qg.npy",
+        "sha256_16": "5e89935f75a466f0",
+        "bytes": 1575772544
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z/feats_bank_text_global.npy",
+        "sha256_16": "8c326e5560a5261c",
+        "bytes": 64184448
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z/feats_bank_text_local.npy",
+        "sha256_16": "277f47ba64d21633",
+        "bytes": 128368768
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z/feats_img_global.npy",
+        "sha256_16": "01d8a5292e3accf2",
+        "bytes": 6553728
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z/feats_img_local.npy",
+        "sha256_16": "bd5a67158abd2136",
+        "bytes": 13107328
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z/meta.json",
+        "sha256_16": "f86e1e1b09941506",
+        "bytes": 563316
+      },
+      {
+        "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed1_20261012T071625394253Z/sim_qg.npy",
+        "sha256_16": "0f93964d46b667d1",
+        "bytes": 40960128
+      }
+    ],
+    "tag": "seed1"
+  }
+}

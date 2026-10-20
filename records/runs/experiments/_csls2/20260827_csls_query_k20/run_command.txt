@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --config /root/autodl-tmp/cfg_l14.yaml --backbone ViT-L/14 --eval_only --resume /root/autodl-tmp/experiments/20260827_l14_final_keep/checkpoint_best.pth --exp_name csls_query_k20 --output_dir /root/autodl-tmp/experiments/_csls2 --batch_size 256 --grad_checkpoint --csls --csls_k 20 --csls_mode query
+cwd: /root/autodl-tmp/TAG-PR
+config_source: /root/autodl-tmp/cfg_l14.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--config", "/root/autodl-tmp/cfg_l14.yaml", "--backbone", "ViT-L/14", "--eval_only", "--resume", "/root/autodl-tmp/experiments/20260827_l14_final_keep/checkpoint_best.pth", "--exp_name", "csls_query_k20", "--output_dir", "/root/autodl-tmp/experiments/_csls2", "--batch_size", "256", "--grad_checkpoint", "--csls", "--csls_k", "20", "--csls_mode", "query"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=127.0.0.1
+MASTER_PORT=29500
+OMP_NUM_THREADS=25
+PYTHONHASHSEED=0

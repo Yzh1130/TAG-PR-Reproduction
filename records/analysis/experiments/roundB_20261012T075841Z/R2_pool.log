@@ -1,0 +1,10 @@
+small_target: candidates=1089 selected=30
+similar_clothing: candidates=732 selected=30
+occlusion_manual_review: candidates=3657 selected=30
+transductive_success: candidates=485 selected=30
+transductive_failure: candidates=315 selected=30
+inductive_success: candidates=428 selected=30
+inductive_failure: candidates=373 selected=30
+JSON: /root/autodl-tmp/experiments/roundB_20261012T075841Z/R2/R2_hard_case_pool.json
+LOG: /root/autodl-tmp/experiments/roundB_20261012T075841Z/R2/R2_hard_case_pool.log
+R2 case pools complete: (PosixPath('/root/autodl-tmp/experiments/roundB_20261012T075841Z/R2/R2_hard_case_pool.json'), PosixPath('/root/autodl-tmp/experiments/roundB_20261012T075841Z/R2/R2_hard_case_pool.log'))

@@ -1,0 +1,35 @@
+TAG-PR / TAG-CLIP single-RTX-5090 reproduction
+
+Dataset: TAG-PEDES
+Seed: 0
+Epochs: 10
+Batch size per process: 80
+World size: 1
+GPU: NVIDIA GeForce RTX 5090
+
+Best epoch: 10
+
+Best results:
+R@1  = 54.29593
+R@5  = 73.41856
+R@10 = 80.87736
+mAP  = 45.55265
+
+Paper-reported TAG-CLIP results:
+R@1  = 62.64
+R@5  = 79.10
+R@10 = 84.81
+mAP  = 49.27
+
+Difference (reproduction - paper):
+R@1  = -8.34407
+R@5  = -5.68144
+R@10 = -3.93264
+mAP  = -3.71735
+
+Note:
+This run uses a single RTX 5090 with world_size=1.
+The original paper used a multi-GPU training setup.
+Because TAG-CLIP gathers cross-GPU features for contrastive learning,
+this run is an engineering-valid single-GPU baseline, but is not yet
+an exact numerical reproduction of the original multi-GPU protocol.

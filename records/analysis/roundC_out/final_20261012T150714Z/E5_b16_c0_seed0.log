@@ -1,0 +1,12 @@
+ANNOTATION INSPECTION path=/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json records=8252 fields=['cam_id', 'captions', 'file_path', 'id', 'split']
+CAM_ID x SOURCE (0=aerial, 1=ground)
+  AG-ReID.v2: cam_id=0 1431, cam_id=1 990
+  G2APS: cam_id=0 1286, cam_id=1 1843
+  Market: cam_id=0 0, cam_id=1 921
+  PRAI-1581: cam_id=0 1014, cam_id=1 0
+  uavhuman: cam_id=0 767, cam_id=1 0
+Loaded model weights from /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed0/checkpoint_last.pth (missing=0 unexpected=0)
+ROUTER visual.transformer.resblocks.6 argmax_accuracy=0.997939893 gumbel_accuracy_mean=0.996788657 mean_flip_rate=0.002011634
+ROUTER visual.transformer.resblocks.7 argmax_accuracy=0.997939893 gumbel_accuracy_mean=0.997152206 mean_flip_rate=0.001526903
+ROUTER visual.transformer.resblocks.8 argmax_accuracy=0.997939893 gumbel_accuracy_mean=0.997297625 mean_flip_rate=0.001405720
+ROUTER EVALUATION COMPLETE JSON=/root/autodl-tmp/roundC_out/final_20261012T150714Z/e5_b16_c0_seed0/R2_router_eval.json

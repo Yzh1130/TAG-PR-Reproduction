@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --config config/config.local.yaml --eval_only --resume /root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth --exp_name rr_k20_k6_l0.5 --output_dir /root/autodl-tmp/experiments/_rr --batch_size 320 --grad_checkpoint --rerank --rerank_k1 20 --rerank_k2 6 --rerank_lambda 0.5
+cwd: /root/autodl-tmp/TAG-PR
+config_source: config/config.local.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--config", "config/config.local.yaml", "--eval_only", "--resume", "/root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth", "--exp_name", "rr_k20_k6_l0.5", "--output_dir", "/root/autodl-tmp/experiments/_rr", "--batch_size", "320", "--grad_checkpoint", "--rerank", "--rerank_k1", "20", "--rerank_k2", "6", "--rerank_lambda", "0.5"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=127.0.0.1
+MASTER_PORT=29500
+OMP_NUM_THREADS=0
+PYTHONHASHSEED=0

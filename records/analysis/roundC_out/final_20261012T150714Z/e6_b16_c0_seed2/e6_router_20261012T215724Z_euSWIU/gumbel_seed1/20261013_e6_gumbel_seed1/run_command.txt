@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --eval_only --config /root/autodl-tmp/TAG-PR/config/config.local.yaml --backbone ViT-B/16 --resume /root/autodl-tmp/experiments/20261012_e3_c0_b0_seed2/checkpoint_last.pth --eval_router_mode gumbel --eval_seed 1 --no_csls --no_rerank --output_dir /root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed2/e6_router_20261012T215724Z_euSWIU/gumbel_seed1 --exp_name e6_gumbel_seed1
+cwd: /root/autodl-tmp/TAG-PR
+config_source: /root/autodl-tmp/TAG-PR/config/config.local.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--eval_only", "--config", "/root/autodl-tmp/TAG-PR/config/config.local.yaml", "--backbone", "ViT-B/16", "--resume", "/root/autodl-tmp/experiments/20261012_e3_c0_b0_seed2/checkpoint_last.pth", "--eval_router_mode", "gumbel", "--eval_seed", "1", "--no_csls", "--no_rerank", "--output_dir", "/root/autodl-tmp/roundC_out/final_20261012T150714Z/e6_b16_c0_seed2/e6_router_20261012T215724Z_euSWIU/gumbel_seed1", "--exp_name", "e6_gumbel_seed1"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=36805
+OMP_NUM_THREADS=8
+PYTHONHASHSEED=0

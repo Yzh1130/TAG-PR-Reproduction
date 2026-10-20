@@ -1,0 +1,14 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --config /root/autodl-tmp/cfg_b16.yaml --backbone ViT-B/16 --seed 0 --batch_size 80 --grad_checkpoint --exp_name 20260831_bs80_ep10_seed0 --output_dir /root/autodl-tmp/experiments
+cwd: /root/autodl-tmp/TAG-PR
+config_source: /root/autodl-tmp/cfg_b16.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--config", "/root/autodl-tmp/cfg_b16.yaml", "--backbone", "ViT-B/16", "--seed", "0", "--batch_size", "80", "--grad_checkpoint", "--exp_name", "20260831_bs80_ep10_seed0", "--output_dir", "/root/autodl-tmp/experiments"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=32987
+OMP_NUM_THREADS=25
+PYTHONHASHSEED=0

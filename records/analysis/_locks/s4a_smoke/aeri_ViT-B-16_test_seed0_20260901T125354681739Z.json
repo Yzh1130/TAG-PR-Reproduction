@@ -1,0 +1,22 @@
+{
+  "checks": {
+    "adapter_counts": true,
+    "path_resolution_complete": true,
+    "pid_in_range": true,
+    "all_losses_finite": true,
+    "evaluation_rows_aligned": true,
+    "result_blinding_enforced": true
+  },
+  "counts": {
+    "requested_steps": 20,
+    "completed_steps": 20,
+    "train_samples": 76007,
+    "num_classes": 3522,
+    "paths_checked": 2000,
+    "paths_resolved": 2000,
+    "captions_checked": 76007,
+    "captions_truncated_by_context": 1480,
+    "evaluation_batches_checked": 8,
+    "evaluation_rows_checked": 256
+  }
+}

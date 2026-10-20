@@ -1,0 +1,17 @@
+[2026-10-13 09:31:36] OUT=/root/autodl-tmp/roundC_out/l14s3_20261013T013136Z HEAD=37c0a08 free=20G
+[2026-10-13 09:31:36] START train_l14_keep_s3
+[2026-10-13 10:56:56] END train_l14_keep_s3 rc=0
+[2026-10-13 10:57:19] ckpt /root/autodl-tmp/experiments/20261013_l14_keep_s3/checkpoint_last.pth sha16=c685aa076d51bc01
+2026-10-13 09:31:42,758 TAG INFO: experiment.itc_block_size effective: 0
+best Acc@1: 63.530052185058594 at epoch 10
+[2026-10-13 10:57:19] START E4_l14_keep_s3
+[2026-10-13 11:16:51] END E4_l14_keep_s3 rc=0
+[2026-10-13 11:16:51] START S13_l14_keep_s3
+[2026-10-13 11:17:28] END S13_l14_keep_s3 rc=0
+[2026-10-13 11:17:28] START E5_l14_keep_s3
+[2026-10-13 11:58:01] END E5_l14_keep_s3 rc=0
+[2026-10-13 11:58:01] START E6_l14_keep_s3
+[2026-10-13 12:06:31] END E6_l14_keep_s3 rc=0
+[2026-10-13 12:06:38] tar /root/autodl-tmp/backup_small_20261013T040631Z.tgz 66M
+[2026-10-13 12:06:38] ===== DONE =====
+[2026-10-13 12:06:38] shutdown in 60 s

@@ -1,0 +1,15 @@
+run: tbapr_ViT-B-16_test_seed0_20260901T134331815055Z
+gallery rows=3200 unique paths=3083 duplicate(non-first) rows=117 rows in conflicting paths=231
+
+=== TBAPR variants (α=0.50 k=10; transductive r recomputed within each variant's queries×gallery; inductive r sliced) ===
+  official merged (MAIN)                 nq=3200  ng=3200  ids=529  base= 39.09 | transΔ=+1.31 [-0.001, 2.653] | indΔ=+0.50 [-0.693, 1.711]
+  AG-ReID only                           nq=1149  ng=1149  ids=189  base= 54.48 | transΔ=+0.96 [-0.937, 2.98] | indΔ=-0.09 [-2.128, 1.91]
+  G2APS-AG only                          nq=2051  ng=2051  ids=340  base= 37.79 | transΔ=+1.12 [-0.678, 2.956] | indΔ=-0.58 [-2.106, 0.895]
+  merged, unique text (first kept)       nq=2241  ng=3200  ids=518  base= 43.69 | transΔ=+2.19 [0.975, 3.468]* | indΔ=+0.67 [-0.702, 2.062]
+  G2APS only, unique text                nq=1199  ng=2051  ids=329  base= 44.62 | transΔ=+1.75 [0.401, 3.135]* | indΔ=-0.25 [-1.926, 1.447]
+  merged, gallery dedup: keep first row  nq=3200  ng=3083  ids=529  base= 39.09 | transΔ=+1.31 [-0.001, 2.653] | indΔ=+0.50 [-0.693, 1.711]
+  merged, gallery: drop conflicting rows nq=3200  ng=2969  ids=529  base= 40.06 | transΔ=+1.28 [-0.062, 2.653] | indΔ=+0.59 [-0.636, 1.842]
+  merged, unique text + drop conflicts   nq=2241  ng=2969  ids=518  base= 44.49 | transΔ=+2.32 [1.106, 3.591]* | indΔ=+0.71 [-0.665, 2.089]
+
+duplicate text: {'queries': 3200, 'unique_texts': 2241, 'texts_shared_by_multiple_identities': 91} | gallery: {'rows': 3200, 'unique_paths': 3083, 'nonfirst_duplicate_rows': 117, 'rows_in_conflicting_paths': 231}
+peak RSS 0.19 GB, elapsed 3.2s

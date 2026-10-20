@@ -1,0 +1,14 @@
+python = 3.10.12 (main, Jul 15 2026, 23:40:17) [GCC 11.4.0]
+python_executable = /root/autodl-tmp/envs/tagpr5090/bin/python
+numpy = 1.26.4
+setuptools = 80.9.0
+einops = 0.6.1
+torch = 2.7.1+cu128
+torchvision = 0.22.1+cu128
+timm = 0.6.11
+wandb = 0.13.5
+cuda_runtime = 12.8
+cuda_available = True
+gpu = NVIDIA GeForce RTX 5090
+capability = (12, 0)
+arch_list = ['sm_75', 'sm_80', 'sm_86', 'sm_90', 'sm_100', 'sm_120', 'compute_120']

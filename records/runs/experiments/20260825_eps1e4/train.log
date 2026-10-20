@@ -1,0 +1,81 @@
+2026-08-25 16:22:27,799 TAG INFO: OVERRIDE SUMMARY
+2026-08-25 16:22:27,799 TAG INFO: data.batch_size: 80 -> 320
+2026-08-25 16:22:27,799 TAG INFO: schedule.epoch: 10 -> 10
+2026-08-25 16:22:27,799 TAG INFO: experiment.grad_checkpoint: False -> True
+2026-08-25 16:22:27,799 TAG INFO: model.saved_path: 'ckpts/' -> '/root/autodl-tmp/experiments/20260825_eps1e4'
+2026-08-25 16:22:27,799 TAG INFO: experiment.grad_checkpoint effective: True
+2026-08-25 16:22:27,799 TAG INFO: experiment.use_bridge effective: False
+2026-08-25 16:22:27,799 TAG INFO: experiment.bridge_cv_ratio effective: 0.0
+2026-08-25 16:22:27,799 TAG INFO: experiment.bridge_tg_ratio effective: 0.0
+2026-08-25 16:22:27,799 TAG INFO: experiment.sdm_ratio effective: 0.0
+2026-08-25 16:22:27,799 TAG INFO: experiment.tal_ratio effective: 0.0
+2026-08-25 16:22:27,799 TAG INFO: experiment.tal_margin effective: 0.1
+2026-08-25 16:22:27,799 TAG INFO: experiment.tal_tau effective: 0.02
+2026-08-25 16:22:27,799 TAG INFO: experiment.nrw_mode effective: 'off'
+2026-08-25 16:22:27,799 TAG INFO: experiment.nrw_alpha effective: 2.0
+2026-08-25 16:22:27,799 TAG INFO: experiment.nrw_min_weight effective: 0.2
+2026-08-25 16:22:27,799 TAG INFO: experiment.nrw_warmup_epochs effective: 3
+2026-08-25 16:22:27,800 TAG INFO: experiment.nrw_ema effective: 0.99
+2026-08-25 16:22:27,800 TAG INFO: experiment.nrw_fixed_aerial effective: 0.8
+2026-08-25 16:22:27,800 TAG INFO: experiment.view_ratio effective: 1.0
+2026-08-25 16:22:27,800 TAG INFO: experiment.ortho_ratio effective: 1.0
+2026-08-25 16:22:27,800 TAG INFO: experiment.disable_moe effective: False
+2026-08-25 16:22:27,800 TAG INFO: experiment.max_words effective: 77
+2026-08-25 16:22:27,800 TAG INFO: experiment.use_ema effective: False
+2026-08-25 16:22:27,800 TAG INFO: experiment.ema_decay effective: 0.999
+2026-08-25 16:22:27,800 TAG INFO: experiment.view_prompt effective: False
+2026-08-25 16:22:27,800 TAG INFO: END OVERRIDE SUMMARY
+2026-08-25 16:22:27,800 TAG INFO: 
+{'device': 'cuda:0', 'misc': {'seed': 0}, 'num_of_experts_groups': 2, 'num_of_experts': 6, 'num_of_selected_experts': 5, 'expert_blocks': [6, 7, 8], 'experiment': {'grad_checkpoint': True, 'use_bridge': False, 'bridge_cv_ratio': 0.0, 'bridge_tg_ratio': 0.0, 'nrw_mode': 'off', 'nrw_alpha': 2.0, 'nrw_min_weight': 0.2, 'nrw_warmup_epochs': 3, 'nrw_ema': 0.99, 'nrw_fixed_aerial': 0.8, 'view_ratio': 1.0, 'ortho_ratio': 1.0, 'disable_moe': False, 'max_words': 77, 'use_ema': False, 'ema_decay': 0.999, 'view_prompt': False, 'input_resolution': [224, 224], 'dropout': 0.05, 'text_length': 77, 'nitc_ratio': 1.0, 'sdm_ratio': 0.0, 'tal_ratio': 0.0, 'tal_margin': 0.1, 'tal_tau': 0.02, 'ritc': True, 'ritc_eps': 0.0001, 'ritc_ratio': 1.0, 'id': True, 'id_ratio': 0.5}, 'schedule': {'lr': 0.0001, 'epoch': 10, 'epoch_warmup': 1, 'lr_start': 1e-06, 'lr_end': 5e-06, 'weight_decay': 0.02, 'betas': [0.9, 0.98], 'eps': 1e-08, 'ratio_factor': 1.0}, 'model': {'ckpt_type': 'original_clip', 'saved_path': '/root/autodl-tmp/experiments/20260825_eps1e4', 'checkpoint': '/root/autodl-tmp/checkpoints/ViT-B-16.pt', 'use_gather': True, 'softlabel_ratio': 0.5, 'embed_dim': 512, 'vocab_size': 49408}, 'log': {'print_period': 50}, 'data': {'batch_size': 320, 'test_batch_size': 256, 'num_workers': 2}, 'distributed': {'backend': 'nccl', 'url': 'env://', 'rank': 0, 'world_size': 1, 'local_rank': 0}, 'anno_dir': '/root/autodl-tmp/datasets/TAG-PEDES', 'image_dir': '/root/autodl-tmp/datasets/TAG-PEDES'}
+2026-08-25 16:22:33,031 TAG INFO: DataLoader batch_size verified: expected=320, actual=320
+2026-08-25 16:22:33,031 TAG INFO: Evaluation DataLoader batch_size: config=256, actual=32
+2026-08-25 16:23:35,705 TAG INFO: Epoch[1] Iteration[50/124], loss: 20.0049, itc_loss: 5.3521, view_loss: 0.6536, view_acc: 0.6177, ortho_loss: 2.3836, ritc_loss: 7.3771, id_loss: 4.2385, Base Lr: 4.04e-05
+2026-08-25 16:24:30,458 TAG INFO: Epoch[1] Iteration[100/124], loss: 17.1912, itc_loss: 2.9699, view_loss: 0.5255, view_acc: 0.8365, ortho_loss: 3.3234, ritc_loss: 6.1526, id_loss: 4.2198, Base Lr: 8.07e-05
+2026-08-25 16:24:56,850 TAG INFO: Epoch 1 done. Time per batch: 1.120[s] Speed: 285.7[samples/s]
+2026-08-25 16:25:49,448 TAG INFO: Acc@1 46.02520 Acc@5 65.24479 Acc@10 72.78841 mAP 36.93867
+2026-08-25 16:25:49,533 TAG INFO: Epoch 1 peak CUDA memory: allocated=15.216 GiB, reserved=16.576 GiB
+2026-08-25 16:26:49,021 TAG INFO: Epoch[2] Iteration[50/124], loss: 13.7252, itc_loss: 2.7131, view_loss: 0.2794, view_acc: 0.8958, ortho_loss: 0.8083, ritc_loss: 5.7638, id_loss: 4.1606, Base Lr: 9.95e-05
+2026-08-25 16:27:44,201 TAG INFO: Epoch[2] Iteration[100/124], loss: 12.5938, itc_loss: 2.5780, view_loss: 0.1687, view_acc: 0.9469, ortho_loss: 0.6030, ritc_loss: 5.1230, id_loss: 4.1211, Base Lr: 9.82e-05
+2026-08-25 16:28:10,680 TAG INFO: Epoch 2 done. Time per batch: 1.119[s] Speed: 286.0[samples/s]
+2026-08-25 16:29:03,620 TAG INFO: Acc@1 50.27266 Acc@5 69.12263 Acc@10 76.44207 mAP 40.26073
+2026-08-25 16:29:03,708 TAG INFO: Epoch 2 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:30:05,006 TAG INFO: Epoch[3] Iteration[50/124], loss: 12.2950, itc_loss: 2.2012, view_loss: 0.1060, view_acc: 0.9698, ortho_loss: 1.5766, ritc_loss: 4.3646, id_loss: 4.0467, Base Lr: 9.45e-05
+2026-08-25 16:30:59,918 TAG INFO: Epoch[3] Iteration[100/124], loss: 11.3916, itc_loss: 2.3685, view_loss: 0.0467, view_acc: 0.9917, ortho_loss: 0.3434, ritc_loss: 4.6344, id_loss: 3.9987, Base Lr: 9.09e-05
+2026-08-25 16:31:26,610 TAG INFO: Epoch 3 done. Time per batch: 1.118[s] Speed: 286.3[samples/s]
+2026-08-25 16:32:19,448 TAG INFO: Acc@1 50.65438 Acc@5 69.05598 Acc@10 76.34512 mAP 40.93178
+2026-08-25 16:32:19,527 TAG INFO: Epoch 3 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:33:19,095 TAG INFO: Epoch[4] Iteration[50/124], loss: 10.7651, itc_loss: 2.1660, view_loss: 0.0483, view_acc: 0.9833, ortho_loss: 0.2688, ritc_loss: 4.3714, id_loss: 3.9105, Base Lr: 8.43e-05
+2026-08-25 16:34:13,975 TAG INFO: Epoch[4] Iteration[100/124], loss: 10.1378, itc_loss: 1.8489, view_loss: 0.0331, view_acc: 0.9865, ortho_loss: 0.5229, ritc_loss: 3.8633, id_loss: 3.8697, Base Lr: 7.91e-05
+2026-08-25 16:34:40,488 TAG INFO: Epoch 4 done. Time per batch: 1.117[s] Speed: 286.6[samples/s]
+2026-08-25 16:35:33,544 TAG INFO: Acc@1 53.48400 Acc@5 72.43092 Acc@10 79.36258 mAP 42.56591
+2026-08-25 16:35:33,622 TAG INFO: Epoch 4 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:36:34,555 TAG INFO: Epoch[5] Iteration[50/124], loss: 9.7054, itc_loss: 1.4926, view_loss: 0.0409, view_acc: 0.9885, ortho_loss: 1.3314, ritc_loss: 3.0580, id_loss: 3.7825, Base Lr: 7.04e-05
+2026-08-25 16:37:29,317 TAG INFO: Epoch[5] Iteration[100/124], loss: 8.9809, itc_loss: 1.5724, view_loss: 0.0337, view_acc: 0.9875, ortho_loss: 0.3147, ritc_loss: 3.3185, id_loss: 3.7416, Base Lr: 6.40e-05
+2026-08-25 16:37:55,884 TAG INFO: Epoch 5 done. Time per batch: 1.116[s] Speed: 286.8[samples/s]
+2026-08-25 16:38:48,588 TAG INFO: Acc@1 54.38076 Acc@5 73.24285 Acc@10 79.97455 mAP 43.30310
+2026-08-25 16:38:48,666 TAG INFO: Epoch 5 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:39:49,606 TAG INFO: Epoch[6] Iteration[50/124], loss: 7.8981, itc_loss: 1.4100, view_loss: 0.0122, view_acc: 1.0000, ortho_loss: 0.0744, ritc_loss: 2.7378, id_loss: 3.6637, Base Lr: 5.42e-05
+2026-08-25 16:40:44,920 TAG INFO: Epoch[6] Iteration[100/124], loss: 8.0464, itc_loss: 1.2625, view_loss: 0.0165, view_acc: 0.9927, ortho_loss: 0.0202, ritc_loss: 3.1091, id_loss: 3.6381, Base Lr: 4.76e-05
+2026-08-25 16:41:11,376 TAG INFO: Epoch 6 done. Time per batch: 1.119[s] Speed: 286.0[samples/s]
+2026-08-25 16:42:06,002 TAG INFO: Acc@1 55.80465 Acc@5 74.53951 Acc@10 81.19244 mAP 44.31875
+2026-08-25 16:42:06,081 TAG INFO: Epoch 6 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:43:06,481 TAG INFO: Epoch[7] Iteration[50/124], loss: 7.3868, itc_loss: 1.1818, view_loss: 0.0099, view_acc: 0.9979, ortho_loss: 0.0565, ritc_loss: 2.5588, id_loss: 3.5799, Base Lr: 3.79e-05
+2026-08-25 16:44:01,333 TAG INFO: Epoch[7] Iteration[100/124], loss: 6.5324, itc_loss: 0.8793, view_loss: 0.0171, view_acc: 0.9969, ortho_loss: 0.0088, ritc_loss: 2.1033, id_loss: 3.5238, Base Lr: 3.17e-05
+2026-08-25 16:44:27,796 TAG INFO: Epoch 7 done. Time per batch: 1.114[s] Speed: 287.3[samples/s]
+2026-08-25 16:45:20,801 TAG INFO: Acc@1 57.95565 Acc@5 76.06641 Acc@10 81.99224 mAP 46.07140
+2026-08-25 16:45:20,879 TAG INFO: Epoch 7 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:46:22,048 TAG INFO: Epoch[8] Iteration[50/124], loss: 5.9977, itc_loss: 0.8248, view_loss: 0.0164, view_acc: 0.9906, ortho_loss: 0.0083, ritc_loss: 1.6574, id_loss: 3.4908, Base Lr: 2.33e-05
+2026-08-25 16:47:16,999 TAG INFO: Epoch[8] Iteration[100/124], loss: 6.2079, itc_loss: 0.8032, view_loss: 0.0068, view_acc: 1.0000, ortho_loss: 0.0345, ritc_loss: 1.8972, id_loss: 3.4662, Base Lr: 1.83e-05
+2026-08-25 16:47:43,660 TAG INFO: Epoch 8 done. Time per batch: 1.118[s] Speed: 286.3[samples/s]
+2026-08-25 16:48:36,524 TAG INFO: Acc@1 58.49491 Acc@5 76.55114 Acc@10 82.77387 mAP 46.59046
+2026-08-25 16:48:36,602 TAG INFO: Epoch 8 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:49:37,700 TAG INFO: Epoch[9] Iteration[50/124], loss: 5.6895, itc_loss: 0.7519, view_loss: 0.0134, view_acc: 0.9938, ortho_loss: 0.0037, ritc_loss: 1.4985, id_loss: 3.4220, Base Lr: 1.23e-05
+2026-08-25 16:50:32,471 TAG INFO: Epoch[9] Iteration[100/124], loss: 5.7852, itc_loss: 0.6785, view_loss: 0.0037, view_acc: 1.0000, ortho_loss: 0.0018, ritc_loss: 1.6584, id_loss: 3.4428, Base Lr: 9.12e-06
+2026-08-25 16:50:59,099 TAG INFO: Epoch 9 done. Time per batch: 1.119[s] Speed: 286.0[samples/s]
+2026-08-25 16:51:52,044 TAG INFO: Acc@1 59.88245 Acc@5 77.75690 Acc@10 84.01599 mAP 47.64317
+2026-08-25 16:51:52,122 TAG INFO: Epoch 9 peak CUDA memory: allocated=15.216 GiB, reserved=16.361 GiB
+2026-08-25 16:52:53,626 TAG INFO: Epoch[10] Iteration[50/124], loss: 5.1279, itc_loss: 0.5794, view_loss: 0.0027, view_acc: 1.0000, ortho_loss: 0.0018, ritc_loss: 1.1108, id_loss: 3.4332, Base Lr: 6.05e-06
+2026-08-25 16:53:48,753 TAG INFO: Epoch[10] Iteration[100/124], loss: 5.5017, itc_loss: 0.7934, view_loss: 0.0023, view_acc: 1.0000, ortho_loss: 0.0014, ritc_loss: 1.3055, id_loss: 3.3992, Base Lr: 5.12e-06
+2026-08-25 16:54:15,276 TAG INFO: Epoch 10 done. Time per batch: 1.118[s] Speed: 286.2[samples/s]
+2026-08-25 16:55:08,015 TAG INFO: Acc@1 60.25206 Acc@5 78.00533 Acc@10 84.20383 mAP 47.94681
+2026-08-25 16:55:08,093 TAG INFO: Epoch 10 peak CUDA memory: allocated=15.216 GiB, reserved=16.359 GiB

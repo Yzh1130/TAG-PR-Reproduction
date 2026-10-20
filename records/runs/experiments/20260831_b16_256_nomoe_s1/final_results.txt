@@ -1,0 +1,10 @@
+best_epoch: 10
+R@1: 61.38511657714844
+R@5: 78.75666046142578
+R@10: 84.3492431640625
+mAP: 48.80341339111328
+total_training_time_sec: 1333.2814433574677
+completed_epochs: 10
+peak_mem_alloc_gb: 7.588359832763672
+peak_mem_reserved_gb: 8.525390625
+run_status: completed

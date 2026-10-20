@@ -1,0 +1,58 @@
+
+==============================================================================
+### aeri  (aeri_ViT-B-16_test_seed0_20260901T142211175107Z)
+    [base] rows 2048/6141
+  baseline offline: {'r1': 37.03, 'r5': 56.505, 'r10': 66.52, 'mAP': 37.208}
+  baseline online : {'r1': 37.03, 'r5': 56.505, 'r10': 66.52, 'mAP': 37.208}
+  diff            : {'r1': 0.0, 'r5': 0.0, 'r10': 0.0, 'mAP': 0.0}   OK
+    [trans] rows 2048/6141
+  transductive r1=36.44 (Δ-0.59) r5=56.16 r10=65.74 mAP=37.20 | idCI [-1.279, 0.084] | qCI [-1.205, 0.033] | distinct 0.519→0.606 maxT1 22→12 | bank=6141
+    [induc] rows 2048/6141
+  inductive    r1=37.44 (Δ+0.41) r5=56.49 r10=66.00 mAP=37.24 | idCI [-0.451, 1.261] | qCI [-0.293, 1.14] | distinct 0.519→0.534 maxT1 22→16 | bank=76007
+
+==============================================================================
+### cuhkpedes  (cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z)
+    [base] rows 2048/6156
+  baseline offline: {'r1': 73.262, 'r5': 88.759, 'r10': 92.885, 'mAP': 66.88}
+  baseline online : {'r1': 73.262, 'r5': 88.759, 'r10': 92.885, 'mAP': 66.88}
+  diff            : {'r1': 0.0, 'r5': -0.0, 'r10': 0.0, 'mAP': 0.0}   OK
+    [trans] rows 2048/6156
+  transductive r1=74.25 (Δ+0.99) r5=89.49 r10=93.40 mAP=67.76 | idCI [0.399, 1.617]* | qCI [0.422, 1.543] | distinct 0.850→0.899 maxT1 10→9 | bank=6156
+    [induc] rows 2048/6156
+  inductive    r1=73.38 (Δ+0.11) r5=88.76 r10=92.72 mAP=66.96 | idCI [-0.392, 0.619] | qCI [-0.374, 0.601] | distinct 0.850→0.866 maxT1 10→9 | bank=68126
+
+==============================================================================
+### icfgpedes  (icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z)
+    [base] rows 2048/19848
+    [base] rows 10240/19848
+    [base] rows 18432/19848
+  baseline offline: {'r1': 66.601, 'r5': 81.147, 'r10': 86.261, 'mAP': 43.362}
+  baseline online : {'r1': 66.586, 'r5': 81.147, 'r10': 86.261, 'mAP': 43.361}
+  diff            : {'r1': 0.0151, 'r5': 0.0, 'r10': 0.0, 'mAP': 0.0011}   OK
+    [trans] rows 2048/19848
+    [trans] rows 10240/19848
+    [trans] rows 18432/19848
+  transductive r1=66.13 (Δ-0.47) r5=81.62 r10=86.62 mAP=42.97 | idCI [-0.836, -0.116]* | qCI [-0.806, -0.141] | distinct 0.559→0.629 maxT1 14→12 | bank=19848
+    [induc] rows 2048/19848
+    [induc] rows 10240/19848
+    [induc] rows 18432/19848
+  inductive    r1=66.86 (Δ+0.26) r5=81.02 r10=86.17 mAP=43.32 | idCI [-0.076, 0.58] | qCI [-0.04, 0.554] | distinct 0.559→0.577 maxT1 14→11 | bank=34674
+
+==============================================================================
+### tbapr  (tbapr_ViT-B-16_test_seed0_20260901T134331815055Z)
+    [base] rows 2048/3200
+  baseline offline: {'r1': 39.094, 'r5': 57.0, 'r10': 64.906, 'mAP': 34.364}
+  baseline online : {'r1': 39.531, 'r5': 56.969, 'r10': 64.875, 'mAP': 34.471}
+  diff            : {'r1': -0.4375, 'r5': 0.0312, 'r10': 0.0312, 'mAP': -0.1063}   !! MISMATCH
+    [trans] rows 2048/3200
+  transductive r1=40.41 (Δ+1.31) r5=58.47 r10=67.03 mAP=35.40 | idCI [-0.001, 2.653] | qCI [0.406, 2.219] | distinct 0.393→0.449 maxT1 35→37 | bank=3200
+    [induc] rows 2048/3200
+  inductive    r1=39.59 (Δ+0.50) r5=56.94 r10=65.56 mAP=34.81 | idCI [-0.693, 1.711] | qCI [-0.375, 1.406] | distinct 0.393→0.422 maxT1 35→34 | bank=31340
+
+=== S7a SUMMARY (transductive ΔR@1, ordered) ===
+  tbapr      base= 39.09  trans Δ=+1.31 [-0.001, 2.653]  ind Δ=+0.50 [-0.693, 1.711]
+  cuhkpedes  base= 73.26  trans Δ=+0.99 [0.399, 1.617]  ind Δ=+0.11 [-0.392, 0.619]
+  icfgpedes  base= 66.60  trans Δ=-0.47 [-0.836, -0.116]  ind Δ=+0.26 [-0.076, 0.58]
+  aeri       base= 37.03  trans Δ=-0.59 [-1.279, 0.084]  ind Δ=+0.41 [-0.451, 1.261]
+peak RSS 3.52 GB  (OK)  elapsed 191.5s
+wrote /root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7a/S7a_csls_seed0/S7a_summary_seed0.json

@@ -1,0 +1,756 @@
+{
+  "tool": "S13",
+  "tag": "s2",
+  "arguments": {
+    "sim": "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_qg_fresh.npy",
+    "bank": "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_bank_g_fresh.npy",
+    "anno": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+    "out": "/root/autodl-tmp/experiments/_e1_s13_s2",
+    "tag": "s2",
+    "seed": 2026,
+    "bootstrap": 10000,
+    "score_block_size": 256,
+    "extra_config": [
+      "train_full:0.5:10",
+      "train_full:0.75:30"
+    ]
+  },
+  "started_utc": "2026-08-31T17:42:44.240220+00:00",
+  "inputs": {
+    "sim": {
+      "path": "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_qg_fresh.npy",
+      "bytes": 544764160,
+      "mtime_ns": 1788197115821987459
+    },
+    "bank": {
+      "path": "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_bank_g_fresh.npy",
+      "bytes": 1317283392,
+      "mtime_ns": 1788197119138035599
+    },
+    "annotation_path": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+    "matrix_mode": "read-only memory map"
+  },
+  "extra_config_provenance": {
+    "argv": [
+      "scripts/S13_inductive_bootstrap.py",
+      "--sim",
+      "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_qg_fresh.npy",
+      "--bank",
+      "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_bank_g_fresh.npy",
+      "--anno",
+      "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+      "--out",
+      "/root/autodl-tmp/experiments/_e1_s13_s2",
+      "--tag",
+      "s2",
+      "--seed",
+      "2026",
+      "--bootstrap",
+      "10000",
+      "--extra-config",
+      "train_full:0.5:10",
+      "--extra-config",
+      "train_full:0.75:30"
+    ],
+    "seeds": {
+      "bootstrap": 2026
+    },
+    "git_HEAD": "e8d41f7bccc38bde2c511be515cc38bd578bfb0d",
+    "inputs": {
+      "sim": {
+        "path": "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_qg_fresh.npy",
+        "sha256_16": "f51fe6f5fc100f9b"
+      },
+      "bank": {
+        "path": "/root/autodl-tmp/experiments/_e1_e3_s2/E3_s2_20260831T172212928653Z_sim_bank_g_fresh.npy",
+        "sha256_16": "78ba3ecac1a921d7"
+      },
+      "anno": {
+        "path": "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json",
+        "sha256_16": "40d549b5669bcc46"
+      }
+    },
+    "scope": "present only when --extra-config is explicitly provided; all bootstrap comparisons use the recorded seed"
+  },
+  "annotation": {
+    "n_query": 16504,
+    "n_gallery": 8252,
+    "aerial": 4498,
+    "ground": 3754,
+    "identities": 2000,
+    "dual_view_identities": 800,
+    "domains": {
+      "AG-ReID.v2": 2421,
+      "G2APS": 3129,
+      "Market": 921,
+      "PRAI-1581": 1014,
+      "uavhuman": 767
+    },
+    "query_order": "annotation image order, then caption order; never sorted"
+  },
+  "query_gallery": {
+    "shape": [
+      16504,
+      8252
+    ],
+    "dtype": "float32",
+    "min": 0.3588058054447174,
+    "max": 0.5053446888923645,
+    "clipped": false,
+    "cosine_bounds_enforced": false
+  },
+  "training_bank_gallery": {
+    "shape": [
+      39908,
+      8252
+    ],
+    "dtype": "float32",
+    "min": 0.3535964787006378,
+    "max": 0.4988284111022949,
+    "clipped": false,
+    "cosine_bounds_enforced": false
+  },
+  "raw": {
+    "n_query": 16504,
+    "n_query_input": 16504,
+    "skipped_no_positive": 0,
+    "gallery_size": 8252,
+    "gallery_size_min": 8252,
+    "gallery_size_max": 8252,
+    "exclude_source": false,
+    "top1_tied_queries": 106,
+    "tie_policy": "score descending, gallery index ascending",
+    "R1": 62.802955627441406,
+    "R5": 79.07779693603516,
+    "R10": 84.37348175048828,
+    "mAP": 50.37408042302719
+  },
+  "configurations": {
+    "a": {
+      "bank": "train_full",
+      "alpha": 0.5,
+      "k": 30,
+      "regime": "E3 fresh-forward training-bank inductive pipeline (filename convention; provenance not verified)",
+      "metrics": {
+        "n_query": 16504,
+        "n_query_input": 16504,
+        "skipped_no_positive": 0,
+        "gallery_size": 8252,
+        "gallery_size_min": 8252,
+        "gallery_size_max": 8252,
+        "exclude_source": false,
+        "top1_tied_queries": 112,
+        "tie_policy": "score descending, gallery index ascending",
+        "R1": 63.33616256713867,
+        "R5": 78.90208435058594,
+        "R10": 84.37348175048828,
+        "mAP": 50.53110765362183
+      },
+      "observed_delta_R1_pp": 0.5332040717401841,
+      "penalty": {
+        "n_bank": 39908,
+        "k": 30,
+        "shape": [
+          8252
+        ],
+        "dtype": "float32",
+        "mean": 0.4675028805435426,
+        "std": 0.003954246753290365,
+        "min": 0.45530474185943604,
+        "max": 0.48608967661857605,
+        "sha256_native_array_bytes": "f597bf01838061c1d62c4a36c34ed76516c99fdd769a955b4bffeba495fdf07b",
+        "estimated_once_from_complete_bank": true,
+        "fixed_during_bootstrap": true
+      },
+      "bootstrap": {
+        "query": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.5332040717401841,
+          "bootstrap_mean_delta_pp": 0.5345492001938924,
+          "bootstrap_std_pp": 0.152047994510187,
+          "ci95_percentile_pp": [
+            0.23024721279689772,
+            0.8361609306834706
+          ],
+          "p_two_sided": 0.0005999400059994001,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "query",
+          "n_units": 16504,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "mcnemar": {
+            "test": "exact two-sided McNemar (conditional Binomial(n_discordant, 0.5))",
+            "first_only_correct": 273,
+            "second_only_correct": 361,
+            "n_discordant": 634,
+            "p_two_sided": 0.0005397481490822874,
+            "log_p_two_sided": -7.5244079177882295,
+            "scope": "query-level paired test; does not account for within-image/identity dependence"
+          },
+          "resampling_unit": "query"
+        },
+        "image": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.5332040717401841,
+          "bootstrap_mean_delta_pp": 0.5336373000484731,
+          "bootstrap_std_pp": 0.15637932255841466,
+          "ci95_percentile_pp": [
+            0.23024721279689772,
+            0.8422200678623364
+          ],
+          "p_two_sided": 0.000999900009999,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 8252,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "image"
+        },
+        "identity": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.5332040717401841,
+          "bootstrap_mean_delta_pp": 0.5313620916524484,
+          "bootstrap_std_pp": 0.16420936742831438,
+          "ci95_percentile_pp": [
+            0.21119642963663085,
+            0.851701523035962
+          ],
+          "p_two_sided": 0.0011998800119988001,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 2000,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "identity"
+        }
+      }
+    },
+    "b": {
+      "bank": "train_full",
+      "alpha": 0.25,
+      "k": 10,
+      "regime": "E3 fresh-forward training-bank inductive pipeline (filename convention; provenance not verified)",
+      "metrics": {
+        "n_query": 16504,
+        "n_query_input": 16504,
+        "skipped_no_positive": 0,
+        "gallery_size": 8252,
+        "gallery_size_min": 8252,
+        "gallery_size_max": 8252,
+        "exclude_source": false,
+        "top1_tied_queries": 108,
+        "tie_policy": "score descending, gallery index ascending",
+        "R1": 63.233154296875,
+        "R5": 78.97479248046875,
+        "R10": 84.42195892333984,
+        "mAP": 50.572073523842455
+      },
+      "observed_delta_R1_pp": 0.4301987396994668,
+      "penalty": {
+        "n_bank": 39908,
+        "k": 10,
+        "shape": [
+          8252
+        ],
+        "dtype": "float32",
+        "mean": 0.4719665488837647,
+        "std": 0.004639644325343173,
+        "min": 0.45774802565574646,
+        "max": 0.4903230667114258,
+        "sha256_native_array_bytes": "cb550dadc8dd65cf8e8f8406ac5461c57f22450f07457e72d86af21153daaf9b",
+        "estimated_once_from_complete_bank": true,
+        "fixed_during_bootstrap": true
+      },
+      "bootstrap": {
+        "query": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.4301987396994668,
+          "bootstrap_mean_delta_pp": 0.43058955404750365,
+          "bootstrap_std_pp": 0.12011738433698643,
+          "ci95_percentile_pp": [
+            0.19389238972370335,
+            0.6665050896752303
+          ],
+          "p_two_sided": 0.0005999400059994001,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "query",
+          "n_units": 16504,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "mcnemar": {
+            "test": "exact two-sided McNemar (conditional Binomial(n_discordant, 0.5))",
+            "first_only_correct": 160,
+            "second_only_correct": 231,
+            "n_discordant": 391,
+            "p_two_sided": 0.0003869104784967326,
+            "log_p_two_sided": -7.857317213407356,
+            "scope": "query-level paired test; does not account for within-image/identity dependence"
+          },
+          "resampling_unit": "query"
+        },
+        "image": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.4301987396994668,
+          "bootstrap_mean_delta_pp": 0.4295728308288899,
+          "bootstrap_std_pp": 0.122177522719998,
+          "ci95_percentile_pp": [
+            0.19389238972370335,
+            0.6666565681046996
+          ],
+          "p_two_sided": 0.00039996000399960006,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 8252,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "image"
+        },
+        "identity": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.4301987396994668,
+          "bootstrap_mean_delta_pp": 0.42881710830946385,
+          "bootstrap_std_pp": 0.12411857413957461,
+          "ci95_percentile_pp": [
+            0.18186061654813965,
+            0.6703261944503458
+          ],
+          "p_two_sided": 0.0005999400059994001,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 2000,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "identity"
+        }
+      }
+    },
+    "c": {
+      "bank": "test_full",
+      "alpha": 0.5,
+      "k": 10,
+      "regime": "transductive: complete test-query bank",
+      "metrics": {
+        "n_query": 16504,
+        "n_query_input": 16504,
+        "skipped_no_positive": 0,
+        "gallery_size": 8252,
+        "gallery_size_min": 8252,
+        "gallery_size_max": 8252,
+        "exclude_source": false,
+        "top1_tied_queries": 108,
+        "tie_policy": "score descending, gallery index ascending",
+        "R1": 63.663352966308594,
+        "R5": 79.52617645263672,
+        "R10": 84.95516204833984,
+        "mAP": 50.89127934738683
+      },
+      "observed_delta_R1_pp": 0.8603974793989336,
+      "penalty": {
+        "n_bank": 16504,
+        "k": 10,
+        "shape": [
+          8252
+        ],
+        "dtype": "float32",
+        "mean": 0.4731713494396996,
+        "std": 0.005027966192361804,
+        "min": 0.45840853452682495,
+        "max": 0.4916784167289734,
+        "sha256_native_array_bytes": "19f9cfc9d432bf33a623eb508b5d18333707ffe7e4481eed71963db12b7965b6",
+        "estimated_once_from_complete_bank": true,
+        "fixed_during_bootstrap": true
+      },
+      "bootstrap": {
+        "query": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.8603974793989336,
+          "bootstrap_mean_delta_pp": 0.8626308773630635,
+          "bootstrap_std_pp": 0.16855889350771303,
+          "ci95_percentile_pp": [
+            0.5332040717401841,
+            1.1997091614154143
+          ],
+          "p_two_sided": 0.00019998000199980003,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "query",
+          "n_units": 16504,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "mcnemar": {
+            "test": "exact two-sided McNemar (conditional Binomial(n_discordant, 0.5))",
+            "first_only_correct": 321,
+            "second_only_correct": 463,
+            "n_discordant": 784,
+            "p_two_sided": 4.443444537184481e-07,
+            "log_p_two_sided": -14.626665778625696,
+            "scope": "query-level paired test; does not account for within-image/identity dependence"
+          },
+          "resampling_unit": "query"
+        },
+        "image": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.8603974793989336,
+          "bootstrap_mean_delta_pp": 0.8604192922927774,
+          "bootstrap_std_pp": 0.17483615371799974,
+          "ci95_percentile_pp": [
+            0.515026660203587,
+            1.1997091614154143
+          ],
+          "p_two_sided": 0.00019998000199980003,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 8252,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "image"
+        },
+        "identity": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.8603974793989336,
+          "bootstrap_mean_delta_pp": 0.8565169116914604,
+          "bootstrap_std_pp": 0.19818631318271027,
+          "ci95_percentile_pp": [
+            0.47004799929863406,
+            1.2480609779276575
+          ],
+          "p_two_sided": 0.00019998000199980003,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 2000,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "identity"
+        }
+      }
+    },
+    "d": {
+      "bank": "train_full",
+      "alpha": 0.5,
+      "k": 10,
+      "regime": "E3 fresh-forward training-bank inductive pipeline (filename convention; provenance not verified)",
+      "metrics": {
+        "n_query": 16504,
+        "n_query_input": 16504,
+        "skipped_no_positive": 0,
+        "gallery_size": 8252,
+        "gallery_size_min": 8252,
+        "gallery_size_max": 8252,
+        "exclude_source": false,
+        "top1_tied_queries": 107,
+        "tie_policy": "score descending, gallery index ascending",
+        "R1": 63.26951217651367,
+        "R5": 78.85967254638672,
+        "R10": 84.36742401123047,
+        "mAP": 50.32730850649643
+      },
+      "observed_delta_R1_pp": 0.46655356277266113,
+      "penalty": {
+        "n_bank": 39908,
+        "k": 10,
+        "shape": [
+          8252
+        ],
+        "dtype": "float32",
+        "mean": 0.4719665488837647,
+        "std": 0.004639644325343173,
+        "min": 0.45774802565574646,
+        "max": 0.4903230667114258,
+        "sha256_native_array_bytes": "cb550dadc8dd65cf8e8f8406ac5461c57f22450f07457e72d86af21153daaf9b",
+        "estimated_once_from_complete_bank": true,
+        "fixed_during_bootstrap": true
+      },
+      "bootstrap": {
+        "query": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.46655356277266113,
+          "bootstrap_mean_delta_pp": 0.46734549200193887,
+          "bootstrap_std_pp": 0.1659957522756089,
+          "ci95_percentile_pp": [
+            0.1454192922927775,
+            0.7937469704314106
+          ],
+          "p_two_sided": 0.0047995200479952005,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "query",
+          "n_units": 16504,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "mcnemar": {
+            "test": "exact two-sided McNemar (conditional Binomial(n_discordant, 0.5))",
+            "first_only_correct": 335,
+            "second_only_correct": 412,
+            "n_discordant": 747,
+            "p_two_sided": 0.005389358160047538,
+            "log_p_two_sided": -5.223328980920336,
+            "scope": "query-level paired test; does not account for within-image/identity dependence"
+          },
+          "resampling_unit": "query"
+        },
+        "image": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.46655356277266113,
+          "bootstrap_mean_delta_pp": 0.46540596219098396,
+          "bootstrap_std_pp": 0.1684214527756879,
+          "ci95_percentile_pp": [
+            0.13330101793504603,
+            0.7937469704314106
+          ],
+          "p_two_sided": 0.006199380061993801,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 8252,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "image"
+        },
+        "identity": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.46655356277266113,
+          "bootstrap_mean_delta_pp": 0.4641495414671758,
+          "bootstrap_std_pp": 0.18370769671175993,
+          "ci95_percentile_pp": [
+            0.10285451590030212,
+            0.8246767066831043
+          ],
+          "p_two_sided": 0.012198780121987801,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 2000,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "identity"
+        }
+      }
+    },
+    "e": {
+      "bank": "train_full",
+      "alpha": 0.75,
+      "k": 30,
+      "regime": "E3 fresh-forward training-bank inductive pipeline (filename convention; provenance not verified)",
+      "metrics": {
+        "n_query": 16504,
+        "n_query_input": 16504,
+        "skipped_no_positive": 0,
+        "gallery_size": 8252,
+        "gallery_size_min": 8252,
+        "gallery_size_max": 8252,
+        "exclude_source": false,
+        "top1_tied_queries": 119,
+        "tie_policy": "score descending, gallery index ascending",
+        "R1": 63.2998046875,
+        "R5": 78.70213317871094,
+        "R10": 84.11294555664062,
+        "mAP": 50.217749050757135
+      },
+      "observed_delta_R1_pp": 0.4968492486669899,
+      "penalty": {
+        "n_bank": 39908,
+        "k": 30,
+        "shape": [
+          8252
+        ],
+        "dtype": "float32",
+        "mean": 0.4675028805435426,
+        "std": 0.003954246753290365,
+        "min": 0.45530474185943604,
+        "max": 0.48608967661857605,
+        "sha256_native_array_bytes": "f597bf01838061c1d62c4a36c34ed76516c99fdd769a955b4bffeba495fdf07b",
+        "estimated_once_from_complete_bank": true,
+        "fixed_during_bootstrap": true
+      },
+      "bootstrap": {
+        "query": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.4968492486669899,
+          "bootstrap_mean_delta_pp": 0.49758785748909357,
+          "bootstrap_std_pp": 0.18221729378750906,
+          "ci95_percentile_pp": [
+            0.1454192922927775,
+            0.8603974793989336
+          ],
+          "p_two_sided": 0.0057994200579942,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "query",
+          "n_units": 16504,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "mcnemar": {
+            "test": "exact two-sided McNemar (conditional Binomial(n_discordant, 0.5))",
+            "first_only_correct": 411,
+            "second_only_correct": 493,
+            "n_discordant": 904,
+            "p_two_sided": 0.007026655361896424,
+            "log_p_two_sided": -4.958044452816649,
+            "scope": "query-level paired test; does not account for within-image/identity dependence"
+          },
+          "resampling_unit": "query"
+        },
+        "image": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.4968492486669899,
+          "bootstrap_mean_delta_pp": 0.49718250121182744,
+          "bootstrap_std_pp": 0.18655131556572,
+          "ci95_percentile_pp": [
+            0.13330101793504603,
+            0.8664566165777994
+          ],
+          "p_two_sided": 0.0081991800819918,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 8252,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "image"
+        },
+        "identity": {
+          "delta_definition": "R1(second) - R1(first), percentage points",
+          "observed_delta_pp": 0.4968492486669899,
+          "bootstrap_mean_delta_pp": 0.49531137846025497,
+          "bootstrap_std_pp": 0.20165262592616762,
+          "ci95_percentile_pp": [
+            0.10346769010459475,
+            0.8919874689704748
+          ],
+          "p_two_sided": 0.015998400159984,
+          "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+          "repeats": 10000,
+          "seed": 2026,
+          "unit": "cluster",
+          "n_units": 2000,
+          "n_queries": 16504,
+          "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+          "resampling_unit": "identity"
+        }
+      }
+    }
+  },
+  "gain_difference_a_minus_c": {
+    "definition": "delta(a vs raw) - delta(c vs raw); raw cancels query by query",
+    "bootstrap": {
+      "query": {
+        "delta_definition": "[R1(a)-R1(raw)] - [R1(c)-R1(raw)] = R1(a)-R1(c), percentage points",
+        "observed_delta_pp": -0.3271934076587494,
+        "bootstrap_mean_delta_pp": -0.32808167716917114,
+        "bootstrap_std_pp": 0.16468596441512678,
+        "ci95_percentile_pp": [
+          -0.6422685409597674,
+          -0.0060591371788657295
+        ],
+        "p_two_sided": 0.048795120487951205,
+        "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+        "repeats": 10000,
+        "seed": 2026,
+        "unit": "query",
+        "n_units": 16504,
+        "n_queries": 16504,
+        "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+        "mcnemar": {
+          "test": "exact two-sided McNemar (conditional Binomial(n_discordant, 0.5))",
+          "first_only_correct": 402,
+          "second_only_correct": 348,
+          "n_discordant": 750,
+          "p_two_sided": 0.052882707664634175,
+          "log_p_two_sided": -2.9396788808041565,
+          "scope": "query-level paired test; does not account for within-image/identity dependence"
+        },
+        "resampling_unit": "query"
+      },
+      "image": {
+        "delta_definition": "[R1(a)-R1(raw)] - [R1(c)-R1(raw)] = R1(a)-R1(c), percentage points",
+        "observed_delta_pp": -0.3271934076587494,
+        "bootstrap_mean_delta_pp": -0.3267819922443044,
+        "bootstrap_std_pp": 0.16777810627134057,
+        "ci95_percentile_pp": [
+          -0.6604459524963645,
+          0.0
+        ],
+        "p_two_sided": 0.05419458054194581,
+        "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+        "repeats": 10000,
+        "seed": 2026,
+        "unit": "cluster",
+        "n_units": 8252,
+        "n_queries": 16504,
+        "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+        "resampling_unit": "image"
+      },
+      "identity": {
+        "delta_definition": "[R1(a)-R1(raw)] - [R1(c)-R1(raw)] = R1(a)-R1(c), percentage points",
+        "observed_delta_pp": -0.3271934076587494,
+        "bootstrap_mean_delta_pp": -0.325154820039012,
+        "bootstrap_std_pp": 0.19050821828724235,
+        "ci95_percentile_pp": [
+          -0.6948697387842006,
+          0.054126385586687704
+        ],
+        "p_two_sided": 0.0923907609239076,
+        "p_method": "two-sided percentile-bootstrap sign tails, +1 Monte Carlo correction (not a null bootstrap)",
+        "repeats": 10000,
+        "seed": 2026,
+        "unit": "cluster",
+        "n_units": 2000,
+        "n_queries": 16504,
+        "estimator": "query-weighted accuracy; entire sampled clusters retain all member queries",
+        "resampling_unit": "identity"
+      }
+    }
+  },
+  "bootstrap_protocol": {
+    "repeats": 10000,
+    "seed": 2026,
+    "units": [
+      "query",
+      "image",
+      "identity"
+    ],
+    "implementation": "_s11_descriptive.paired_test",
+    "pairing": "Each comparison uses identical ordered queries, group labels and seed. Consequently every resampling draw is identical within a unit; a-c is computed directly as correct_a-correct_c, not by subtracting independent intervals.",
+    "clusters": "Uniformly sample whole clusters with replacement; all captions retained with multiplicity; query-weighted accuracy, not a mean of cluster accuracies.",
+    "calibration": "Column top-k means computed once from each complete bank, frozen before all bootstrap calls; no resampling or refitting of banks.",
+    "conditional_inference": "Intervals condition on the supplied matrices and fixed bank penalties; they exclude feature extraction, routing, alignment, and bank estimation uncertainty.",
+    "p_method": "Two-sided percentile-bootstrap sign tails with +1 Monte Carlo correction; not a null-distribution bootstrap significance test. Query-level exact McNemar is additionally reported by the reused helper."
+  },
+  "formula": "corrected s = s - alpha * mean(topk(bank[:,g])); alpha=.5 is ranking-equivalent to 2*s-r(g)",
+  "source_image_exclusion": false,
+  "labels_used_for_bank_penalty": false,
+  "pure_query_independent_inductive_pipeline": true,
+  "training_bank_provenance_note": "The bank filename contains '_fresh': classified by the E3 filename convention as a fresh-forward training bank, without a test-fitted W. This filename classification does not verify the extraction provenance; retain the corresponding E3 JSON as evidence.",
+  "warnings": [],
+  "training_bank_provenance_classification": {
+    "source": "bank filename contains '_fresh' (case-insensitive)",
+    "verified": false,
+    "scope": "train_full configurations only; test_full remains transductive"
+  },
+  "penalty_elapsed_sec": 4.346142942085862,
+  "score_block_size": 256,
+  "status": "complete",
+  "elapsed_sec": 29.64772036112845
+}

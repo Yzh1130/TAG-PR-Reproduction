@@ -1,0 +1,549 @@
+{
+  "grid": {
+    "alphas": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "ks": [
+      5,
+      10,
+      16,
+      20,
+      30
+    ]
+  },
+  "tie_break": "max val ΔR@1; then smaller k; then alpha nearest 0.5",
+  "cuhk_validation_selection": {
+    "transductive": {
+      "val_grid": {
+        "0.25,5": 0.341,
+        "0.5,5": -0.1624,
+        "0.75,5": -1.429,
+        "1.0,5": -3.3615,
+        "0.25,10": 0.2436,
+        "0.5,10": 0.0325,
+        "0.75,10": -0.7308,
+        "1.0,10": -1.7863,
+        "0.25,16": 0.2761,
+        "0.5,16": 0.0974,
+        "0.75,16": -0.4222,
+        "1.0,16": -0.8931,
+        "0.25,20": 0.2111,
+        "0.5,20": 0.065,
+        "0.75,20": -0.2923,
+        "1.0,20": -0.6333,
+        "0.25,30": 0.2273,
+        "0.5,30": 0.1949,
+        "0.75,30": -0.1299,
+        "1.0,30": -0.3085
+      },
+      "val_baseline_r1": 73.75771354335824,
+      "selected": [
+        0.25,
+        5
+      ],
+      "val_delta_selected": 0.341,
+      "val_delta_default": 0.0325,
+      "test_delta_selected": 0.5523,
+      "test_ci_selected": [
+        0.082,
+        1.022
+      ],
+      "test_delta_default": 0.9909,
+      "test_ci_default": [
+        0.399,
+        1.617
+      ]
+    },
+    "inductive": {
+      "val_grid": {
+        "0.25,5": -0.0325,
+        "0.5,5": -0.2273,
+        "0.75,5": -0.682,
+        "1.0,5": -1.9324,
+        "0.25,10": -0.1624,
+        "0.5,10": -0.1462,
+        "0.75,10": -0.5684,
+        "1.0,10": -1.2179,
+        "0.25,16": -0.0974,
+        "0.5,16": 0.0162,
+        "0.75,16": -0.341,
+        "1.0,16": -0.9581,
+        "0.25,20": -0.065,
+        "0.5,20": 0.0487,
+        "0.75,20": -0.4222,
+        "1.0,20": -0.7308,
+        "0.25,30": 0.065,
+        "0.5,30": 0.0487,
+        "0.75,30": -0.3897,
+        "1.0,30": -0.5196
+      },
+      "val_baseline_r1": 73.75771354335824,
+      "selected": [
+        0.25,
+        30
+      ],
+      "val_delta_selected": 0.065,
+      "val_delta_default": -0.1462,
+      "test_delta_selected": 0.0975,
+      "test_ci_selected": [
+        -0.245,
+        0.441
+      ],
+      "test_delta_default": 0.1137,
+      "test_ci_default": [
+        -0.392,
+        0.619
+      ]
+    }
+  },
+  "posthoc_test_grid": {
+    "cuhkpedes": {
+      "transductive": {
+        "grid": {
+          "0.25,5": 0.5523,
+          "0.5,5": 0.5198,
+          "0.75,5": -0.3736,
+          "1.0,5": -2.8428,
+          "0.25,10": 0.5848,
+          "0.5,10": 0.9909,
+          "0.75,10": 0.8447,
+          "1.0,10": -0.4224,
+          "0.25,16": 0.3899,
+          "0.5,16": 1.0234,
+          "0.75,16": 1.2183,
+          "1.0,16": 0.731,
+          "0.25,20": 0.4224,
+          "0.5,20": 0.9747,
+          "0.75,20": 1.1696,
+          "1.0,20": 1.0396,
+          "0.25,30": 0.2762,
+          "0.5,30": 0.8122,
+          "0.75,30": 1.1371,
+          "1.0,30": 1.2833
+        },
+        "best": [
+          1.0,
+          30
+        ],
+        "best_delta": 1.2833,
+        "default_delta": 0.9909,
+        "n_positive": 17
+      },
+      "inductive": {
+        "grid": {
+          "0.25,5": 0.3411,
+          "0.5,5": 0.1462,
+          "0.75,5": -0.0487,
+          "1.0,5": -1.0559,
+          "0.25,10": 0.1462,
+          "0.5,10": 0.1137,
+          "0.75,10": -0.065,
+          "1.0,10": -0.601,
+          "0.25,16": 0.1624,
+          "0.5,16": 0.13,
+          "0.75,16": -0.0487,
+          "1.0,16": -0.4873,
+          "0.25,20": 0.0812,
+          "0.5,20": 0.0,
+          "0.75,20": 0.0325,
+          "1.0,20": -0.601,
+          "0.25,30": 0.0975,
+          "0.5,30": -0.0162,
+          "0.75,30": 0.0162,
+          "1.0,30": -0.5036
+        },
+        "best": [
+          0.25,
+          5
+        ],
+        "best_delta": 0.3411,
+        "default_delta": 0.1137,
+        "n_positive": 10
+      }
+    },
+    "icfgpedes": {
+      "transductive": {
+        "grid": {
+          "0.25,5": -0.0202,
+          "0.5,5": -0.9069,
+          "0.75,5": -2.3831,
+          "1.0,5": -5.2852,
+          "0.25,10": 0.131,
+          "0.5,10": -0.4736,
+          "0.75,10": -1.7533,
+          "1.0,10": -3.7586,
+          "0.25,16": 0.2519,
+          "0.5,16": -0.131,
+          "0.75,16": -1.0328,
+          "1.0,16": -2.6955,
+          "0.25,20": 0.2821,
+          "0.5,20": -0.0403,
+          "0.75,20": -0.6852,
+          "1.0,20": -1.9498,
+          "0.25,30": 0.3628,
+          "0.5,30": 0.2922,
+          "0.75,30": -0.1965,
+          "1.0,30": -0.917
+        },
+        "best": [
+          0.25,
+          30
+        ],
+        "best_delta": 0.3628,
+        "default_delta": -0.4736,
+        "n_positive": 5
+      },
+      "inductive": {
+        "grid": {
+          "0.25,5": 0.3225,
+          "0.5,5": -0.0605,
+          "0.75,5": -0.6902,
+          "1.0,5": -1.9045,
+          "0.25,10": 0.3527,
+          "0.5,10": 0.257,
+          "0.75,10": -0.1411,
+          "1.0,10": -1.0228,
+          "0.25,16": 0.4081,
+          "0.5,16": 0.3779,
+          "0.75,16": 0.0705,
+          "1.0,16": -0.6247,
+          "0.25,20": 0.3879,
+          "0.5,20": 0.3879,
+          "0.75,20": 0.136,
+          "1.0,20": -0.3678,
+          "0.25,30": 0.3577,
+          "0.5,30": 0.5189,
+          "0.75,30": 0.2771,
+          "1.0,30": -0.126
+        },
+        "best": [
+          0.5,
+          30
+        ],
+        "best_delta": 0.5189,
+        "default_delta": 0.257,
+        "n_positive": 12
+      }
+    },
+    "aeri": {
+      "transductive": {
+        "grid": {
+          "0.25,5": -0.0489,
+          "0.5,5": -1.3679,
+          "0.75,5": -3.6965,
+          "1.0,5": -6.9533,
+          "0.25,10": 0.114,
+          "0.5,10": -0.5862,
+          "0.75,10": -2.1006,
+          "1.0,10": -4.4618,
+          "0.25,16": 0.342,
+          "0.5,16": -0.1466,
+          "0.75,16": -0.9445,
+          "1.0,16": -2.5729,
+          "0.25,20": 0.456,
+          "0.5,20": 0.0977,
+          "0.75,20": -0.5699,
+          "1.0,20": -1.5795,
+          "0.25,30": 0.5374,
+          "0.5,30": 0.456,
+          "0.75,30": 0.0814,
+          "1.0,30": -0.6839
+        },
+        "best": [
+          0.25,
+          30
+        ],
+        "best_delta": 0.5374,
+        "default_delta": -0.5862,
+        "n_positive": 7
+      },
+      "inductive": {
+        "grid": {
+          "0.25,5": 0.4722,
+          "0.5,5": 0.0163,
+          "0.75,5": -1.3679,
+          "1.0,5": -3.5662,
+          "0.25,10": 0.5699,
+          "0.5,10": 0.4071,
+          "0.75,10": -0.8142,
+          "1.0,10": -2.7194,
+          "0.25,16": 0.5211,
+          "0.5,16": 0.5211,
+          "0.75,16": -0.5699,
+          "1.0,16": -1.6935,
+          "0.25,20": 0.5211,
+          "0.5,20": 0.5699,
+          "0.75,20": -0.4397,
+          "1.0,20": -1.3516,
+          "0.25,30": 0.6351,
+          "0.5,30": 0.5537,
+          "0.75,30": 0.114,
+          "1.0,30": -0.7491
+        },
+        "best": [
+          0.25,
+          30
+        ],
+        "best_delta": 0.6351,
+        "default_delta": 0.4071,
+        "n_positive": 11
+      }
+    },
+    "tbapr": {
+      "transductive": {
+        "grid": {
+          "0.25,5": 0.8438,
+          "0.5,5": 1.3438,
+          "0.75,5": 0.7188,
+          "1.0,5": -2.6562,
+          "0.25,10": 1.375,
+          "0.5,10": 1.3125,
+          "0.75,10": 1.5625,
+          "1.0,10": -2.0,
+          "0.25,16": 1.1875,
+          "0.5,16": 1.4688,
+          "0.75,16": 1.625,
+          "1.0,16": -0.1562,
+          "0.25,20": 1.2188,
+          "0.5,20": 1.5312,
+          "0.75,20": 1.5,
+          "1.0,20": 0.1875,
+          "0.25,30": 0.9375,
+          "0.5,30": 1.4688,
+          "0.75,30": 1.3125,
+          "1.0,30": 1.0938
+        },
+        "best": [
+          0.75,
+          16
+        ],
+        "best_delta": 1.625,
+        "default_delta": 1.3125,
+        "n_positive": 17
+      },
+      "inductive": {
+        "grid": {
+          "0.25,5": 0.25,
+          "0.5,5": 0.4688,
+          "0.75,5": 0.2188,
+          "1.0,5": -1.0312,
+          "0.25,10": 0.625,
+          "0.5,10": 0.5,
+          "0.75,10": -0.2812,
+          "1.0,10": -0.3438,
+          "0.25,16": 0.6875,
+          "0.5,16": 0.5938,
+          "0.75,16": 0.0625,
+          "1.0,16": -0.7812,
+          "0.25,20": 0.625,
+          "0.5,20": 0.4375,
+          "0.75,20": 0.0938,
+          "1.0,20": -0.1562,
+          "0.25,30": 0.7188,
+          "0.5,30": 0.7812,
+          "0.75,30": 0.1875,
+          "1.0,30": -0.125
+        },
+        "best": [
+          0.5,
+          30
+        ],
+        "best_delta": 0.7812,
+        "default_delta": 0.5,
+        "n_positive": 14
+      }
+    }
+  },
+  "_meta": {
+    "peak_rss_gb": 3.669936,
+    "elapsed_sec": 97.7,
+    "provenance": {
+      "argv": [
+        "S7c_valselect.py",
+        "--root",
+        "/root/autodl-tmp/TAG-PR/experiments_ext",
+        "--run-dir",
+        "cuhkpedes:val=/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z",
+        "--run-dir",
+        "cuhkpedes:test=/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z",
+        "--run-dir",
+        "icfgpedes:test=/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z",
+        "--run-dir",
+        "aeri:test=/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z",
+        "--run-dir",
+        "tbapr:test=/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z",
+        "--tag",
+        "seed0",
+        "--out",
+        "/root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7c"
+      ],
+      "seeds": {
+        "bootstrap": 2026,
+        "run_seeds": {
+          "aeri:test": 0,
+          "cuhkpedes:test": 0,
+          "cuhkpedes:val": 0,
+          "icfgpedes:test": 0,
+          "tbapr:test": 0
+        }
+      },
+      "git_HEAD": "37c0a083b22436ad8ae14ce0ba5b559ae6572075",
+      "inputs": [
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z/feats_bank_text_global.npy",
+          "sha256_16": "55564928314056d6",
+          "bytes": 155662464
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z/feats_bank_text_local.npy",
+          "sha256_16": "f3bb378bed1ab92a",
+          "bytes": 311324800
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z/feats_img_global.npy",
+          "sha256_16": "d2cf2ce97274da26",
+          "bytes": 11315328
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z/feats_img_local.npy",
+          "sha256_16": "d4de8c49e1c794da",
+          "bytes": 22630528
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z/meta.json",
+          "sha256_16": "a5b1affc4c5dc138",
+          "bytes": 967334
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/aeri_ViT-B-16_test_seed0_20260901T142211175107Z/sim_qg.npy",
+          "sha256_16": "6d92bc5bbbbe175b",
+          "bytes": 135716228
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/feats_bank_text_global.npy",
+          "sha256_16": "4b5320b83ebc35b0",
+          "bytes": 139522176
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/feats_bank_text_local.npy",
+          "sha256_16": "06bd11ec2a657d67",
+          "bytes": 279044224
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/feats_img_global.npy",
+          "sha256_16": "6efe7163423306b1",
+          "bytes": 6295680
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/feats_img_local.npy",
+          "sha256_16": "2e8e2ceb2591c29b",
+          "bytes": 12591232
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/meta.json",
+          "sha256_16": "9e5b070668462a6c",
+          "bytes": 426588
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_test_seed0_20260901T135609212790Z/sim_qg.npy",
+          "sha256_16": "1a9e5ac7fcf7b3fd",
+          "bytes": 75694304
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z/feats_bank_text_global.npy",
+          "sha256_16": "4b5320b83ebc35b0",
+          "bytes": 139522176
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z/feats_bank_text_local.npy",
+          "sha256_16": "06bd11ec2a657d67",
+          "bytes": 279044224
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z/feats_img_global.npy",
+          "sha256_16": "a8fba3848ace2713",
+          "bytes": 6303872
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z/feats_img_local.npy",
+          "sha256_16": "bdd9d3dcd9024d9a",
+          "bytes": 12607616
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z/meta.json",
+          "sha256_16": "b6aa0f0cdfad9c5b",
+          "bytes": 428475
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/cuhkpedes_ViT-B-16_val_seed0_20260901T155224658281Z/sim_qg.npy",
+          "sha256_16": "a9003b0588c0e072",
+          "bytes": 75817424
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z/feats_bank_text_global.npy",
+          "sha256_16": "bbd644ad3f8fdc21",
+          "bytes": 71012480
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z/feats_bank_text_local.npy",
+          "sha256_16": "402d08696ba59b13",
+          "bytes": 142024832
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z/feats_img_global.npy",
+          "sha256_16": "929cc6ea97df5e66",
+          "bytes": 40648832
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z/feats_img_local.npy",
+          "sha256_16": "4cfd030177b76d6d",
+          "bytes": 81297536
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z/meta.json",
+          "sha256_16": "e5ab7ad4f6109513",
+          "bytes": 2725296
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/icfgpedes_ViT-B-16_test_seed0_20260901T132852330853Z/sim_qg.npy",
+          "sha256_16": "4230c2a30259a686",
+          "bytes": 1575772544
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z/feats_bank_text_global.npy",
+          "sha256_16": "5760ea634f29ac41",
+          "bytes": 64184448
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z/feats_bank_text_local.npy",
+          "sha256_16": "88229894475ed7d9",
+          "bytes": 128368768
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z/feats_img_global.npy",
+          "sha256_16": "546af856e69443ad",
+          "bytes": 6553728
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z/feats_img_local.npy",
+          "sha256_16": "e9f16482f679654a",
+          "bytes": 13107328
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z/meta.json",
+          "sha256_16": "ec779b25099bfc1e",
+          "bytes": 563297
+        },
+        {
+          "path": "/root/autodl-tmp/TAG-PR/experiments_ext/tbapr_ViT-B-16_test_seed0_20260901T134331815055Z/sim_qg.npy",
+          "sha256_16": "b0551781d6de9aab",
+          "bytes": 40960128
+        }
+      ],
+      "tag": "seed0"
+    }
+  }
+}

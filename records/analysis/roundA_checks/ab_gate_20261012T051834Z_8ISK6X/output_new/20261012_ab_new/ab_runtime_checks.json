@@ -1,0 +1,15 @@
+{
+  "image_eval_calls": 258,
+  "shuffle_false": true,
+  "sequential_sampler": true,
+  "misc_seed": 0,
+  "router_mode": "gumbel",
+  "eval_seed": null,
+  "test_batch_size": 32,
+  "num_workers": 0,
+  "annotation_hashes": {
+    "/root/autodl-tmp/datasets/TAG-PEDES/raw_reid.json": "1757c7c26a84eb8ed453c1d98f4f1717755b7f6b59a000c6934bc59b0368f451",
+    "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json": "40d549b5669bcc46c98cb5a45ec5e4d79770899b90f5a4b92c8bf310d7b93b3b",
+    "/root/autodl-tmp/datasets/TAG-PEDES/train_reid.json": "bf9d86bf3df91dee5c12c46503d806abcc6e875a7d824ac5ec3c86656d4b8588"
+  }
+}

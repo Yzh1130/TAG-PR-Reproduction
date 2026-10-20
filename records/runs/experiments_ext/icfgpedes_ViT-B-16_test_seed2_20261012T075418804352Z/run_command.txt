@@ -1,0 +1,16 @@
+command: /root/autodl-tmp/envs/tagpr5090/bin/python main.py --config cfg_icfg.yaml --seed 2 --quiet_metrics
+cwd: /root/autodl-tmp/TAG-PR-frozen-8bf2616
+config_source: cfg_icfg.yaml
+sys.executable: /root/autodl-tmp/envs/tagpr5090/bin/python
+sys.argv: ["main.py", "--config", "cfg_icfg.yaml", "--seed", "2", "--quiet_metrics"]
+environment:
+CUDA_VISIBLE_DEVICES=0
+RANK=0
+LOCAL_RANK=0
+WORLD_SIZE=1
+MASTER_ADDR=localhost
+MASTER_PORT=34299
+OMP_NUM_THREADS=1
+PYTHONHASHSEED=2
+external_environment:
+CLIP_B16_CHECKPOINT=/root/autodl-tmp/checkpoints/ViT-B-16.pt

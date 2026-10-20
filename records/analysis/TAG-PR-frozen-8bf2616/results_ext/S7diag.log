@@ -1,0 +1,52 @@
+
+==============================================================================
+### aeri
+  gallery duplicates: {'dup_paths': 0, 'dup_rows': 0, 'conflicting_pid_paths': 0}  conflict examples: []
+  output.json type=list len=6141 first={'0': {'pred': [4, 0, 2, 424, 1, 280, 2075, 4634, 281, 2509, 425, 283, 285, 5, 282, 5263, 2072, 5310, 284, 279, 2074, 426, 4637, 3, 4633, 3961, 5262, 5309, 2510, 1985, 429, 5261, 1918, 2507, 1704, 463
+  transductive lost=204 gained=168 net=-36 | lost: old-top1 hubcount=4.6, new top1 same identity as old=0.00 | gained: old-top1 hubcount=4.5
+  inductive    lost=228 gained=253 net=+25 | lost: old-top1 hubcount=3.9, new top1 same identity as old=0.00 | gained: old-top1 hubcount=3.8
+  structure: imgs/identity=5.53 queries/identity=6.14 nq/ng=1.11
+  hub purity: all top1=0.370 | hubs(count>=5, n=248)=0.425
+  kNN legitimacy: mean legit share of r(g) neighbourhood=0.229 | corr(r(g), legit share)=+0.301
+  r(g) by legitimacy: legit>=0.5 -> mean r=0.4622 (n=777) | legit<0.5 -> mean r=0.4586 (n=4748)
+
+==============================================================================
+### cuhkpedes
+  gallery duplicates: {'dup_paths': 0, 'dup_rows': 0, 'conflicting_pid_paths': 0}  conflict examples: []
+  output.json type=list len=6156 first={'0': {'pred': [0, 1, 2, 636, 482, 155, 1820, 1819, 1065, 549, 2442, 1818, 2441, 1066, 151, 652, 1053, 1817, 653, 152, 2461, 376, 2111, 1067, 377, 2856, 290, 2855, 2047, 623, 789, 154, 256, 2455, 2457
+  transductive lost=122 gained=183 net=+61 | lost: old-top1 hubcount=3.6, new top1 same identity as old=0.00 | gained: old-top1 hubcount=3.6
+  inductive    lost=114 gained=121 net=+7 | lost: old-top1 hubcount=3.4, new top1 same identity as old=0.00 | gained: old-top1 hubcount=3.6
+  structure: imgs/identity=3.07 queries/identity=6.16 nq/ng=2.00
+  hub purity: all top1=0.733 | hubs(count>=5, n=183)=0.634
+  kNN legitimacy: mean legit share of r(g) neighbourhood=0.449 | corr(r(g), legit share)=+0.582
+  r(g) by legitimacy: legit>=0.5 -> mean r=0.4672 (n=1414) | legit<0.5 -> mean r=0.4624 (n=1660)
+
+==============================================================================
+### icfgpedes
+  gallery duplicates: {'dup_paths': 0, 'dup_rows': 0, 'conflicting_pid_paths': 0}  conflict examples: []
+  output.json type=list len=19848 first={'0': {'pred': [0, 12, 10, 14, 9, 3, 13, 16, 11, 5, 1, 7, 6, 16016, 8, 8139, 11793, 16614, 8204, 2, 13465, 2754, 4540, 19333, 13455, 10121, 2753, 1903, 360, 18195, 11798, 2842, 13451, 4, 11802, 11799,
+  transductive lost=591 gained=497 net=-94 | lost: old-top1 hubcount=2.9, new top1 same identity as old=0.00 | gained: old-top1 hubcount=3.0
+  inductive    lost=416 gained=467 net=+51 | lost: old-top1 hubcount=2.7, new top1 same identity as old=0.00 | gained: old-top1 hubcount=2.7
+  structure: imgs/identity=19.85 queries/identity=19.85 nq/ng=1.00
+  hub purity: all top1=0.666 | hubs(count>=5, n=376)=0.603
+  kNN legitimacy: mean legit share of r(g) neighbourhood=0.544 | corr(r(g), legit share)=+0.528
+  r(g) by legitimacy: legit>=0.5 -> mean r=0.5262 (n=11864) | legit<0.5 -> mean r=0.5219 (n=7984)
+
+==============================================================================
+### tbapr
+  gallery duplicates: {'dup_paths': 114, 'dup_rows': 117, 'conflicting_pid_paths': 114}  conflict examples: [('/root/autodl-tmp/datasets/TBAGPR/G2APS-AG/img/D7_20_001350_00005.jpg', [197, 198]), ('/root/autodl-tmp/datasets/TBAGPR/G2APS-AG/img/D7_20_001710_00004.jpg', [201, 210]), ('/root/autodl-tmp/datasets/TBAGPR/G2APS-AG/img/D7_20_001950_00005.jpg', [201, 212])]
+  output.json type=list len=3200 first={'0': {'pred': [1135, 1028, 670, 962, 382, 872, 558, 52, 604, 875, 67, 753, 421, 399, 410, 521, 0, 425, 458, 1010, 122, 1051, 178, 637, 2800, 404, 764, 932, 1035, 870, 973, 332, 406, 716, 532, 220, 11
+  transductive lost=89 gained=131 net=+42 | lost: old-top1 hubcount=4.1, new top1 same identity as old=0.00 | gained: old-top1 hubcount=5.0
+  inductive    lost=97 gained=113 net=+16 | lost: old-top1 hubcount=4.0, new top1 same identity as old=0.00 | gained: old-top1 hubcount=4.7
+  structure: imgs/identity=6.05 queries/identity=6.05 nq/ng=1.00
+  hub purity: all top1=0.391 | hubs(count>=5, n=192)=0.315
+  kNN legitimacy: mean legit share of r(g) neighbourhood=0.264 | corr(r(g), legit share)=+0.395
+  r(g) by legitimacy: legit>=0.5 -> mean r=0.5509 (n=610) | legit<0.5 -> mean r=0.5465 (n=2590)
+
+=== cross-dataset view ===
+  dataset      transΔ     indΔ    img/id    purity   legitNN      corr
+  tbapr         +1.31    +0.50      6.05     0.391     0.264    +0.395
+  cuhkpedes     +0.99    +0.11      3.07     0.733     0.449    +0.582
+  icfgpedes     -0.47    +0.26     19.85     0.666     0.544    +0.528
+  aeri          -0.59    +0.41      5.53     0.370     0.229    +0.301
+wrote /root/autodl-tmp/_e_ext/s7a/S7diag.json

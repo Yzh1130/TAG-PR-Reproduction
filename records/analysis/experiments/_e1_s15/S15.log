@@ -1,0 +1,54 @@
+ANNOTATION INSPECTION path=/root/autodl-tmp/datasets/TAG-PEDES/train_reid.json records=19954 fields=['cam_id', 'captions', 'file_path', 'id', 'split']
+S15 TRAINING PARTITION {"B": 3840, "G_V": 4137, "Q_V": 8274, "T_B": 31634, "V": 1000, "all_captions": 39908, "all_identities": 4840, "all_images": 19954}
+S15 LIMITATION: 代理验证图像为训练图像，模型在训练期已见
+Loaded model weights from /root/autodl-tmp/experiments/20260827_l14_final_keep/checkpoint_best.pth (missing=0 unexpected=0)
+PASS exact: proxy gallery extracted count
+PASS exact: proxy_text_V extracted count
+PASS exact: bank_text_B extracted count
+S15 PROXY VALIDATION (source image excluded)
+setting      alpha  k   R@1            R@5            R@10           mAP            queries
+uncorrected  -      -   70.7503662109  84.0335083008  88.4895553589  61.8427462286  8236   
+proxy        0.25   5   70.8353576660  84.0456542969  88.5138397217  61.8690781996  8236   
+proxy        0.25   10  70.9446334839  84.1306457520  88.5988311768  61.9494459840  8236   
+proxy        0.25   16  70.9689178467  84.2034988403  88.6231155396  61.9782813800  8236   
+proxy        0.25   20  70.9203491211  84.2156372070  88.6109771729  61.9787394552  8236   
+proxy        0.25   30  70.9446334839  84.2034988403  88.5624084473  62.0004219871  8236   
+proxy        0.5    5   70.7382202148  83.7299652100  88.1131591797  61.4706677199  8236   
+proxy        0.5    10  70.9082107544  83.7785339355  88.1981506348  61.6621707831  8236   
+proxy        0.5    16  71.0053405762  84.0577926636  88.2224349976  61.7568695613  8236   
+proxy        0.5    20  71.0781936646  84.0699386597  88.2102966309  61.8102901893  8236   
+proxy        0.5    30  71.0417709351  84.0456542969  88.2345809937  61.8598971648  8236   
+proxy        0.75   5   70.2039794922  83.0378799438  87.3725128174  60.5361539595  8236   
+proxy        0.75   10  70.5318145752  83.4507064819  87.5789184570  60.9408363655  8236   
+proxy        0.75   16  70.7989349365  83.6813964844  87.8460388184  61.2430670187  8236   
+proxy        0.75   20  70.9203491211  83.7178268433  87.8581848145  61.3537068327  8236   
+proxy        0.75   30  71.1510467529  83.8513870239  88.0038833618  61.5420904109  8236   
+proxy        1.0    5   69.0140838623  82.0786819458  86.4618759155  59.0788482626  8236   
+proxy        1.0    10  69.6090316772  82.5279235840  86.8868408203  59.8493525969  8236   
+proxy        1.0    16  70.2404098511  82.8314743042  87.1418151855  60.3177586753  8236   
+proxy        1.0    20  70.3496856689  82.9650344849  87.2753753662  60.5061817729  8236   
+proxy        1.0    30  70.7260818481  83.2685775757  87.4089355469  60.8563012208  8236   
+S15 PARAMETERS LOCKED alpha=0.75 k=30 lock=/root/autodl-tmp/experiments/_e1_s15/parameters_lock.json
+PASS exact: E3/proxy feature provenance backbone
+PASS exact: E3/proxy feature provenance loaded_state
+PASS exact: E3/proxy feature provenance seed
+PASS exact: E3/proxy checkpoint path
+PASS exact: E3/proxy config path
+PASS exact: E3/full training identities
+PASS exact: E3/full training captions
+PASS exact: E3/full training text fingerprint
+PASS exact: E3/test annotation counts
+PASS exact: E3/test qg declared shape
+PASS exact: E3/full training bank declared shape
+PASS exact: E3 uncorrected exact R1
+PASS exact: E3 uncorrected exact R5
+PASS exact: E3 uncorrected exact R10
+PASS exact: E3 uncorrected exact mAP
+S15 FINAL TEST (frozen once; no parameter search)
+setting             alpha  k   R@1            R@5            R@10           mAP            queries
+uncorrected         -      -   63.6330604553  79.2595748901  84.6097946167  50.4649490217  16504  
+selected            0.75   30  63.8754234314  78.7627258301  84.3371276855  50.3404888738  16504  
+literature_default  0.5    10  63.9723701477  79.1686859131  84.6279678345  50.4887113041  16504  
+S15 status=complete
+JSON: /root/autodl-tmp/experiments/_e1_s15/S15.json
+LOG: /root/autodl-tmp/experiments/_e1_s15/S15.log

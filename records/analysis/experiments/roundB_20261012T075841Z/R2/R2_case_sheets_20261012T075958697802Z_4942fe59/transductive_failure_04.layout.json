@@ -1,0 +1,870 @@
+{
+  "text_enabled": true,
+  "font": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+  "title": "transductive_failure",
+  "correction_condition": "complete-test-query transductive CSLS alpha=.5 k=10",
+  "canvas_size": [
+    1440,
+    2030
+  ],
+  "rows": [
+    {
+      "query_index": 12139,
+      "query_text": "The person can be spotted wearing a white shirt, black pants, and carrying a black backpack. They have dark hair and are walking on what appears to be a paved surface. The person's footwear is not clearly visible in the image.",
+      "pid": 6203,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 6069,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000723_0002_00000007.jpg",
+          "pid": 6203,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            50,
+            179,
+            249
+          ],
+          "label": "query_source g=6069 pid=6203 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 6071,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000723_0001_00000002.jpg",
+          "pid": 6203,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.47638601064682007,
+          "image_rectangle": [
+            180,
+            50,
+            359,
+            249
+          ],
+          "label": "before_rank_1 g=6071 pid=6203 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 743,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D4_20_004185_3_train.jpg",
+          "pid": 4974,
+          "view": 0,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4754944443702698,
+          "image_rectangle": [
+            360,
+            50,
+            539,
+            249
+          ],
+          "label": "before_rank_2 g=743 pid=4974 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 1160,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D5_20_010365_0_train.jpg",
+          "pid": 5046,
+          "view": 0,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.4752577543258667,
+          "image_rectangle": [
+            540,
+            50,
+            719,
+            249
+          ],
+          "label": "before_rank_3 g=1160 pid=5046 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 1160,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D5_20_010365_0_train.jpg",
+          "pid": 5046,
+          "view": 0,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.23817987740039825,
+          "image_rectangle": [
+            720,
+            50,
+            899,
+            249
+          ],
+          "label": "after_rank_1 g=1160 pid=5046 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 6071,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000723_0001_00000002.jpg",
+          "pid": 6203,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.2377302497625351,
+          "image_rectangle": [
+            900,
+            50,
+            1079,
+            249
+          ],
+          "label": "after_rank_2 g=6071 pid=6203 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 743,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/G2APS/D4_20_004185_3_train.jpg",
+          "pid": 4974,
+          "view": 0,
+          "source": "G2APS",
+          "hit": false,
+          "score": 0.2352723926305771,
+          "image_rectangle": [
+            1080,
+            50,
+            1259,
+            249
+          ],
+          "label": "after_rank_3 g=743 pid=4974 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 6071,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000723_0001_00000002.jpg",
+          "pid": 6203,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            50,
+            1439,
+            249
+          ],
+          "label": "best_positive g=6071 pid=6203 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 12352,
+      "query_text": "The person is a young adult male with short black hair, wearing a gray tank top and black pants. He has white shoes on his feet and is not carrying any visible belongings.",
+      "pid": 6230,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 6176,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000935_0001_00000000.jpg",
+          "pid": 6230,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            380,
+            179,
+            579
+          ],
+          "label": "query_source g=6176 pid=6230 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 6176,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000935_0001_00000000.jpg",
+          "pid": 6230,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.4702554941177368,
+          "image_rectangle": [
+            180,
+            380,
+            359,
+            579
+          ],
+          "label": "before_rank_1 g=6176 pid=6230 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 6544,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001572_0002_00000024.jpg",
+          "pid": 6322,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.4702228605747223,
+          "image_rectangle": [
+            360,
+            380,
+            539,
+            579
+          ],
+          "label": "before_rank_2 g=6544 pid=6322 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 6373,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001255_0001_00000000.jpg",
+          "pid": 6279,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.46922731399536133,
+          "image_rectangle": [
+            540,
+            380,
+            719,
+            579
+          ],
+          "label": "before_rank_3 g=6373 pid=6279 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 6544,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001572_0002_00000024.jpg",
+          "pid": 6322,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.23358267545700073,
+          "image_rectangle": [
+            720,
+            380,
+            899,
+            579
+          ],
+          "label": "after_rank_1 g=6544 pid=6322 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 6178,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000935_0001_00000005.jpg",
+          "pid": 6230,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.23339518904685974,
+          "image_rectangle": [
+            900,
+            380,
+            1079,
+            579
+          ],
+          "label": "after_rank_2 g=6178 pid=6230 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 6176,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000935_0001_00000000.jpg",
+          "pid": 6230,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.2330549657344818,
+          "image_rectangle": [
+            1080,
+            380,
+            1259,
+            579
+          ],
+          "label": "after_rank_3 g=6176 pid=6230 hit=True"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 6176,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000935_0001_00000000.jpg",
+          "pid": 6230,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            380,
+            1439,
+            579
+          ],
+          "label": "best_positive g=6176 pid=6230 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 12952,
+      "query_text": "The person is a young adult female with short brown hair, wearing a white top and blue jeans, paired with red shoes.",
+      "pid": 6305,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 6476,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001419_0001_00000000.jpg",
+          "pid": 6305,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            710,
+            179,
+            909
+          ],
+          "label": "query_source g=6476 pid=6305 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 6476,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001419_0001_00000000.jpg",
+          "pid": 6305,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.4883349537849426,
+          "image_rectangle": [
+            180,
+            710,
+            359,
+            909
+          ],
+          "label": "before_rank_1 g=6476 pid=6305 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 6429,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001338_0002_00000002.jpg",
+          "pid": 6293,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.4876028001308441,
+          "image_rectangle": [
+            360,
+            710,
+            539,
+            909
+          ],
+          "label": "before_rank_2 g=6429 pid=6293 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 5544,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000010_0002_00000002.jpg",
+          "pid": 6071,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.4818791449069977,
+          "image_rectangle": [
+            540,
+            710,
+            719,
+            909
+          ],
+          "label": "before_rank_3 g=5544 pid=6071 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 6429,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001338_0002_00000002.jpg",
+          "pid": 6293,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.24892020225524902,
+          "image_rectangle": [
+            720,
+            710,
+            899,
+            909
+          ],
+          "label": "after_rank_1 g=6429 pid=6293 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 6476,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001419_0001_00000000.jpg",
+          "pid": 6305,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.24873414635658264,
+          "image_rectangle": [
+            900,
+            710,
+            1079,
+            909
+          ],
+          "label": "after_rank_2 g=6476 pid=6305 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 5544,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000010_0002_00000002.jpg",
+          "pid": 6071,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.24482539296150208,
+          "image_rectangle": [
+            1080,
+            710,
+            1259,
+            909
+          ],
+          "label": "after_rank_3 g=5544 pid=6071 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 6476,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001419_0001_00000000.jpg",
+          "pid": 6305,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            710,
+            1439,
+            909
+          ],
+          "label": "best_positive g=6476 pid=6305 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 13008,
+      "query_text": "The person is a young adult female with short black hair, wearing a white top with a pattern and black bottoms. She has on white shoes and is carrying a pink bag.",
+      "pid": 6312,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 6504,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001471_0002_00000009.jpg",
+          "pid": 6312,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            1040,
+            179,
+            1239
+          ],
+          "label": "query_source g=6504 pid=6312 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 6507,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001471_0001_00000000.jpg",
+          "pid": 6312,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.47337424755096436,
+          "image_rectangle": [
+            180,
+            1040,
+            359,
+            1239
+          ],
+          "label": "before_rank_1 g=6507 pid=6312 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 7655,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/0229_c6s1_046851_00.jpg",
+          "pid": 6643,
+          "view": 1,
+          "source": "Market",
+          "hit": false,
+          "score": 0.47110700607299805,
+          "image_rectangle": [
+            360,
+            1040,
+            539,
+            1239
+          ],
+          "label": "before_rank_2 g=7655 pid=6643 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 6504,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001471_0002_00000009.jpg",
+          "pid": 6312,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.470592737197876,
+          "image_rectangle": [
+            540,
+            1040,
+            719,
+            1239
+          ],
+          "label": "before_rank_3 g=6504 pid=6312 hit=True"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 6139,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00000859_0002_00000007.jpg",
+          "pid": 6220,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": false,
+          "score": 0.23470884561538696,
+          "image_rectangle": [
+            720,
+            1040,
+            899,
+            1239
+          ],
+          "label": "after_rank_1 g=6139 pid=6220 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 7655,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/0229_c6s1_046851_00.jpg",
+          "pid": 6643,
+          "view": 1,
+          "source": "Market",
+          "hit": false,
+          "score": 0.2334940880537033,
+          "image_rectangle": [
+            900,
+            1040,
+            1079,
+            1239
+          ],
+          "label": "after_rank_2 g=7655 pid=6643 hit=False"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 6507,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001471_0001_00000000.jpg",
+          "pid": 6312,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "score": 0.23254601657390594,
+          "image_rectangle": [
+            1080,
+            1040,
+            1259,
+            1239
+          ],
+          "label": "after_rank_3 g=6507 pid=6312 hit=True"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 6507,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/PRAI-1581/00001471_0001_00000000.jpg",
+          "pid": 6312,
+          "view": 0,
+          "source": "PRAI-1581",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            1040,
+            1439,
+            1239
+          ],
+          "label": "best_positive g=6507 pid=6312 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 14108,
+      "query_text": "The person appears to be a young adult male wearing a bright yellow short-sleeved shirt, light-colored shorts with a pattern, a black cap worn backward, and white sneakers with black accents. He has short dark hair and is not carrying any visible belongings.",
+      "pid": 6458,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 7054,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P093S01G10B00H20UC082000LC112000A018R0_09211052_003_bbx.jpg",
+          "pid": 6458,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            1370,
+            179,
+            1569
+          ],
+          "label": "query_source g=7054 pid=6458 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 7053,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P093S01G10B00H20UC082000LC112000A028R0_09211052_178_bbx.jpg",
+          "pid": 6458,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": true,
+          "score": 0.4827674627304077,
+          "image_rectangle": [
+            180,
+            1370,
+            359,
+            1569
+          ],
+          "label": "before_rank_1 g=7053 pid=6458 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 6753,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P060S01G10B00H20UC082000LC052000A026R0_09081816_117_bbx.jpg",
+          "pid": 6380,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": false,
+          "score": 0.48082149028778076,
+          "image_rectangle": [
+            360,
+            1370,
+            539,
+            1569
+          ],
+          "label": "before_rank_2 g=6753 pid=6380 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 6755,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P060S01G10B00H20UC082000LC052000A048R0_09081816_042_bbx.jpg",
+          "pid": 6380,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": false,
+          "score": 0.4801221489906311,
+          "image_rectangle": [
+            540,
+            1370,
+            719,
+            1569
+          ],
+          "label": "before_rank_3 g=6755 pid=6380 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 6755,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P060S01G10B00H20UC082000LC052000A048R0_09081816_042_bbx.jpg",
+          "pid": 6380,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": false,
+          "score": 0.23782192170619965,
+          "image_rectangle": [
+            720,
+            1370,
+            899,
+            1569
+          ],
+          "label": "after_rank_1 g=6755 pid=6380 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 6753,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P060S01G10B00H20UC082000LC052000A026R0_09081816_117_bbx.jpg",
+          "pid": 6380,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": false,
+          "score": 0.23749244213104248,
+          "image_rectangle": [
+            900,
+            1370,
+            1079,
+            1569
+          ],
+          "label": "after_rank_2 g=6753 pid=6380 hit=False"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 7053,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P093S01G10B00H20UC082000LC112000A028R0_09211052_178_bbx.jpg",
+          "pid": 6458,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": true,
+          "score": 0.23690152168273926,
+          "image_rectangle": [
+            1080,
+            1370,
+            1259,
+            1569
+          ],
+          "label": "after_rank_3 g=7053 pid=6458 hit=True"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 7053,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/uavhuman/P093S01G10B00H20UC082000LC112000A028R0_09211052_178_bbx.jpg",
+          "pid": 6458,
+          "view": 0,
+          "source": "uavhuman",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            1370,
+            1439,
+            1569
+          ],
+          "label": "best_positive g=7053 pid=6458 hit=True"
+        }
+      ]
+    },
+    {
+      "query_index": 14878,
+      "query_text": "The person is a woman with long dark hair, wearing a black top and black shorts, paired with black flip-flops.",
+      "pid": 6571,
+      "before_correct": true,
+      "after_correct": false,
+      "slots": [
+        {
+          "role": "query_source",
+          "gallery_index": 7439,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/0594_c3s2_019962_00.jpg",
+          "pid": 6571,
+          "view": 1,
+          "source": "Market",
+          "hit": true,
+          "image_rectangle": [
+            0,
+            1700,
+            179,
+            1899
+          ],
+          "label": "query_source g=7439 pid=6571 hit=True"
+        },
+        {
+          "role": "before_rank_1",
+          "gallery_index": 7439,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/0594_c3s2_019962_00.jpg",
+          "pid": 6571,
+          "view": 1,
+          "source": "Market",
+          "hit": true,
+          "score": 0.4768422842025757,
+          "image_rectangle": [
+            180,
+            1700,
+            359,
+            1899
+          ],
+          "label": "before_rank_1 g=7439 pid=6571 hit=True"
+        },
+        {
+          "role": "before_rank_2",
+          "gallery_index": 7723,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/1146_c1s5_026386_00.jpg",
+          "pid": 6665,
+          "view": 1,
+          "source": "Market",
+          "hit": false,
+          "score": 0.47565314173698425,
+          "image_rectangle": [
+            360,
+            1700,
+            539,
+            1899
+          ],
+          "label": "before_rank_2 g=7723 pid=6665 hit=False"
+        },
+        {
+          "role": "before_rank_3",
+          "gallery_index": 7839,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/1105_c5s2_149849_00.jpg",
+          "pid": 6704,
+          "view": 1,
+          "source": "Market",
+          "hit": false,
+          "score": 0.46465030312538147,
+          "image_rectangle": [
+            540,
+            1700,
+            719,
+            1899
+          ],
+          "label": "before_rank_3 g=7839 pid=6704 hit=False"
+        },
+        {
+          "role": "after_rank_1",
+          "gallery_index": 7723,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/1146_c1s5_026386_00.jpg",
+          "pid": 6665,
+          "view": 1,
+          "source": "Market",
+          "hit": false,
+          "score": 0.23872634768486023,
+          "image_rectangle": [
+            720,
+            1700,
+            899,
+            1899
+          ],
+          "label": "after_rank_1 g=7723 pid=6665 hit=False"
+        },
+        {
+          "role": "after_rank_2",
+          "gallery_index": 7439,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/0594_c3s2_019962_00.jpg",
+          "pid": 6571,
+          "view": 1,
+          "source": "Market",
+          "hit": true,
+          "score": 0.23826856911182404,
+          "image_rectangle": [
+            900,
+            1700,
+            1079,
+            1899
+          ],
+          "label": "after_rank_2 g=7439 pid=6571 hit=True"
+        },
+        {
+          "role": "after_rank_3",
+          "gallery_index": 7839,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/1105_c5s2_149849_00.jpg",
+          "pid": 6704,
+          "view": 1,
+          "source": "Market",
+          "hit": false,
+          "score": 0.23132649064064026,
+          "image_rectangle": [
+            1080,
+            1700,
+            1259,
+            1899
+          ],
+          "label": "after_rank_3 g=7839 pid=6704 hit=False"
+        },
+        {
+          "role": "best_positive",
+          "gallery_index": 7439,
+          "path": "/root/autodl-tmp/datasets/TAG-PEDES/Market/0594_c3s2_019962_00.jpg",
+          "pid": 6571,
+          "view": 1,
+          "source": "Market",
+          "hit": true,
+          "image_rectangle": [
+            1260,
+            1700,
+            1439,
+            1899
+          ],
+          "label": "best_positive g=7439 pid=6571 hit=True"
+        }
+      ]
+    }
+  ]
+}

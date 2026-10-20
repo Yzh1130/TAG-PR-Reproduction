@@ -1,0 +1,103 @@
+{
+  "status": "PASS",
+  "gate": "default_eval_numerical_parity",
+  "metrics": {
+    "R@1": {
+      "old": 62.28186798095703,
+      "new": 62.28186798095703,
+      "difference": 0.0,
+      "equal": true
+    },
+    "R@5": {
+      "old": 79.39287567138672,
+      "new": 79.39287567138672,
+      "difference": 0.0,
+      "equal": true
+    },
+    "R@10": {
+      "old": 84.64008331298828,
+      "new": 84.64008331298828,
+      "difference": 0.0,
+      "equal": true
+    },
+    "mAP": {
+      "old": 49.018836975097656,
+      "new": 49.018836975097656,
+      "difference": 0.0,
+      "equal": true
+    }
+  },
+  "predictions": {
+    "equal": true,
+    "old_queries": 16504,
+    "new_queries": 16504,
+    "first_differences": []
+  },
+  "sim_qg": {
+    "old_shape": [
+      16504,
+      8252
+    ],
+    "new_shape": [
+      16504,
+      8252
+    ],
+    "old_dtype": "float32",
+    "new_dtype": "float32",
+    "equal": true,
+    "max_abs_diff": 0.0,
+    "differing_entries": 0,
+    "first_difference": null
+  },
+  "runtime_checks": {
+    "misc_seed": {
+      "old": 0,
+      "new": 0,
+      "equal": true
+    },
+    "test_batch_size": {
+      "old": 32,
+      "new": 32,
+      "equal": true
+    },
+    "num_workers": {
+      "old": 0,
+      "new": 0,
+      "equal": true
+    },
+    "annotation_hashes": {
+      "old": {
+        "/root/autodl-tmp/datasets/TAG-PEDES/raw_reid.json": "1757c7c26a84eb8ed453c1d98f4f1717755b7f6b59a000c6934bc59b0368f451",
+        "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json": "40d549b5669bcc46c98cb5a45ec5e4d79770899b90f5a4b92c8bf310d7b93b3b",
+        "/root/autodl-tmp/datasets/TAG-PEDES/train_reid.json": "bf9d86bf3df91dee5c12c46503d806abcc6e875a7d824ac5ec3c86656d4b8588"
+      },
+      "new": {
+        "/root/autodl-tmp/datasets/TAG-PEDES/raw_reid.json": "1757c7c26a84eb8ed453c1d98f4f1717755b7f6b59a000c6934bc59b0368f451",
+        "/root/autodl-tmp/datasets/TAG-PEDES/test_reid.json": "40d549b5669bcc46c98cb5a45ec5e4d79770899b90f5a4b92c8bf310d7b93b3b",
+        "/root/autodl-tmp/datasets/TAG-PEDES/train_reid.json": "bf9d86bf3df91dee5c12c46503d806abcc6e875a7d824ac5ec3c86656d4b8588"
+      },
+      "equal": true
+    },
+    "shuffle_false": {
+      "old": true,
+      "new": true,
+      "equal": true
+    },
+    "sequential_sampler": {
+      "old": true,
+      "new": true,
+      "equal": true
+    },
+    "router_mode": {
+      "old": "gumbel",
+      "new": "gumbel",
+      "equal": true
+    },
+    "eval_seed": {
+      "old": null,
+      "new": null,
+      "equal": true
+    }
+  },
+  "note": "No provenance-byte comparison, numerical tolerance, router change or seed retry."
+}

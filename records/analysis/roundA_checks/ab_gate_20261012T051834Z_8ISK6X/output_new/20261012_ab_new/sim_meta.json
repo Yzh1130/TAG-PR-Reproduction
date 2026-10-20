@@ -1,0 +1,31 @@
+{
+  "n_query": 16504,
+  "n_gallery": 8252,
+  "dtype": "float32",
+  "sim_qg_scoring": "sim_qg = 0.5 * cosine(text_global, image_global) + 0.5 * cosine(text_TSE, image_TSE); all features are L2-normalized.",
+  "sim_gg_scoring": "sim_gg = 0.5 * cosine(image_global, image_global) + 0.5 * cosine(image_TSE, image_TSE); the two image branches are L2-normalized and use the same weights as sim_qg.",
+  "sim_gg_composition_matches_sim_qg": true,
+  "checkpoint_path": "/root/autodl-tmp/experiments/20260821_bs320_ep10_seed0/checkpoint_best.pth",
+  "checkpoint_note": "loaded from --resume",
+  "exp_name": "ab_new",
+  "git_commit": "05cd179329b799317ef0d2df213e9d3a9084ca34",
+  "raw_metrics": {
+    "R@1": 62.28186798095703,
+    "R@5": 79.39287567138672,
+    "R@10": 84.64008331298828,
+    "mAP": 49.018836975097656
+  },
+  "sim_qg_stats": {
+    "mean": 0.4632909371578791,
+    "std": 0.008857463058749815,
+    "min": 0.39326754212379456,
+    "max": 0.5402728319168091
+  },
+  "sim_gg_stats": {
+    "mean": 0.5780508754503653,
+    "std": 0.14151133692996823,
+    "min": 0.13517749309539795,
+    "max": 1.0000004768371582
+  },
+  "dump_elapsed_sec": 2.4471135986968875
+}

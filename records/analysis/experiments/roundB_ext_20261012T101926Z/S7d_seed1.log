@@ -1,0 +1,32 @@
+run: aeri_ViT-B-16_test_seed1_20261012T064713194376Z
+extra_meta keys: ['dataset', 'split', 'type', 'n', 'paths', 'pid', 'view', 'source_subset']
+queries=6141 aerial=5525 ground=4220 | ground pids in query set: 1.000
+
+=== AERI protocols (text queries = 6141, identity-level; positives = same identity) ===
+  T→A official (aerial 5525)   ng=5525  base {'r1': 37.551, 'r5': 56.424, 'r10': 66.52, 'mAP': 37.626}
+                               trans Δr1=-0.73 idCI=[-1.472, 0.016] | ind Δr1=+0.31 idCI=[-0.567, 1.157] | ex_skew=0.712 distinct=0.527 maxT1=18
+  T→G ground-only (4220)       ng=4220  base {'r1': 37.03, 'r5': 56.294, 'r10': 65.673, 'mAP': 33.864}
+                               trans Δr1=+0.68 idCI=[-0.081, 1.43] | ind Δr1=+0.78 idCI=[-0.032, 1.59] | ex_skew=1.808 distinct=0.465 maxT1=56
+  T→A+G mixed (9745)           ng=9745  base {'r1': 41.524, 'r5': 61.114, 'r10': 70.51, 'mAP': 32.66}
+                               trans Δr1=-0.60 idCI=[-1.355, 0.15] | ind Δr1=+0.51 idCI=[-0.365, 1.379] | ex_skew=0.870 distinct=0.341 maxT1=18
+                               view: ground share of gallery=0.433 | of top-1 (all)=0.287 | of top-1 among CORRECT=0.370 | among WRONG=0.228
+  T→A size-controlled (4220) s2026 ng=4220  base {'r1': 37.193, 'r5': 57.222, 'r10': 66.699, 'mAP': 38.223}
+                               trans Δr1=-0.62 idCI=[-1.305, 0.082] | ind Δr1=+0.26 idCI=[-0.612, 1.137] | ex_skew=0.657 distinct=0.616 maxT1=18
+  T→A size-controlled (4220) s2027 ng=4220  base {'r1': 37.6, 'r5': 57.596, 'r10': 67.676, 'mAP': 38.369}
+                               trans Δr1=-0.81 idCI=[-1.589, -0.05] | ind Δr1=+0.03 idCI=[-0.862, 0.917] | ex_skew=0.646 distinct=0.610 maxT1=20
+  T→A size-controlled (4220) s2028 ng=4220  base {'r1': 37.469, 'r5': 57.71, 'r10': 67.22, 'mAP': 38.511}
+                               trans Δr1=-0.99 idCI=[-1.741, -0.23] | ind Δr1=-0.06 idCI=[-0.94, 0.792] | ex_skew=0.674 distinct=0.611 maxT1=18
+  T→A size-controlled (4220) s2029 ng=4220  base {'r1': 37.339, 'r5': 57.157, 'r10': 67.09, 'mAP': 38.63}
+                               trans Δr1=-0.16 idCI=[-0.883, 0.583] | ind Δr1=+0.42 idCI=[-0.39, 1.246] | ex_skew=0.622 distinct=0.611 maxT1=19
+  T→A size-controlled (4220) s2030 ng=4220  base {'r1': 37.176, 'r5': 56.978, 'r10': 66.488, 'mAP': 37.838}
+                               trans Δr1=-0.85 idCI=[-1.541, -0.12] | ind Δr1=-0.11 idCI=[-0.983, 0.758] | ex_skew=0.725 distinct=0.608 maxT1=19
+
+=== SUMMARY ===
+  T2A_official       ng=5525  R@1= 37.55 mAP= 37.63 | transΔ=-0.73 [-1.472, 0.016] | indΔ=+0.31 [-0.567, 1.157] | ex_skew=0.712
+  T2G_ground_only    ng=4220  R@1= 37.03 mAP= 33.86 | transΔ=+0.68 [-0.081, 1.43] | indΔ=+0.78 [-0.032, 1.59] | ex_skew=1.808
+  T2M_mixed          ng=9745  R@1= 41.52 mAP= 32.66 | transΔ=-0.60 [-1.355, 0.15] | indΔ=+0.51 [-0.365, 1.379] | ex_skew=0.870
+  T2A_ctrl_4220      ng=4220  R@1= 37.35±0.16 | transΔ=-0.69 | indΔ=+0.11  (5 seeds)
+  mixed-gallery view analysis: ground = 43.3% of gallery, 28.7% of all top-1, 37.0% of CORRECT top-1, 22.8% of WRONG top-1
+paired gallery ΔR@1 / identity CI: {'ground_minus_official_aerial': {'delta_r1_pp': -0.5210877707213846, 'identity_ci95': [-2.493, 1.513], 'nq': 6141, 'n_identity_clusters': 1000, 'correction_gain_difference': {'transductive': {'delta_gain_r1_pp': 1.4167073766487541, 'identity_ci95': [0.444, 2.395]}, 'inductive': {'delta_gain_r1_pp': 0.4722357922162514, 'identity_ci95': [-0.626, 1.587]}}}, 'mixed_minus_official_aerial': {'delta_r1_pp': 3.9732942517505254, 'identity_ci95': [3.07, 4.908], 'nq': 6141, 'n_identity_clusters': 1000, 'correction_gain_difference': {'transductive': {'delta_gain_r1_pp': 0.1302719426803452, 'identity_ci95': [-0.461, 0.71]}, 'inductive': {'delta_gain_r1_pp': 0.19540791402051783, 'identity_ci95': [-0.498, 0.88]}}}, 'size_controlled_aerial_minus_official_aerial': {'runs': [{'seed': 2026, 'delta_r1_pp': -0.3582478423709512, 'identity_ci95': [-1.166, 0.47], 'correction_gain_difference': {'transductive': {'delta_gain_r1_pp': 0.113987949845302, 'identity_ci95': [-0.39, 0.628]}, 'inductive': {'delta_gain_r1_pp': -0.048851978505129456, 'identity_ci95': [-0.647, 0.557]}}}, {'seed': 2027, 'delta_r1_pp': 0.04885197850512668, 'identity_ci95': [-0.696, 0.824], 'correction_gain_difference': {'transductive': {'delta_gain_r1_pp': -0.08141996417521583, 'identity_ci95': [-0.617, 0.452]}, 'inductive': {'delta_gain_r1_pp': -0.2768278781957336, 'identity_ci95': [-0.86, 0.307]}}}, {'seed': 2028, 'delta_r1_pp': -0.08141996417521669, 'identity_ci95': [-0.732, 0.582], 'correction_gain_difference': {'transductive': {'delta_gain_r1_pp': -0.2605438853606904, 'identity_ci95': [-0.789, 0.26]}, 'inductive': {'delta_gain_r1_pp': -0.37453183520599254, 'identity_ci95': [-0.956, 0.209]}}}, {'seed': 2029, 'delta_r1_pp': -0.2116919068555656, 'identity_ci95': [-0.888, 0.461], 'correction_gain_difference': {'transductive': {'delta_gain_r1_pp': 0.5699397492265103, 'identity_ci95': [0.081, 1.084]}, 'inductive': {'delta_gain_r1_pp': 0.113987949845302, 'identity_ci95': [-0.465, 0.691]}}}, {'seed': 2030, 'delta_r1_pp': -0.3745318352059934, 'identity_ci95': [-1.143, 0.387], 'correction_gain_difference': {'transductive': {'delta_gain_r1_pp': -0.113987949845302, 'identity_ci95': [-0.63, 0.415]}, 'inductive': {'delta_gain_r1_pp': -0.423383813711122, 'identity_ci95': [-0.956, 0.113]}}}], 'mean_delta_r1_pp': -0.19540791402051783, 'identity_ci95_conditional_on_five_draws': [-0.62, 0.229], 'nq': 6141, 'n_identity_clusters': 1000, 'correction_gain_difference': {'transductive': {'mean_delta_gain_r1_pp': 0.04559517993812075, 'identity_ci95_conditional_on_five_draws': [-0.289, 0.382]}, 'inductive': {'mean_delta_gain_r1_pp': -0.20192151115453516, 'identity_ci95_conditional_on_five_draws': [-0.552, 0.158]}}}}
+peak RSS 1.68 GB, elapsed 166.5s
+wrote /root/autodl-tmp/experiments/roundB_ext_20261012T101926Z/ext_s7d/S7d_aeri_seed1/S7d_aeri_seed1.json
